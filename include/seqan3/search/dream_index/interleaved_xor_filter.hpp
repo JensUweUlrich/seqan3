@@ -155,7 +155,10 @@ private:
      */
     inline constexpr FingerprintType fingerprint(const uint64_t hash) const 
     {
-        return (FingerprintType) hash ^ (hash >> 32);
+        FingerprintType h = (FingerprintType) hash ^ (hash >> 32);
+        if (h == 0)
+            h = (FingerprintType) hash ^ (hash >> 16);
+        return h;
     }
 
     /*!\brief   Multiply hash value with blockLength and divide by 2^32

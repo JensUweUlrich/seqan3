@@ -158,6 +158,8 @@ private:
         FingerprintType h = (FingerprintType) hash ^ (hash >> 32);
         if (h == 0)
             h = (FingerprintType) hash ^ (hash >> 16);
+        if (h == 0)
+            h = (FingerprintType) hash ^ (hash >> 8);
         return h;
     }
 

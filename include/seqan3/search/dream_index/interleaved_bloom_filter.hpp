@@ -445,7 +445,7 @@ public:
      * \include test/snippet/search/dream_index/counting_agent_construction.cpp
      * \sa seqan3::interleaved_bloom_filter::counting_agent_type::bulk_count
      */
-    template <typename value_t = uint16_t>
+    template <typename value_t = uint32_t>
     counting_agent_type<value_t> counting_agent() const
     {
         return counting_agent_type<value_t>{*this};

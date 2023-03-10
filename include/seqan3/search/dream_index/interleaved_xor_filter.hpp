@@ -707,7 +707,7 @@ public:
      * ### Example
      *
      */
-    template <typename value_t = uint16_t>
+    template <typename value_t = uint32_t>
     counting_agent_type<value_t> counting_agent() const
     {
         return counting_agent_type<value_t>{*this};

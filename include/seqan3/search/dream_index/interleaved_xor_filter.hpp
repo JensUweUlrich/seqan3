@@ -12,6 +12,7 @@
 #include <bitset>
 
 #include <seqan3/core/concept/cereal.hpp>
+#include <seqan3/core/debug_stream.hpp>
 
 namespace seqan3
 {
@@ -155,11 +156,15 @@ private:
      */
     inline constexpr FingerprintType fingerprint(const uint64_t hash) const 
     {
+        assert(hash != 0);
         FingerprintType h = (FingerprintType) hash ^ (hash >> 32);
         if (h == 0)
             h = (FingerprintType) hash ^ (hash >> 16);
         if (h == 0)
             h = (FingerprintType) hash ^ (hash >> 8);
+        
+        assert(h != 0);
+
         return h;
     }
 
@@ -177,6 +182,14 @@ private:
         // http://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
         return (uint32_t) (((uint64_t) hash * n) >> 32);
     }
+    
+
+    /*inline constexpr uint64_t reduce(uint64_t hash, uint64_t n) const
+    {
+        // http://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
+        return hash * n;
+    }
+    */
 
     /*!\brief Calculate a hash from a given 64-bit hash value
      * \param hash 64-bit hash value
@@ -186,7 +199,8 @@ private:
      */
     inline constexpr size_t getHashFromHash(uint64_t hash, int index, int blockLength) const
     {
-        uint32_t r = rotl64(hash, index * 21);
+        //uint32_t r = rotl64(hash, index * 21);
+        uint64_t r = rotl64(hash, index * 21);
         return (size_t) reduce(r, blockLength) + ((size_t)index) * ((size_t)blockLength);
     }
 
@@ -457,6 +471,9 @@ private:
             reverse_orders.clear();
             for (std::vector<size_t> vec : elements)
             {
+                //if (vec.size() == 0)
+                //    continue;
+
                 std::vector<t2val_t> t2vals_vec(bin_size_);
                 sdsl::int_vector<> alone_positions = sdsl::int_vector(bin_size_);
                 int alone_position_nr = find_alone_positions(vec, t2vals_vec, alone_positions);
@@ -481,6 +498,8 @@ private:
         
         for (size_t i = 0; i < elements.size(); ++i)
         {
+            //if (elements[i].size() == 0)
+            //    continue;
             fill_filter(reverse_orders[i], reverse_hs[i], i);
         }
         
@@ -515,6 +534,7 @@ public:
     interleaved_xor_filter(std::vector<std::vector<size_t>>& elements)
     {
         bins = elements.size();
+        int idx = 0;
         for (std::vector<size_t> v : elements)
         {
             if (v.size() > max_bin_elements)
@@ -542,7 +562,7 @@ public:
 
         
         data = sdsl::int_vector<>(bins * bin_size_, 0, ftype);
-    
+
         add_elements(elements);
 
         
@@ -889,17 +909,20 @@ public:
         uint8_t ftype = ixf_ptr->ftype;
         uint8_t bins_per_batch = ixf_ptr->bins_per_batch;
         uint64_t hash = ixf_ptr->murmur64(value);
+
         FingerprintType f = ixf_ptr->fingerprint(hash);
-        uint32_t r0 = (uint32_t) hash;
-        uint32_t r1 = (uint32_t) ixf_ptr->rotl64(hash, 21);
-        uint32_t r2 = (uint32_t) ixf_ptr->rotl64(hash, 42);
-        uint32_t h0 = ixf_ptr->reduce(r0, ixf_ptr->block_length);
-        uint32_t h1 = ixf_ptr->reduce(r1, ixf_ptr->block_length) + ixf_ptr->block_length;
-        uint32_t h2 = ixf_ptr->reduce(r2, ixf_ptr->block_length) + 2 * ixf_ptr->block_length;
+        uint64_t r0 = hash;
+        uint64_t r1 = ixf_ptr->rotl64(hash, 21);
+        uint64_t r2 = ixf_ptr->rotl64(hash, 42);
+        uint64_t h0 = ixf_ptr->reduce(r0, ixf_ptr->block_length);
+        uint64_t h1 = ixf_ptr->reduce(r1, ixf_ptr->block_length) + ixf_ptr->block_length;
+        uint64_t h2 = ixf_ptr->reduce(r2, ixf_ptr->block_length) + 2 * ixf_ptr->block_length;
+
 
         h0 = (h0*bins) * ftype;
         h1 = (h1*bins) * ftype;
         h2 = (h2*bins) * ftype;
+
 
         // concatenate (64/ftype) the fingerprint
         uint64_t fc64 = f;
@@ -911,6 +934,7 @@ public:
         for (size_t batch = 0; batch < ixf_ptr->bin_words; ++batch)
         {
             size_t batch_start = batch * 64;
+            
             uint64_t v = fc64 ^ ixf_ptr->data.get_int(h0 + batch_start, 64) 
                               ^ ixf_ptr->data.get_int(h1 + batch_start, 64) 
                               ^ ixf_ptr->data.get_int(h2 + batch_start, 64);

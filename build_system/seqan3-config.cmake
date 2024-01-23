@@ -378,9 +378,10 @@ endif ()
 # ZLIB dependency
 # ----------------------------------------------------------------------------
 
-if (NOT SEQAN3_NO_ZLIB)
-    find_package (ZLIB QUIET)
-endif ()
+# JUU: delete to make sure that static library is used instead of dynamic library
+#if (NOT SEQAN3_NO_ZLIB)
+#    find_package (ZLIB QUIET)
+#endif ()
 
 if (ZLIB_FOUND)
     set (SEQAN3_LIBRARIES ${SEQAN3_LIBRARIES} ${ZLIB_LIBRARIES})

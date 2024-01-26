@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -21,11 +21,20 @@ TEST(default_simd_length, int8_t)
 
     switch (max_length)
     {
-        case 0: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 1 ); break;
-        case 16: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 16 ); break;
-        case 32: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 32 ); break;
-        case 64: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 64 ); break;
-        default: FAIL() << "Unsupported max_length";
+    case 0:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 1);
+        break;
+    case 16:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 16);
+        break;
+    case 32:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 32);
+        break;
+    case 64:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 64);
+        break;
+    default:
+        FAIL() << "Unsupported max_length";
     }
 }
 
@@ -36,11 +45,20 @@ TEST(default_simd_length, int16_t)
 
     switch (max_length)
     {
-        case 0: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 1 ); break;
-        case 16: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 8 ); break;
-        case 32: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 16 ); break;
-        case 64: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 32 ); break;
-        default: FAIL() << "Unsupported max_length";
+    case 0:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 1);
+        break;
+    case 16:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 8);
+        break;
+    case 32:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 16);
+        break;
+    case 64:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 32);
+        break;
+    default:
+        FAIL() << "Unsupported max_length";
     }
 }
 
@@ -51,11 +69,20 @@ TEST(default_simd_length, int32_t)
 
     switch (max_length)
     {
-        case 0: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 1 ); break;
-        case 16: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 4 ); break;
-        case 32: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 8 ); break;
-        case 64: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 16 ); break;
-        default: FAIL() << "Unsupported max_length";
+    case 0:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 1);
+        break;
+    case 16:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 4);
+        break;
+    case 32:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 8);
+        break;
+    case 64:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 16);
+        break;
+    default:
+        FAIL() << "Unsupported max_length";
     }
 }
 
@@ -66,11 +93,20 @@ TEST(default_simd_length, int64_t)
 
     switch (max_length)
     {
-        case 0: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 1 ); break;
-        case 16: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 2 ); break;
-        case 32: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 4 ); break;
-        case 64: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 8 ); break;
-        default: FAIL() << "Unsupported max_length";
+    case 0:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 1);
+        break;
+    case 16:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 2);
+        break;
+    case 32:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 4);
+        break;
+    case 64:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 8);
+        break;
+    default:
+        FAIL() << "Unsupported max_length";
     }
 }
 
@@ -81,11 +117,20 @@ TEST(default_simd_length, uint8_t)
 
     switch (max_length)
     {
-        case 0: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 1 ); break;
-        case 16: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 16 ); break;
-        case 32: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 32 ); break;
-        case 64: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 64 ); break;
-        default: FAIL() << "Unsupported max_length";
+    case 0:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 1);
+        break;
+    case 16:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 16);
+        break;
+    case 32:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 32);
+        break;
+    case 64:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 64);
+        break;
+    default:
+        FAIL() << "Unsupported max_length";
     }
 }
 
@@ -96,11 +141,20 @@ TEST(default_simd_length, uint16_t)
 
     switch (max_length)
     {
-        case 0: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 1 ); break;
-        case 16: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 8 ); break;
-        case 32: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 16 ); break;
-        case 64: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 32 ); break;
-        default: FAIL() << "Unsupported max_length";
+    case 0:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 1);
+        break;
+    case 16:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 8);
+        break;
+    case 32:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 16);
+        break;
+    case 64:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 32);
+        break;
+    default:
+        FAIL() << "Unsupported max_length";
     }
 }
 
@@ -111,11 +165,20 @@ TEST(default_simd_length, uint32_t)
 
     switch (max_length)
     {
-        case 0: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 1 ); break;
-        case 16: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 4 ); break;
-        case 32: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 8 ); break;
-        case 64: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 16 ); break;
-        default: FAIL() << "Unsupported max_length";
+    case 0:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 1);
+        break;
+    case 16:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 4);
+        break;
+    case 32:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 8);
+        break;
+    case 64:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 16);
+        break;
+    default:
+        FAIL() << "Unsupported max_length";
     }
 }
 
@@ -126,10 +189,19 @@ TEST(default_simd_length, uint64_t)
 
     switch (max_length)
     {
-        case 0: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 1 ); break;
-        case 16: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 2 ); break;
-        case 32: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 4 ); break;
-        case 64: EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 8 ); break;
-        default: FAIL() << "Unsupported max_length";
+    case 0:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 1);
+        break;
+    case 16:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 2);
+        break;
+    case 32:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 4);
+        break;
+    case 64:
+        EXPECT_EQ((seqan3::detail::default_simd_length<scalar_t, seqan3::detail::builtin_simd>), 8);
+        break;
+    default:
+        FAIL() << "Unsupported max_length";
     }
 }

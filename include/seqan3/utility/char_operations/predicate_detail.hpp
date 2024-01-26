@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -15,10 +15,11 @@
 
 #include <array>
 #include <cctype>
-#include <seqan3/std/concepts>
+#include <concepts>
 #include <stdexcept>
 #include <string>
 
+#include <seqan3/utility/concept.hpp>
 #include <seqan3/utility/detail/type_name_as_string.hpp>
 #include <seqan3/utility/type_traits/basic.hpp>
 
@@ -39,6 +40,7 @@ class constexpr_pseudo_bitset : public std::array<bool, N>
 private:
     //!\brief The base type.
     using base_t = std::array<bool, N>;
+
 public:
     //!\brief Inherit constructors.
     using base_t::base_t;
@@ -74,14 +76,11 @@ public:
  * \tparam condition_ts     Remaining list of conditions separated by `op`.
  * \relates seqan3::detail::char_predicate
  */
-template <char op, typename condition_head_t, typename ...condition_ts>
-inline const std::string condition_message_v
-{
-    std::string{"("} +
-    (condition_head_t::msg + ... +
-        (std::string{" "} + std::string{{op, op}} + std::string{" "} + condition_ts::msg)) +
-    std::string{")"}
-};
+template <char op, typename condition_head_t, typename... condition_ts>
+inline const std::string condition_message_v{
+    std::string{"("}
+    + (condition_head_t::msg + ... + (std::string{" "} + std::string{{op, op}} + std::string{" "} + condition_ts::msg))
+    + std::string{")"}};
 
 // ----------------------------------------------------------------------------
 // char_predicate
@@ -103,18 +102,18 @@ struct char_predicate_base;
  */
 //!\cond
 template <typename condition_t>
-concept char_predicate = requires
-{
-    requires std::predicate<std::remove_reference_t<condition_t>, char>;
-    requires std::is_base_of_v<char_predicate_base<std::remove_cvref_t<condition_t>>,
-                               std::remove_cvref_t<condition_t>>;
+concept char_predicate = requires {
+                             requires std::predicate<std::remove_reference_t<condition_t>, char>;
+                             requires std::is_base_of_v<char_predicate_base<std::remove_cvref_t<condition_t>>,
+                                                        std::remove_cvref_t<condition_t>>;
 
-    std::remove_reference_t<condition_t>::msg;
+                             std::remove_reference_t<condition_t>::msg;
 
-    //The msg type can be added with a std::string.
-    SEQAN3_RETURN_TYPE_CONSTRAINT(std::string{} + std::remove_reference_t<condition_t>::msg,
-                                  std::convertible_to, decltype(std::remove_reference_t<condition_t>::msg));
-};
+                             //The msg type can be added with a std::string.
+                             {
+                                 std::string{} + std::remove_reference_t<condition_t>::msg
+                                 } -> std::convertible_to<decltype(std::remove_reference_t<condition_t>::msg)>;
+                         };
 //!\endcond
 
 /*!\name Requirements for seqan3::detail::char_predicate
@@ -186,9 +185,7 @@ struct char_predicate_base
     //!\brief Invokes the condition on `val`.
     template <std::integral value_t>
     constexpr bool operator()(value_t const val) const noexcept
-    //!\cond
         requires (sizeof(value_t) == 1)
-    //!\endcond
     {
         return derived_t::data[static_cast<unsigned char>(val)];
     }
@@ -196,13 +193,26 @@ struct char_predicate_base
     //!\overload
     template <std::integral value_t>
     constexpr bool operator()(value_t const val) const noexcept
-    //!\cond
         requires (sizeof(value_t) != 1)
-    //!\endcond
     {
-        using char_trait = std::char_traits<value_t>;
-        return (static_cast<std::make_unsigned_t<value_t>>(val) < 256) ? operator()(static_cast<uint8_t>(val)) :
-               (char_trait::eq_int_type(val, char_trait::eof()))       ? derived_t::data[256]                  : false;
+        // std::char_traits is only guaranteed to be defined for character types.
+        // libc++ deprecates other specialisations in llvm-17, and removes them in llvm-18.
+        // We map the non-character types to corresponding chracter types.
+        // For example, `seqan3::is_eof(EOF)` will call this function with `value_t == int`.
+        // clang-format off
+        using char_value_t = std::conditional_t<seqan3::builtin_character<value_t>, value_t,
+                             std::conditional_t<std::same_as<value_t, std::char_traits<char>::int_type>, char,
+                             std::conditional_t<std::same_as<value_t, std::char_traits<wchar_t>::int_type>, wchar_t,
+                             std::conditional_t<std::same_as<value_t, std::char_traits<char8_t>::int_type>, char8_t,
+                             std::conditional_t<std::same_as<value_t, std::char_traits<char16_t>::int_type>, char16_t,
+                             std::conditional_t<std::same_as<value_t, std::char_traits<char32_t>::int_type>, char32_t,
+                             void>>>>>>;
+        // clang-format on
+        static_assert(!std::same_as<char_value_t, void>, "There is no valid character representation.");
+        using char_trait = std::char_traits<char_value_t>;
+        return (static_cast<std::make_unsigned_t<value_t>>(val) < 256) ? operator()(static_cast<uint8_t>(val))
+             : (char_trait::eq_int_type(val, char_trait::eof()))       ? derived_t::data[256]
+                                                                       : false;
     }
     //!\}
 
@@ -228,13 +238,11 @@ struct char_predicate_base
  * \ingroup utility_char_operations
  */
 template <char_predicate... condition_ts>
-//!\cond
     requires (sizeof...(condition_ts) >= 2)
-//!\endcond
 struct char_predicate_disjunction : public char_predicate_base<char_predicate_disjunction<condition_ts...>>
 {
     //!\brief The message representing the disjunction of the associated conditions.
-    inline static const std::string msg = detail::condition_message_v<'|', condition_ts...>;
+    static inline const std::string msg = detail::condition_message_v<'|', condition_ts...>;
 
     //!\brief The base type.
     using base_t = char_predicate_base<char_predicate_disjunction<condition_ts...>>;
@@ -255,7 +263,7 @@ template <char_predicate condition_t>
 struct char_predicate_negator : public char_predicate_base<char_predicate_negator<condition_t>>
 {
     //!\brief The message representing the negation of the associated condition.
-    inline static const std::string msg = std::string{'!'} + condition_t::msg;
+    static inline const std::string msg = std::string{'!'} + condition_t::msg;
 
     //!\brief The base type.
     using base_t = char_predicate_base<char_predicate_negator<condition_t>>;
@@ -279,17 +287,12 @@ struct char_predicate_negator : public char_predicate_base<char_predicate_negato
  *                       Must be greater than or equal to `interval_first`.
  */
 template <uint8_t interval_first, uint8_t interval_last>
-//!\cond
     requires (interval_first <= interval_last)
-//!\endcond
 struct is_in_interval_type : public char_predicate_base<is_in_interval_type<interval_first, interval_last>>
 {
     //!\brief The message representing this condition.
-    inline static const std::string msg = std::string{"is_in_interval<'"} +
-                                          std::string{interval_first}     +
-                                          std::string{"', '"}             +
-                                          std::string{interval_last}      +
-                                          std::string{"'>"};
+    static inline const std::string msg = std::string{"is_in_interval<'"} + std::string{interval_first}
+                                        + std::string{"', '"} + std::string{interval_last} + std::string{"'>"};
 
     //!\brief The base type.
     using base_t = char_predicate_base<is_in_interval_type<interval_first, interval_last>>;
@@ -297,7 +300,7 @@ struct is_in_interval_type : public char_predicate_base<is_in_interval_type<inte
     //!\brief Import the data type from the base class.
     using typename base_t::data_t;
     //!\brief The look-up table that is used to evaluate the input.
-    static constexpr data_t data = [] () constexpr
+    static constexpr data_t data = []() constexpr
     {
         data_t ret{};
 
@@ -323,11 +326,8 @@ struct is_char_type : public char_predicate_base<is_char_type<char_v>>
     static_assert(char_v == EOF || static_cast<uint64_t>(char_v) < 256, "TODO");
 
     //!\brief The message representing this condition.
-    inline static const std::string msg = std::string{"is_char<'"}                                     +
-                                          ((char_v == EOF) ? std::string{"EOF"} : std::string{char_v}) +
-                                          std::string{"'>"};
-
-
+    static inline const std::string msg =
+        std::string{"is_char<'"} + ((char_v == EOF) ? std::string{"EOF"} : std::string{char_v}) + std::string{"'>"};
 
     //!\brief The base type.
     using base_t = char_predicate_base<is_char_type<char_v>>;
@@ -335,7 +335,7 @@ struct is_char_type : public char_predicate_base<is_char_type<char_v>>
     //!\brief Import the data type from the base class.
     using typename base_t::data_t;
     //!\brief The look-up table that is used to evaluate the input.
-    static constexpr data_t data = [] () constexpr
+    static constexpr data_t data = []() constexpr
     {
         data_t ret{};
 

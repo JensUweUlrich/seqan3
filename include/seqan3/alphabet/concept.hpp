@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,12 +12,12 @@
 
 #pragma once
 
-#include <seqan3/std/type_traits>
+#include <type_traits>
 
 #include <seqan3/alphabet/exception.hpp>
 #include <seqan3/core/concept/cereal.hpp>
 #include <seqan3/core/detail/customisation_point.hpp>
-#include <seqan3/utility/concept/exposition_only/core_language.hpp>
+#include <seqan3/utility/concept.hpp>
 #include <seqan3/utility/detail/type_name_as_string.hpp>
 #include <seqan3/utility/type_traits/basic.hpp>
 
@@ -72,8 +72,8 @@ namespace seqan3::detail::adl_only
 {
 
 //!\brief Poison-pill overload to prevent non-ADL forms of unqualified lookup.
-template <typename ...args_t>
-void to_rank(args_t ...) = delete;
+template <typename... args_t>
+void to_rank(args_t...) = delete;
 
 //!\brief seqan3::detail::customisation_point_object (CPO) definition for seqan3::to_rank.
 //!\ingroup alphabet
@@ -89,8 +89,7 @@ struct to_rank_cpo : public detail::customisation_point_object<to_rank_cpo, 2>
      * \param alphabet The alphabet the rank is returned from.
      */
     template <typename alphabet_t>
-    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<2>, alphabet_t && alphabet)
-    (
+    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<2>, alphabet_t && alphabet)(
         /*return*/ seqan3::custom::alphabet<alphabet_t>::to_rank(std::forward<alphabet_t>(alphabet)) /*;*/
     );
 
@@ -99,8 +98,7 @@ struct to_rank_cpo : public detail::customisation_point_object<to_rank_cpo, 2>
      * \param alphabet The alphabet the rank is returned from.
      */
     template <typename alphabet_t>
-    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<1>, alphabet_t && alphabet)
-    (
+    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<1>, alphabet_t && alphabet)(
         /*return*/ to_rank(std::forward<alphabet_t>(alphabet)) /*;*/
     );
 
@@ -109,8 +107,7 @@ struct to_rank_cpo : public detail::customisation_point_object<to_rank_cpo, 2>
      * \param alphabet The alphabet the rank is returned from.
      */
     template <typename alphabet_t>
-    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<0>, alphabet_t && alphabet)
-    (
+    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<0>, alphabet_t && alphabet)(
         /*return*/ std::forward<alphabet_t>(alphabet).to_rank() /*;*/
     );
 };
@@ -164,15 +161,17 @@ namespace seqan3
 inline constexpr auto to_rank = detail::adl_only::to_rank_cpo{};
 //!\}
 
- /*!\brief The `rank_type` of the semi-alphabet; defined as the return type of seqan3::to_rank.
+/*!\brief The `rank_type` of the semi-alphabet; defined as the return type of seqan3::to_rank.
  * !\ingroup alphabet
  *
  * \stableapi{Since version 3.1.}
  */
 template <typename semi_alphabet_type>
-//!\cond
-    requires requires { { seqan3::to_rank(std::declval<semi_alphabet_type>()) }; }
-//!\endcond
+    requires requires {
+                 {
+                     seqan3::to_rank(std::declval<semi_alphabet_type>())
+                 };
+             }
 using alphabet_rank_t = decltype(seqan3::to_rank(std::declval<semi_alphabet_type>()));
 
 } // namespace seqan3
@@ -185,8 +184,8 @@ namespace seqan3::detail::adl_only
 {
 
 //!\brief Poison-pill overload to prevent non-ADL forms of unqualified lookup.
-template <typename ...args_t>
-void assign_rank_to(args_t ...) = delete;
+template <typename... args_t>
+void assign_rank_to(args_t...) = delete;
 
 //!\brief seqan3::detail::customisation_point_object (CPO) definition for seqan3::assign_rank_to.
 //!\ingroup alphabet
@@ -211,10 +210,8 @@ struct assign_rank_to_cpo : public detail::customisation_point_object<assign_ran
      * return an explicit copy of it if the forwarding reference of the alphabet is a rvalue-reference.
      */
     template <typename alphabet_t>
-    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<2>,
-                                              seqan3::alphabet_rank_t<alphabet_t> const rank,
-                                              alphabet_t && alphabet)
-    (
+    static constexpr auto
+    SEQAN3_CPO_OVERLOAD(priority_tag<2>, seqan3::alphabet_rank_t<alphabet_t> const rank, alphabet_t && alphabet)(
         /*return*/ static_cast<alphabet_t>(seqan3::custom::alphabet<alphabet_t>::assign_rank_to(rank, alphabet)) /*;*/
     );
 
@@ -232,10 +229,8 @@ struct assign_rank_to_cpo : public detail::customisation_point_object<assign_ran
      * return an explicit copy of it if the forwarding reference of the alphabet is a rvalue-reference.
      */
     template <typename alphabet_t>
-    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<1>,
-                                              seqan3::alphabet_rank_t<alphabet_t> const rank,
-                                              alphabet_t && alphabet)
-    (
+    static constexpr auto
+    SEQAN3_CPO_OVERLOAD(priority_tag<1>, seqan3::alphabet_rank_t<alphabet_t> const rank, alphabet_t && alphabet)(
         /*return*/ static_cast<alphabet_t>(assign_rank_to(rank, alphabet)) /*;*/
     );
 
@@ -250,10 +245,8 @@ struct assign_rank_to_cpo : public detail::customisation_point_object<assign_ran
      * return an explicit copy of it if the forwarding reference of the alphabet is a rvalue-reference.
      */
     template <typename alphabet_t> // least priority
-    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<0>,
-                                              seqan3::alphabet_rank_t<alphabet_t> const rank,
-                                              alphabet_t && alphabet)
-    (
+    static constexpr auto
+    SEQAN3_CPO_OVERLOAD(priority_tag<0>, seqan3::alphabet_rank_t<alphabet_t> const rank, alphabet_t && alphabet)(
         /*return*/ static_cast<alphabet_t>(std::forward<alphabet_t>(alphabet).assign_rank(rank)) /*;*/
     );
 };
@@ -321,8 +314,8 @@ namespace seqan3::detail::adl_only
 {
 
 //!\brief Poison-pill overload to prevent non-ADL forms of unqualified lookup.
-template <typename ...args_t>
-void to_char(args_t ...) = delete;
+template <typename... args_t>
+void to_char(args_t...) = delete;
 
 //!\brief seqan3::detail::customisation_point_object (CPO) definition for seqan3::to_char.
 //!\ingroup alphabet
@@ -338,8 +331,7 @@ struct to_char_cpo : public detail::customisation_point_object<to_char_cpo, 2>
      * \param alphabet The alphabet the character representation is returned from.
      */
     template <typename alphabet_t>
-    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<2>, alphabet_t && alphabet)
-    (
+    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<2>, alphabet_t && alphabet)(
         /*return*/ seqan3::custom::alphabet<alphabet_t>::to_char(std::forward<alphabet_t>(alphabet)) /*;*/
     );
 
@@ -348,8 +340,7 @@ struct to_char_cpo : public detail::customisation_point_object<to_char_cpo, 2>
      * \param alphabet The alphabet the character representation is returned from.
      */
     template <typename alphabet_t>
-    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<1>, alphabet_t && alphabet)
-    (
+    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<1>, alphabet_t && alphabet)(
         /*return*/ to_char(std::forward<alphabet_t>(alphabet)) /*;*/
     );
 
@@ -358,8 +349,7 @@ struct to_char_cpo : public detail::customisation_point_object<to_char_cpo, 2>
      * \param alphabet The alphabet the character representation is returned from.
      */
     template <typename alphabet_t>
-    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<0>, alphabet_t && alphabet)
-    (
+    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<0>, alphabet_t && alphabet)(
         /*return*/ std::forward<alphabet_t>(alphabet).to_char() /*;*/
     );
 };
@@ -420,9 +410,11 @@ inline constexpr auto to_char = detail::adl_only::to_char_cpo{};
  * \stableapi{Since version 3.1.}
  */
 template <typename alphabet_type>
-//!\cond
-    requires requires (alphabet_type const a) { { seqan3::to_char(a) }; }
-//!\endcond
+    requires requires (alphabet_type const a) {
+                 {
+                     seqan3::to_char(a)
+                 };
+             }
 using alphabet_char_t = decltype(seqan3::to_char(std::declval<alphabet_type const>()));
 
 } // namespace seqan3
@@ -435,8 +427,8 @@ namespace seqan3::detail::adl_only
 {
 
 //!\brief Poison-pill overload to prevent non-ADL forms of unqualified lookup.
-template <typename ...args_t>
-void assign_char_to(args_t ...) = delete;
+template <typename... args_t>
+void assign_char_to(args_t...) = delete;
 
 //!\brief seqan3::detail::customisation_point_object (CPO) definition for seqan3::assign_char_to.
 //!\ingroup alphabet
@@ -461,10 +453,8 @@ struct assign_char_to_cpo : public detail::customisation_point_object<assign_cha
      * return an explicit copy of it if the forwarding reference of the alphabet is a rvalue-reference.
      */
     template <typename alphabet_t>
-    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<2>,
-                                              seqan3::alphabet_char_t<alphabet_t> const chr,
-                                              alphabet_t && alphabet)
-    (
+    static constexpr auto
+    SEQAN3_CPO_OVERLOAD(priority_tag<2>, seqan3::alphabet_char_t<alphabet_t> const chr, alphabet_t && alphabet)(
         /*return*/ static_cast<alphabet_t>(seqan3::custom::alphabet<alphabet_t>::assign_char_to(chr, alphabet)) /*;*/
     );
 
@@ -482,10 +472,8 @@ struct assign_char_to_cpo : public detail::customisation_point_object<assign_cha
      * return an explicit copy of it if the forwarding reference of the alphabet is a rvalue-reference.
      */
     template <typename alphabet_t>
-    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<1>,
-                                              seqan3::alphabet_char_t<alphabet_t> const chr,
-                                              alphabet_t && alphabet)
-    (
+    static constexpr auto
+    SEQAN3_CPO_OVERLOAD(priority_tag<1>, seqan3::alphabet_char_t<alphabet_t> const chr, alphabet_t && alphabet)(
         /*return*/ static_cast<alphabet_t>(assign_char_to(chr, alphabet)) /*;*/
     );
 
@@ -500,10 +488,8 @@ struct assign_char_to_cpo : public detail::customisation_point_object<assign_cha
      * return an explicit copy of it if the forwarding reference of the alphabet is a rvalue-reference.
      */
     template <typename alphabet_t> // least priority
-    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<0>,
-                                              seqan3::alphabet_char_t<alphabet_t> const chr,
-                                              alphabet_t && alphabet)
-    (
+    static constexpr auto
+    SEQAN3_CPO_OVERLOAD(priority_tag<0>, seqan3::alphabet_char_t<alphabet_t> const chr, alphabet_t && alphabet)(
         /*return*/ static_cast<alphabet_t>(alphabet.assign_char(chr)) /*;*/
     );
 };
@@ -571,8 +557,8 @@ namespace seqan3::detail::adl_only
 {
 
 //!\brief Poison-pill overload to prevent non-ADL forms of unqualified lookup.
-template <typename ...args_t>
-void char_is_valid_for(args_t ...) = delete;
+template <typename... args_t>
+void char_is_valid_for(args_t...) = delete;
 
 /*!\brief seqan3::detail::customisation_point_object (CPO) definition for seqan3::char_is_valid_for.
  * \tparam alphabet_t The alphabet type being queried.
@@ -590,18 +576,17 @@ struct char_is_valid_for_cpo : public detail::customisation_point_object<char_is
      *        std::type_identity instead of a default constructed alphabet.
      */
     template <typename alphabet_type>
-    using alphabet_or_type_identity
-        = std::conditional_t<std::is_nothrow_default_constructible_v<std::remove_cvref_t<alphabet_type>>,
-                             std::remove_cvref_t<alphabet_type>,
-                             std::type_identity<alphabet_type>>;
+    using alphabet_or_type_identity =
+        std::conditional_t<std::is_nothrow_default_constructible_v<std::remove_cvref_t<alphabet_type>>,
+                           std::remove_cvref_t<alphabet_type>,
+                           std::type_identity<alphabet_type>>;
 
     /*!\brief CPO overload (check 1 out of 3): explicit customisation via `seqan3::custom::alphabet`
      * \tparam alphabet_type The type of the alphabet. (Needed to defer instantiation for incomplete types.)
      * \param chr The character of the alphabet.
      */
     template <typename alphabet_type = alphabet_t>
-    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<3>, alphabet_char_t<alphabet_type> const chr)
-    (
+    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<3>, alphabet_char_t<alphabet_type> const chr)(
         /*return*/ seqan3::custom::alphabet<alphabet_type>::char_is_valid(chr) == true /*;*/
     );
 
@@ -616,8 +601,7 @@ struct char_is_valid_for_cpo : public detail::customisation_point_object<char_is
      * `char_is_valid_for(chr, std::type_identity<alphabet_type>{})` will be called.
      */
     template <typename alphabet_type = alphabet_t>
-    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<2>, alphabet_char_t<alphabet_type> const chr)
-    (
+    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<2>, alphabet_char_t<alphabet_type> const chr)(
         /*return*/ char_is_valid_for(chr, alphabet_or_type_identity<alphabet_type>{}) == true /*;*/
     );
 
@@ -626,8 +610,7 @@ struct char_is_valid_for_cpo : public detail::customisation_point_object<char_is
      * \param chr The character of the alphabet.
      */
     template <typename alphabet_type = alphabet_t>
-    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<1>, alphabet_char_t<alphabet_type> const chr)
-    (
+    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<1>, alphabet_char_t<alphabet_type> const chr)(
         /*return*/ std::remove_cvref_t<alphabet_type>::char_is_valid(chr) == true /*;*/
     );
 
@@ -652,8 +635,7 @@ struct char_is_valid_for_cpo : public detail::customisation_point_object<char_is
      * ```
      */
     template <typename alphabet_type = alphabet_t>
-    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<0>, alphabet_char_t<alphabet_type> const chr)
-    (
+    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<0>, alphabet_char_t<alphabet_type> const chr)(
         /*return*/ seqan3::to_char(seqan3::assign_char_to(chr, alphabet_or_type_identity<alphabet_type>{})) == chr /*;*/
     );
 };
@@ -712,9 +694,11 @@ namespace seqan3
  * \experimentalapi{Experimental since version 3.1.}
  */
 template <typename alph_t>
-//!\cond
-    requires requires { { to_char(std::declval<alph_t>()) }; } // to_char() is required by some defs
-//!\endcond
+    requires requires {
+                 {
+                     to_char(std::declval<alph_t>())
+                 };
+             } // to_char() is required by some defs
 inline constexpr auto char_is_valid_for = detail::adl_only::char_is_valid_for_cpo<alph_t>{};
 //!\}
 } // namespace seqan3
@@ -733,14 +717,14 @@ struct assign_char_strictly_to_fn
     //!\brief Operator overload for rvalues.
     template <typename alphabet_t>
     constexpr decltype(auto) operator()(seqan3::alphabet_char_t<alphabet_t> const chr, alphabet_t && alphabet) const
-    //!\cond
-        requires requires ()
-        {
-            SEQAN3_RETURN_TYPE_CONSTRAINT(seqan3::assign_char_to(chr, std::forward<alphabet_t>(alphabet)),
-                                          std::convertible_to, alphabet_t);
-            SEQAN3_RETURN_TYPE_CONSTRAINT(seqan3::char_is_valid_for<alphabet_t>(chr), std::same_as, bool);
-        }
-    //!\endcond
+        requires requires () {
+                     {
+                         seqan3::assign_char_to(chr, std::forward<alphabet_t>(alphabet))
+                         } -> std::convertible_to<alphabet_t>;
+                     {
+                         seqan3::char_is_valid_for<alphabet_t>(chr)
+                         } -> std::same_as<bool>;
+                 }
     {
         if (!seqan3::char_is_valid_for<alphabet_t>(chr))
             throw seqan3::invalid_char_assignment{detail::type_name_as_string<alphabet_t>, chr};
@@ -791,8 +775,8 @@ namespace seqan3::detail::adl_only
 {
 
 //!\brief Poison-pill overload to prevent non-ADL forms of unqualified lookup.
-template <typename ...args_t>
-void alphabet_size(args_t ...) = delete;
+template <typename... args_t>
+void alphabet_size(args_t...) = delete;
 
 /*!\brief seqan3::detail::customisation_point_object (CPO) definition for seqan3::alphabet_size.
  * \tparam alphabet_t The alphabet type being queried.
@@ -810,18 +794,17 @@ struct alphabet_size_cpo : public detail::customisation_point_object<alphabet_si
      *        std::type_identity instead of a default constructed alphabet.
      */
     template <typename alphabet_type>
-    using alphabet_or_type_identity
-        = std::conditional_t<std::is_nothrow_default_constructible_v<std::remove_cvref_t<alphabet_type>> &&
-                             seqan3::is_constexpr_default_constructible_v<std::remove_cvref_t<alphabet_type>>,
-                             std::remove_cvref_t<alphabet_type>,
-                             std::type_identity<alphabet_type>>;
+    using alphabet_or_type_identity =
+        std::conditional_t<std::is_nothrow_default_constructible_v<std::remove_cvref_t<alphabet_type>>
+                               && seqan3::is_constexpr_default_constructible_v<std::remove_cvref_t<alphabet_type>>,
+                           std::remove_cvref_t<alphabet_type>,
+                           std::type_identity<alphabet_type>>;
 
     /*!\brief CPO overload (check 1 out of 3): explicit customisation via `seqan3::custom::alphabet`
      * \tparam alphabet_type The type of the alphabet. (Needed to defer instantiation for incomplete types.)
      */
     template <typename alphabet_type = alphabet_t>
-    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<2>)
-    (
+    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<2>)(
         /*return*/ seqan3::custom::alphabet<alphabet_type>::alphabet_size /*;*/
     );
 
@@ -834,8 +817,7 @@ struct alphabet_size_cpo : public detail::customisation_point_object<alphabet_si
      * `alphabet_size(std::type_identity<alphabet_type>{})` will be called.
      */
     template <typename alphabet_type = alphabet_t>
-    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<1>)
-    (
+    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<1>)(
         /*return*/ alphabet_size(alphabet_or_type_identity<alphabet_type>{}) /*;*/
     );
 
@@ -843,17 +825,10 @@ struct alphabet_size_cpo : public detail::customisation_point_object<alphabet_si
      * \tparam alphabet_type The type of the alphabet. (Needed to defer instantiation for incomplete types.)
      */
     template <typename alphabet_type = alphabet_t>
-    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<0>)
-    (
+    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<0>)(
         /*return*/ std::remove_cvref_t<alphabet_type>::alphabet_size /*;*/
     );
 };
-
-#if SEQAN3_WORKAROUND_GCC_89953
-template <typename alph_t>
-    requires requires { { alphabet_size_cpo<alph_t>{} }; }
-inline constexpr auto alphabet_size_obj = alphabet_size_cpo<alph_t>{};
-#endif // SEQAN3_WORKAROUND_GCC_89953
 
 } // namespace seqan3::detail::adl_only
 
@@ -903,20 +878,13 @@ namespace seqan3
  * \stableapi{Since version 3.1. The name seqan3::alphabet_size, Implementation 1,
  *            and Implementation 3 are stable and will not change.}
  */
-#if SEQAN3_WORKAROUND_GCC_89953
 template <typename alph_t>
-//!\cond
-    requires requires { { detail::adl_only::alphabet_size_cpo<alph_t>{} }; } &&
-             requires { { detail::adl_only::alphabet_size_obj<alph_t>() }; } // ICE workarounds
-//!\endcond
-inline constexpr auto alphabet_size = detail::adl_only::alphabet_size_obj<alph_t>();
-#else // ^^^ workaround / no workaround vvv
-template <typename alph_t>
-//!\cond
-    requires requires { { detail::adl_only::alphabet_size_cpo<alph_t>{}() }; }
-//!\endcond
+    requires requires {
+                 {
+                     detail::adl_only::alphabet_size_cpo<alph_t>{}()
+                 };
+             }
 inline constexpr auto alphabet_size = detail::adl_only::alphabet_size_cpo<alph_t>{}();
-#endif // SEQAN3_WORKAROUND_GCC_89953
 
 // ============================================================================
 // semialphabet
@@ -965,15 +933,15 @@ inline constexpr auto alphabet_size = detail::adl_only::alphabet_size_cpo<alph_t
  */
 //!\cond
 template <typename t>
-concept semialphabet =
-    std::totally_ordered<t> &&
-    std::copy_constructible<t> &&
-    std::is_nothrow_copy_constructible_v<t> &&
-    requires (t v)
-{
-    { seqan3::alphabet_size<t> };
-    { seqan3::to_rank(v) };
-};
+concept semialphabet = std::totally_ordered<t> && std::copy_constructible<t> && std::is_nothrow_copy_constructible_v<t>
+                    && requires (t v) {
+                           {
+                               seqan3::alphabet_size<t>
+                           };
+                           {
+                               seqan3::to_rank(v)
+                           };
+                       };
 //!\endcond
 
 // ============================================================================
@@ -1016,10 +984,11 @@ concept semialphabet =
  */
 //!\cond
 template <typename t>
-concept writable_semialphabet = semialphabet<t> && requires (t v, alphabet_rank_t<t> r)
-{
-    { seqan3::assign_rank_to(r, v) };
-};
+concept writable_semialphabet = semialphabet<t> && requires (t v, alphabet_rank_t<t> r) {
+                                                       {
+                                                           seqan3::assign_rank_to(r, v)
+                                                       };
+                                                   };
 //!\endcond
 
 // ============================================================================
@@ -1055,10 +1024,11 @@ concept writable_semialphabet = semialphabet<t> && requires (t v, alphabet_rank_
  */
 //!\cond
 template <typename t>
-concept alphabet = semialphabet<t> && requires (t v)
-{
-    { seqan3::to_char(v) };
-};
+concept alphabet = semialphabet<t> && requires (t v) {
+                                          {
+                                              seqan3::to_char(v)
+                                          };
+                                      };
 //!\endcond
 
 // ============================================================================
@@ -1103,10 +1073,11 @@ concept alphabet = semialphabet<t> && requires (t v)
  */
 //!\cond
 template <typename t>
-concept writable_alphabet = alphabet<t> && writable_semialphabet<t> && requires (t v, alphabet_char_t<t> c)
-{
-    { seqan3::assign_char_to(c, v) };
-};
+concept writable_alphabet = alphabet<t> && writable_semialphabet<t> && requires (t v, alphabet_char_t<t> c) {
+                                                                           {
+                                                                               seqan3::assign_char_to(c, v)
+                                                                           };
+                                                                       };
 //!\endcond
 
 // ============================================================================
@@ -1183,11 +1154,11 @@ namespace seqan3::detail
  */
 //!\cond
 template <typename t>
-concept constexpr_semialphabet = semialphabet<t> && requires
-{
-    // currently only tests rvalue interfaces, because we have no constexpr values in this scope to get references to
-    requires SEQAN3_IS_CONSTEXPR(to_rank(std::remove_reference_t<t>{}));
-};
+concept constexpr_semialphabet =
+    semialphabet<t> && requires {
+                           // currently only tests rvalue interfaces, because we have no constexpr values in this scope to get references to
+                           requires SEQAN3_IS_CONSTEXPR(to_rank(std::remove_reference_t<t>{}));
+                       };
 //!\endcond
 
 // ============================================================================
@@ -1205,11 +1176,12 @@ concept constexpr_semialphabet = semialphabet<t> && requires
  */
 //!\cond
 template <typename t>
-concept writable_constexpr_semialphabet = constexpr_semialphabet<t> && writable_semialphabet<t> && requires
-{
-    // currently only tests rvalue interfaces, because we have no constexpr values in this scope to get references to
-    requires SEQAN3_IS_CONSTEXPR(seqan3::assign_rank_to(alphabet_rank_t<t>{}, std::remove_reference_t<t>{}));
-};
+concept writable_constexpr_semialphabet =
+    constexpr_semialphabet<t> && writable_semialphabet<t>
+    && requires {
+           // currently only tests rvalue interfaces, because we have no constexpr values in this scope to get references to
+           requires SEQAN3_IS_CONSTEXPR(seqan3::assign_rank_to(alphabet_rank_t<t>{}, std::remove_reference_t<t>{}));
+       };
 //!\endcond
 
 // ============================================================================
@@ -1227,11 +1199,11 @@ concept writable_constexpr_semialphabet = constexpr_semialphabet<t> && writable_
  */
 //!\cond
 template <typename t>
-concept constexpr_alphabet = constexpr_semialphabet<t> && alphabet<t> && requires
-{
-    // currently only tests rvalue interfaces, because we have no constexpr values in this scope to get references to
-    requires SEQAN3_IS_CONSTEXPR(to_char(std::remove_reference_t<t>{}));
-};
+concept constexpr_alphabet =
+    constexpr_semialphabet<t> && alphabet<t> && requires {
+                                                    // currently only tests rvalue interfaces, because we have no constexpr values in this scope to get references to
+                                                    requires SEQAN3_IS_CONSTEXPR(to_char(std::remove_reference_t<t>{}));
+                                                };
 //!\endcond
 
 // ============================================================================
@@ -1251,11 +1223,11 @@ concept constexpr_alphabet = constexpr_semialphabet<t> && alphabet<t> && require
 //!\cond
 template <typename t>
 concept writable_constexpr_alphabet =
-    constexpr_alphabet<t> && writable_constexpr_semialphabet<t> && writable_alphabet<t> && requires
-{
-    // currently only tests rvalue interfaces, because we have no constexpr values in this scope to get references to
-    requires SEQAN3_IS_CONSTEXPR(seqan3::assign_char_to(alphabet_char_t<t>{}, std::remove_reference_t<t>{}));
-};
+    constexpr_alphabet<t> && writable_constexpr_semialphabet<t> && writable_alphabet<t>
+    && requires {
+           // currently only tests rvalue interfaces, because we have no constexpr values in this scope to get references to
+           requires SEQAN3_IS_CONSTEXPR(seqan3::assign_char_to(alphabet_char_t<t>{}, std::remove_reference_t<t>{}));
+       };
 //!\endcond
 
 } // namespace seqan3::detail

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -80,10 +80,10 @@ TYPED_TEST(unsigned_operations, ceil_log2)
 
             if constexpr (seqan3::detail::bits_of<unsigned_t> <= 32u) // known to fail for 64bit unsigned integers
             {
-                EXPECT_EQ(std::ceil(std::log2(n)), log2_value + 1u) << "ceil_log2 of " << start << " should be "
-                                                                    << log2_value
-                                                                    << "; If this fails this might be a floating point"
-                                                                    << "rounding error on your machine.";
+                EXPECT_EQ(std::ceil(std::log2(n)), log2_value + 1u)
+                    << "ceil_log2 of " << start << " should be " << log2_value
+                    << "; If this fails this might be a floating point"
+                    << "rounding error on your machine.";
             }
         }
     }

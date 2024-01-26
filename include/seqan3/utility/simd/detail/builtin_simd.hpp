@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include <seqan3/std/bit>
+#include <bit>
 #include <type_traits>
 
 #include <seqan3/utility/detail/integer_traits.hpp>
@@ -55,13 +55,11 @@ struct builtin_simd;
 //!\copydoc seqan3::detail::builtin_simd
 //!\ingroup utility_simd
 template <typename scalar_t, size_t length>
-//!\cond
     requires (std::has_single_bit(length))
-//!\endcond
 struct builtin_simd<scalar_t, length>
 {
     //!\brief The type of the builtin simd.
-#if SEQAN3_DOXYGEN_ONLY(1)0
+#if SEQAN3_DOXYGEN_ONLY(1) 0
     using type = scalar_t __attribute__((vector_size(sizeof(scalar_t) * length))));
     // doxygen 1.8.13 does not support c++11 attributes, thus this doxygen-only definition
 #elif defined(__clang__)
@@ -85,12 +83,13 @@ struct builtin_simd_traits_helper : std::false_type
  */
 template <typename builtin_simd_t>
 //!\cond
-    // NOTE: gcc throws a compile time error if builtin_simd_t is a pointer of an incomplete type. To tackle this we
-    // short-circuit the requires with is_pointer_v. See builtin_simd_test.cpp for a test case for this.
-    requires (!std::is_pointer_v<std::decay_t<builtin_simd_t>>) && requires(builtin_simd_t simd)
-    {
-        { simd[0] };
-    }
+// NOTE: gcc throws a compile time error if builtin_simd_t is a pointer of an incomplete type. To tackle this we
+// short-circuit the requires with is_pointer_v. See builtin_simd_test.cpp for a test case for this.
+    requires (!std::is_pointer_v<std::decay_t<builtin_simd_t>>) && requires (builtin_simd_t simd) {
+                                                                       {
+                                                                           simd[0]
+                                                                       };
+                                                                   }
 //!\endcond
 struct builtin_simd_traits_helper<builtin_simd_t>
 {
@@ -101,9 +100,9 @@ struct builtin_simd_traits_helper<builtin_simd_t>
 
     //!\brief Whether builtin_simd_t is a builtin type or not?
     //!\hideinitializer
-    static constexpr bool value = std::has_single_bit(length) &&
-                                  std::is_same_v<builtin_simd_t,
-                                                 transformation_trait_or_t<builtin_simd<scalar_type, length>, void>>;
+    static constexpr bool value =
+        std::has_single_bit(length)
+        && std::is_same_v<builtin_simd_t, transformation_trait_or_t<builtin_simd<scalar_type, length>, void>>;
 };
 
 /*!\brief This class inherits from std::true_type, **iff**
@@ -135,7 +134,7 @@ constexpr bool is_builtin_simd_v = is_builtin_simd<builtin_simd_t>::value;
  * seqan3::detail::builtin_simd types.
  */
 template <>
-constexpr auto default_simd_max_length<builtin_simd> = []()
+inline constexpr auto default_simd_max_length<builtin_simd> = []()
 {
 #if defined(__AVX512F__)
     return min_viable_uint_v<64u>;
@@ -162,13 +161,14 @@ constexpr auto default_simd_max_length<builtin_simd> = []()
  */
 template <typename builtin_simd_t>
 struct is_native_builtin_simd :
-    std::bool_constant<(default_simd_max_length<builtin_simd> != 0) &&
-                       ((builtin_simd_traits_helper<builtin_simd_t>::length *
-                            sizeof(typename builtin_simd_traits_helper<builtin_simd_t>::scalar_type)) >= 16) &&
-                       ((builtin_simd_traits_helper<builtin_simd_t>::length *
-                            sizeof(typename builtin_simd_traits_helper<builtin_simd_t>::scalar_type)) <= 64)>
+    std::bool_constant<(default_simd_max_length<builtin_simd> != 0)
+                       && ((builtin_simd_traits_helper<builtin_simd_t>::length
+                            * sizeof(typename builtin_simd_traits_helper<builtin_simd_t>::scalar_type))
+                           >= 16)
+                       && ((builtin_simd_traits_helper<builtin_simd_t>::length
+                            * sizeof(typename builtin_simd_traits_helper<builtin_simd_t>::scalar_type))
+                           <= 64)>
 {};
-
 
 /*!\brief Helper variable to test whether a type is a native simd builtin type.
  * \ingroup utility_simd
@@ -218,6 +218,6 @@ struct simd_traits<builtin_simd_t>
     using rebind = typename detail::builtin_simd<new_scalar_type, length>::type;
 };
 
-} // inline namespace simd
+} // namespace simd
 
 } // namespace seqan3

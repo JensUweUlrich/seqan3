@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -13,15 +13,15 @@
 
 #pragma once
 
-#include <seqan3/std/algorithm>
+#include <algorithm>
 
 #include <seqan3/alphabet/concept.hpp>
 #include <seqan3/core/concept/cereal.hpp>
 #include <seqan3/core/detail/strong_type.hpp>
-#include <seqan3/utility/concept/exposition_only/core_language.hpp>
+#include <seqan3/utility/concept.hpp>
 
 #if SEQAN3_WITH_CEREAL
-#include <cereal/types/array.hpp>
+#    include <cereal/types/array.hpp>
 #endif // SEQAN3_WITH_CEREAL
 
 namespace seqan3
@@ -39,7 +39,7 @@ namespace seqan3
 template <arithmetic score_type>
 struct match_score : detail::strong_type<score_type, match_score<score_type>, detail::strong_type_skill::convert>
 {
-     using detail::strong_type<score_type, match_score<score_type>, detail::strong_type_skill::convert>::strong_type;
+    using detail::strong_type<score_type, match_score<score_type>, detail::strong_type_skill::convert>::strong_type;
 };
 
 /*!\name Template argument type deduction guides
@@ -64,7 +64,7 @@ match_score(score_type) -> match_score<score_type>;
 template <arithmetic score_type>
 struct mismatch_score : detail::strong_type<score_type, mismatch_score<score_type>, detail::strong_type_skill::convert>
 {
-     using detail::strong_type<score_type, mismatch_score<score_type>, detail::strong_type_skill::convert>::strong_type;
+    using detail::strong_type<score_type, mismatch_score<score_type>, detail::strong_type_skill::convert>::strong_type;
 };
 
 /*!\name Template argument type deduction guides
@@ -179,8 +179,8 @@ public:
     {
         std::conditional_t<std::integral<score_t>, int64_t, double> i_ms = static_cast<score_arg_t>(ms);
         std::conditional_t<std::integral<score_t>, int64_t, double> i_mms = static_cast<score_arg_t>(mms);
-        if ((i_ms  < std::numeric_limits<score_t>::lowest() || i_ms  > std::numeric_limits<score_t>::max()) ||
-            (i_mms < std::numeric_limits<score_t>::lowest() || i_mms > std::numeric_limits<score_t>::max()))
+        if ((i_ms < std::numeric_limits<score_t>::lowest() || i_ms > std::numeric_limits<score_t>::max())
+            || (i_mms < std::numeric_limits<score_t>::lowest() || i_mms > std::numeric_limits<score_t>::max()))
         {
             throw std::invalid_argument{"You passed a score value to set_simple_scheme that is out of range of the "
                                         "scoring scheme's underlying type. Define your scoring scheme with a larger "
@@ -213,19 +213,15 @@ public:
      * \return The score of the two letters in the current scheme.
      */
     template <typename alph1_t, typename alph2_t>
-    //!\cond
         requires explicitly_convertible_to<alph1_t, alphabet_t> && explicitly_convertible_to<alph2_t, alphabet_t>
-    //!\endcond
     constexpr score_t & score(alph1_t const alph1, alph2_t const alph2) noexcept
     {
         return matrix[to_rank(static_cast<alphabet_t>(alph1))][to_rank(static_cast<alphabet_t>(alph2))];
     }
 
-    //!\copydoc score
+    //!\copydoc seqan3::scoring_scheme_base::score
     template <typename alph1_t, typename alph2_t>
-    //!\cond
         requires explicitly_convertible_to<alph1_t, alphabet_t> && explicitly_convertible_to<alph2_t, alphabet_t>
-    //!\endcond
     constexpr score_t score(alph1_t const alph1, alph2_t const alph2) const noexcept
     {
         return matrix[to_rank(static_cast<alphabet_t>(alph1))][to_rank(static_cast<alphabet_t>(alph2))];

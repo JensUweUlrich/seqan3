@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include <seqan3/std/ranges>
+#include <ranges>
 
 #include <seqan3/io/record.hpp>
 #include <seqan3/utility/tuple/concept.hpp>
@@ -62,8 +62,8 @@ template <typename field_types,
           typename field_types_as_ids,
           typename selected_field_ids,
           size_t field_no = 0,
-          typename ...return_types>
-struct select_types_with_ids                               // unconstrained template is recursion anchor
+          typename... return_types>
+struct select_types_with_ids // unconstrained template is recursion anchor
 {
     //!\brief The return type.
     using type = type_list<return_types...>;
@@ -76,18 +76,16 @@ template <typename field_types,
           typename field_types_as_ids,
           typename selected_field_ids,
           size_t field_no = 0,
-          typename ...return_types>
-using select_types_with_ids_t = typename select_types_with_ids<field_types,
-                                                               field_types_as_ids,
-                                                               selected_field_ids,
-                                                               field_no,
-                                                               return_types...>::type;
+          typename... return_types>
+using select_types_with_ids_t =
+    typename select_types_with_ids<field_types, field_types_as_ids, selected_field_ids, field_no, return_types...>::
+        type;
 //!\cond
 template <typename field_types,
           typename field_types_as_ids,
           typename selected_field_ids,
           size_t field_no,
-          typename ...return_types>
+          typename... return_types>
     requires (field_no < selected_field_ids::as_array.size()) // perform recursion while not at end
 struct select_types_with_ids<field_types, field_types_as_ids, selected_field_ids, field_no, return_types...>
 {
@@ -95,17 +93,15 @@ struct select_types_with_ids<field_types, field_types_as_ids, selected_field_ids
                   "You selected a field that was not in field_types_as_ids.");
 
     // call this type trait again, but increase index by one and append a type to the returned type list.
-    using type = select_types_with_ids_t<field_types,
-                                         field_types_as_ids,
-                                         selected_field_ids,
-                                         field_no + 1,
-                                         return_types ...,
-                                         list_traits::at<field_types_as_ids::index_of(
-                                             selected_field_ids::as_array[field_no]), field_types>>;
-
+    using type = select_types_with_ids_t<
+        field_types,
+        field_types_as_ids,
+        selected_field_ids,
+        field_no + 1,
+        return_types...,
+        list_traits::at<field_types_as_ids::index_of(selected_field_ids::as_array[field_no]), field_types>>;
 };
 //!\endcond
-
 
 // ----------------------------------------------------------------------------
 // get_or_ignore
@@ -178,7 +174,7 @@ decltype(auto) get_or(record<field_types, field_ids> const & r, or_type && or_va
 }
 
 //!\copydoc seqan3::detail::get_or
-template <size_t i, typename or_type, typename ...types>
+template <size_t i, typename or_type, typename... types>
 decltype(auto) get_or(std::tuple<types...> & t, or_type && or_value)
 {
     if constexpr (i < sizeof...(types))
@@ -188,7 +184,7 @@ decltype(auto) get_or(std::tuple<types...> & t, or_type && or_value)
 }
 
 //!\copydoc seqan3::detail::get_or
-template <size_t i, typename or_type, typename ...types>
+template <size_t i, typename or_type, typename... types>
 decltype(auto) get_or(std::tuple<types...> const & t, or_type && or_value)
 {
     if constexpr (i < sizeof...(types))

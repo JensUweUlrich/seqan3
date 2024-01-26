@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -16,26 +16,25 @@
 #include <seqan3/alignment/pairwise/align_pairwise.hpp>
 #include <seqan3/alphabet/nucleotide/dna4.hpp>
 #include <seqan3/test/alignment/align_pairwise_edit_distance.hpp>
-#include <seqan3/test/performance/units.hpp>
 #include <seqan3/test/performance/sequence_generator.hpp>
+#include <seqan3/test/performance/units.hpp>
 #include <seqan3/test/seqan2.hpp>
 #include <seqan3/utility/views/zip.hpp>
 
 #ifdef SEQAN3_HAS_SEQAN2
-#include <seqan/align.h>
-#include <seqan/basic.h>
-#include <seqan/find.h>
-#include <seqan/sequence.h>
+#    include <seqan/align.h>
+#    include <seqan/basic.h>
+#    include <seqan/find.h>
+#    include <seqan/sequence.h>
 #endif
 
-constexpr auto edit_distance_cfg = seqan3::align_cfg::method_global{} |
-                                   seqan3::align_cfg::edit_scheme |
-                                   seqan3::align_cfg::output_score{};
+constexpr auto edit_distance_cfg =
+    seqan3::align_cfg::method_global{} | seqan3::align_cfg::edit_scheme | seqan3::align_cfg::output_score{};
 
 // Shortcut to determine the alignment result type.
 template <typename seq1_t, typename seq2_t, typename config_t>
-using alignment_result_type_t = seqan3::alignment_result<
-    typename seqan3::detail::align_result_selector<seq1_t, seq2_t, config_t>::type>;
+using alignment_result_type_t =
+    seqan3::alignment_result<typename seqan3::detail::align_result_selector<seq1_t, seq2_t, config_t>::type>;
 
 // ============================================================================
 //  edit_distance; score; dna4; single
@@ -56,8 +55,8 @@ void seqan3_edit_distance_dna4(benchmark::State & state)
         score += algorithm(seq1, seq2, edit_distance_cfg).score();
 
     state.counters["score"] = score;
-    state.counters["cells"] = seqan3::test::pairwise_cell_updates(std::views::single(std::tie(seq1, seq2)),
-                                                                  edit_distance_cfg);
+    state.counters["cells"] =
+        seqan3::test::pairwise_cell_updates(std::views::single(std::tie(seq1, seq2)), edit_distance_cfg);
     state.counters["CUPS"] = seqan3::test::cell_updates_per_second(state.counters["cells"]);
 }
 
@@ -75,8 +74,8 @@ void seqan3_edit_distance_dna4_selector(benchmark::State & state)
     }
 
     state.counters["score"] = score;
-    state.counters["cells"] = seqan3::test::pairwise_cell_updates(std::views::single(std::tie(seq1, seq2)),
-                                                                  edit_distance_cfg);
+    state.counters["cells"] =
+        seqan3::test::pairwise_cell_updates(std::views::single(std::tie(seq1, seq2)), edit_distance_cfg);
     state.counters["CUPS"] = seqan3::test::cell_updates_per_second(state.counters["cells"]);
 }
 
@@ -86,8 +85,8 @@ void seqan2_edit_distance_dna4(benchmark::State & state)
     using seqan3::test::edit_distance_algorithm_seqan2;
 
     size_t sequence_length = 500;
-    auto seq1 = seqan3::test::generate_sequence_seqan2<seqan::Dna>(sequence_length, 0, 0);
-    auto seq2 = seqan3::test::generate_sequence_seqan2<seqan::Dna>(sequence_length, 0, 1);
+    auto seq1 = seqan3::test::generate_sequence_seqan2<seqan2::Dna>(sequence_length, 0, 0);
+    auto seq2 = seqan3::test::generate_sequence_seqan2<seqan2::Dna>(sequence_length, 0, 1);
     int score = 0;
 
     seqan3::configuration align_cfg = seqan3::align_cfg::method_global{};
@@ -97,24 +96,24 @@ void seqan2_edit_distance_dna4(benchmark::State & state)
         score += algorithm_seqan2(seq1, seq2);
 
     state.counters["score"] = score;
-    state.counters["cells"] = seqan3::test::pairwise_cell_updates(std::views::single(std::tie(seq1, seq2)),
-                                                                  edit_distance_cfg);
+    state.counters["cells"] =
+        seqan3::test::pairwise_cell_updates(std::views::single(std::tie(seq1, seq2)), edit_distance_cfg);
     state.counters["CUPS"] = seqan3::test::cell_updates_per_second(state.counters["cells"]);
 }
 
 void seqan2_edit_distance_generic_dna4(benchmark::State & state)
 {
     size_t sequence_length = 500;
-    auto seq1 = seqan3::test::generate_sequence_seqan2<seqan::Dna>(sequence_length, 0, 0);
-    auto seq2 = seqan3::test::generate_sequence_seqan2<seqan::Dna>(sequence_length, 0, 1);
+    auto seq1 = seqan3::test::generate_sequence_seqan2<seqan2::Dna>(sequence_length, 0, 0);
+    auto seq2 = seqan3::test::generate_sequence_seqan2<seqan2::Dna>(sequence_length, 0, 1);
     int score = 0;
 
     for (auto _ : state)
-        score += seqan::globalAlignmentScore(seq1, seq2, seqan::Score<int>{0, -1, -1});
+        score += seqan2::globalAlignmentScore(seq1, seq2, seqan2::Score<int>{0, -1, -1});
 
     state.counters["score"] = score;
-    state.counters["cells"] = seqan3::test::pairwise_cell_updates(std::views::single(std::tie(seq1, seq2)),
-                                                                  edit_distance_cfg);
+    state.counters["cells"] =
+        seqan3::test::pairwise_cell_updates(std::views::single(std::tie(seq1, seq2)), edit_distance_cfg);
     state.counters["CUPS"] = seqan3::test::cell_updates_per_second(state.counters["cells"]);
 }
 #endif // SEQAN3_HAS_SEQAN2
@@ -133,8 +132,8 @@ void seqan3_edit_distance_dna4_collection(benchmark::State & state)
     auto vec = seqan3::test::generate_sequence_pairs<seqan3::dna4>(sequence_length, set_size);
     int score = 0;
 
-    auto algorithm = edit_distance_algorithm::select<decltype(std::get<0>(vec[0])),
-                                                     decltype(std::get<1>(vec[0]))>(edit_distance_cfg);
+    auto algorithm = edit_distance_algorithm::select<decltype(std::get<0>(vec[0])), decltype(std::get<1>(vec[0]))>(
+        edit_distance_cfg);
 
     for (auto _ : state)
     {
@@ -174,7 +173,7 @@ void seqan2_edit_distance_dna4_collection(benchmark::State & state)
     size_t sequence_length = 500;
     size_t set_size = 100;
 
-    auto [vec1, vec2] = seqan3::test::generate_sequence_pairs_seqan2<seqan::Dna>(sequence_length, set_size);
+    auto [vec1, vec2] = seqan3::test::generate_sequence_pairs_seqan2<seqan2::Dna>(sequence_length, set_size);
     int score = 0;
 
     seqan3::configuration align_cfg = seqan3::align_cfg::method_global{};
@@ -196,12 +195,12 @@ void seqan2_edit_distance_dna4_generic_collection(benchmark::State & state)
     size_t sequence_length = 500;
     size_t set_size = 100;
 
-    auto [vec1, vec2] = seqan3::test::generate_sequence_pairs_seqan2<seqan::Dna>(sequence_length, set_size);
+    auto [vec1, vec2] = seqan3::test::generate_sequence_pairs_seqan2<seqan2::Dna>(sequence_length, set_size);
     int score = 0;
 
     for (auto _ : state)
     {
-        for (int score_ : seqan::globalAlignmentScore(vec1, vec2, seqan::Score<int>{0, -1, -1}))
+        for (int score_ : seqan2::globalAlignmentScore(vec1, vec2, seqan2::Score<int>{0, -1, -1}))
             score += score_;
     }
 
@@ -214,7 +213,6 @@ void seqan2_edit_distance_dna4_generic_collection(benchmark::State & state)
 // ============================================================================
 //  instantiate tests
 // ============================================================================
-
 
 BENCHMARK(seqan3_edit_distance_dna4);
 BENCHMARK(seqan3_edit_distance_dna4_selector);

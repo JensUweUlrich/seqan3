@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -8,21 +8,21 @@
 #include <gtest/gtest.h>
 
 #include <iostream>
-#include <seqan3/std/ranges>
+#include <ranges>
 
 #include <seqan3/alphabet/detail/debug_stream_alphabet.hpp>
 #include <seqan3/alphabet/nucleotide/dna4.hpp>
 #include <seqan3/alphabet/nucleotide/dna5.hpp>
 #include <seqan3/test/expect_range_eq.hpp>
-#include <seqan3/utility/views/convert.hpp>
 #include <seqan3/utility/range/concept.hpp>
+#include <seqan3/utility/views/convert.hpp>
 
 using seqan3::operator""_dna4;
 using seqan3::operator""_dna5;
 
 TEST(view_convert, basic)
 {
-    std::vector<int>  vec{7, 5, 0, 5, 0, 0, 4, 8, -3};
+    std::vector<int> vec{7, 5, 0, 5, 0, 0, 4, 8, -3};
     std::vector<bool> cmp{1, 1, 0, 1, 0, 0, 1, 1, 1};
 
     // pipe notation

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -20,10 +20,12 @@ TEST(align_cfg_edit, is_hamming)
         {
             if (i == j)
                 EXPECT_EQ((scheme.score(seqan3::assign_rank_to(i, seqan3::dna15{}),
-                                        seqan3::assign_rank_to(j, seqan3::dna15{}))), 0);
+                                        seqan3::assign_rank_to(j, seqan3::dna15{}))),
+                          0);
             else
                 EXPECT_EQ((scheme.score(seqan3::assign_rank_to(i, seqan3::dna15{}),
-                                        seqan3::assign_rank_to(j, seqan3::dna15{}))), -1);
+                                        seqan3::assign_rank_to(j, seqan3::dna15{}))),
+                          -1);
         }
     }
 }

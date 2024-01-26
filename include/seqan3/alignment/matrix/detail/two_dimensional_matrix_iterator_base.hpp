@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,8 +12,8 @@
 
 #pragma once
 
-#include <seqan3/std/concepts>
-#include <seqan3/std/ranges>
+#include <concepts>
+#include <ranges>
 #include <type_traits>
 
 #include <seqan3/alignment/matrix/detail/matrix_coordinate.hpp>
@@ -81,11 +81,6 @@ private:
 
     //!\brief Befriend other base class types for const iterator compatibility.
     template <typename other_derived_t, matrix_major_order other_order>
-    //!\cond
-#if !SEQAN3_WORKAROUND_FURTHER_CONSTRAIN_FRIEND_DECLARATION
-        requires (order == other_order)
-#endif // !SEQAN3_WORKAROUND_FURTHER_CONSTRAIN_FRIEND_DECLARATION
-    //!\endcond
     friend class two_dimensional_matrix_iterator_base;
 
     /*!\name Constructors, destructor and assignment
@@ -118,7 +113,6 @@ private:
     using pointer = typename _derived_t::pointer;
 
 public:
-
     /*!\name Element access
      * \{
      */
@@ -302,9 +296,8 @@ public:
     // What if the derived type is different?
     // How can make sure this is the same type?
     template <typename other_derived_t>
-    //!\cond
-        requires std::constructible_from<derived_t, other_derived_t> || std::constructible_from<other_derived_t, derived_t>
-    //!\endcond
+        requires std::constructible_from<derived_t, other_derived_t>
+              || std::constructible_from<other_derived_t, derived_t>
     constexpr bool operator==(two_dimensional_matrix_iterator_base<other_derived_t, order> const & rhs) const noexcept
     {
         return as_derived().host_iter == rhs.as_derived().host_iter;
@@ -312,9 +305,8 @@ public:
 
     //!\brief Returns `true` if both iterators are unequal, `false` otherwise.
     template <typename other_derived_t>
-    //!\cond
-        requires std::constructible_from<derived_t, other_derived_t> || std::constructible_from<other_derived_t, derived_t>
-    //!\endcond
+        requires std::constructible_from<derived_t, other_derived_t>
+              || std::constructible_from<other_derived_t, derived_t>
     constexpr bool operator!=(two_dimensional_matrix_iterator_base<other_derived_t, order> const & rhs) const noexcept
     {
         return !(*this == rhs);
@@ -322,9 +314,8 @@ public:
 
     //!\brief Checks if `lhs` is smaller than `rhs`.
     template <typename other_derived_t>
-    //!\cond
-        requires std::constructible_from<derived_t, other_derived_t> || std::constructible_from<other_derived_t, derived_t>
-    //!\endcond
+        requires std::constructible_from<derived_t, other_derived_t>
+              || std::constructible_from<other_derived_t, derived_t>
     constexpr bool operator<(two_dimensional_matrix_iterator_base<other_derived_t, order> const & rhs) const noexcept
     {
         return as_derived().host_iter < rhs.as_derived().host_iter;
@@ -332,9 +323,8 @@ public:
 
     //!\brief Checks if `lhs` is smaller than or equal to `rhs`.
     template <typename other_derived_t>
-    //!\cond
-        requires std::constructible_from<derived_t, other_derived_t> || std::constructible_from<other_derived_t, derived_t>
-    //!\endcond
+        requires std::constructible_from<derived_t, other_derived_t>
+              || std::constructible_from<other_derived_t, derived_t>
     constexpr bool operator<=(two_dimensional_matrix_iterator_base<other_derived_t, order> const & rhs) const noexcept
     {
         return as_derived().host_iter <= rhs.as_derived().host_iter;
@@ -342,9 +332,8 @@ public:
 
     //!\brief Checks if `lhs` is greater than `rhs`.
     template <typename other_derived_t>
-    //!\cond
-        requires std::constructible_from<derived_t, other_derived_t> || std::constructible_from<other_derived_t, derived_t>
-    //!\endcond
+        requires std::constructible_from<derived_t, other_derived_t>
+              || std::constructible_from<other_derived_t, derived_t>
     constexpr bool operator>(two_dimensional_matrix_iterator_base<other_derived_t, order> const & rhs) const noexcept
     {
         return as_derived().host_iter > rhs.as_derived().host_iter;
@@ -352,16 +341,15 @@ public:
 
     //!\brief Checks if `lhs` is greater than or equal to `rhs`.
     template <typename other_derived_t>
-    //!\cond
-        requires std::constructible_from<derived_t, other_derived_t> || std::constructible_from<other_derived_t, derived_t>
-    //!\endcond
+        requires std::constructible_from<derived_t, other_derived_t>
+              || std::constructible_from<other_derived_t, derived_t>
     constexpr bool operator>=(two_dimensional_matrix_iterator_base<other_derived_t, order> const & rhs) const noexcept
     {
         return as_derived().host_iter >= rhs.as_derived().host_iter;
     }
     //!\}
-private:
 
+private:
     //!\brief Return the host_iter of the derived type.
     constexpr auto const & as_host_iter() const
     {
@@ -374,7 +362,7 @@ private:
         return static_cast<derived_t &>(*this);
     }
 
-    //!\copydoc as_derived
+    //!\copydoc seqan3::detail::two_dimensional_matrix_iterator_base::as_derived
     constexpr derived_t const & as_derived() const
     {
         return static_cast<derived_t const &>(*this);

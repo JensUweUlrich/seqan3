@@ -1,49 +1,43 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
+#include <benchmark/benchmark.h>
+
 #include <sstream>
 #include <string>
 
-#include <benchmark/benchmark.h>
-
 #include <seqan3/alphabet/nucleotide/rna4.hpp>
 #include <seqan3/alphabet/views/to_char.hpp>
-#include <seqan3/core/detail/persist_view.hpp>
+#include <seqan3/io/structure_file/format_vienna.hpp>
 #include <seqan3/io/structure_file/input.hpp>
 #include <seqan3/io/structure_file/output.hpp>
-#include <seqan3/io/structure_file/format_vienna.hpp>
 #include <seqan3/test/performance/sequence_generator.hpp>
 #include <seqan3/test/performance/units.hpp>
 #include <seqan3/test/seqan2.hpp>
-#include <seqan3/utility/views/to.hpp>
+#include <seqan3/utility/range/to.hpp>
 
 #if SEQAN3_HAS_SEQAN2
-    #include <seqan/rna_io.h>
+#    include <seqan/rna_io.h>
 #endif
 
 inline constexpr size_t iterations_per_run = 1024;
 
-inline std::string const header{"seq foobar blobber"};
-auto const sequence = seqan3::test::generate_sequence<seqan3::rna4>(474, 0, 0) |
-                                                      seqan3::detail::persist |
-                                                      seqan3::views::to_char |
-                                                      seqan3::views::to<std::string>;
+static std::string const header{"seq foobar blobber"};
+static inline auto const rna_sequence = seqan3::test::generate_sequence<seqan3::rna4>(474, 0, 0);
+static auto const sequence = rna_sequence | seqan3::views::to_char | seqan3::ranges::to<std::string>();
 
-inline std::string const structure
-{
-    "(((((((..((((........)))).((((.........)))).....(((((.......))))))))))))......."
-    "(((((((..((((........)))).((((.........)))).....(((((.......))))))))))))......."
-    "(((((((..((((........)))).((((.........)))).....(((((.......))))))))))))......."
-    "(((((((..((((........)))).((((.........)))).....(((((.......))))))))))))......."
-    "(((((((..((((........)))).((((.........)))).....(((((.......))))))))))))......."
-    "(((((((..((((........)))).((((.........)))).....(((((.......))))))))))))......."
-};
+static std::string const structure{"(((((((..((((........)))).((((.........)))).....(((((.......))))))))))))......."
+                                   "(((((((..((((........)))).((((.........)))).....(((((.......))))))))))))......."
+                                   "(((((((..((((........)))).((((.........)))).....(((((.......))))))))))))......."
+                                   "(((((((..((((........)))).((((.........)))).....(((((.......))))))))))))......."
+                                   "(((((((..((((........)))).((((.........)))).....(((((.......))))))))))))......."
+                                   "(((((((..((((........)))).((((.........)))).....(((((.......))))))))))))......."};
 
-inline std::string const vienna_file = []()
+static std::string const vienna_file = []()
 {
     std::string file{};
     for (size_t idx = 0; idx < iterations_per_run; idx++)
@@ -75,19 +69,19 @@ BENCHMARK(write_seqan3);
 void write_seqan2(benchmark::State & state)
 {
     std::ostringstream ostream;
-    seqan::RnaRecord record{};
+    seqan2::RnaRecord record{};
     record.name = header;
     record.sequence = sequence;
-    seqan::bracket2graph(record.fixedGraphs, structure);
+    seqan2::bracket2graph(record.fixedGraphs, structure);
 
     for (auto _ : state)
     {
         for (size_t idx = 0; idx < iterations_per_run; ++idx)
-            seqan::writeRecord(ostream, record, seqan::Vienna());
+            seqan2::writeRecord(ostream, record, seqan2::Vienna());
     }
 
     ostream = std::ostringstream{};
-    seqan::writeRecord(ostream, record, seqan::Vienna());
+    seqan2::writeRecord(ostream, record, seqan2::Vienna());
     size_t bytes_per_run = ostream.str().size() * iterations_per_run;
     state.counters["iterations_per_run"] = iterations_per_run;
     state.counters["bytes_per_run"] = bytes_per_run;
@@ -121,18 +115,18 @@ BENCHMARK(read_seqan3);
 #if SEQAN3_HAS_SEQAN2
 void read_seqan2(benchmark::State & state)
 {
-    seqan::RnaRecord record{};
+    seqan2::RnaRecord record{};
     std::istringstream istream{vienna_file};
 
     for (auto _ : state)
     {
         istream.clear();
         istream.seekg(0, std::ios::beg);
-        auto it = seqan::Iter<std::istringstream, seqan::StreamIterator<seqan::Input>>(istream);
+        auto it = seqan2::Iter<std::istringstream, seqan2::StreamIterator<seqan2::Input>>(istream);
 
         for (size_t idx = 0; idx < iterations_per_run; ++idx)
         {
-            seqan::readRecord(record, it, seqan::Vienna());
+            seqan2::readRecord(record, it, seqan2::Vienna());
             clear(record);
         }
     }

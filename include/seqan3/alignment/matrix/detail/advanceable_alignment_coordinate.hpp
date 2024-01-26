@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,8 +12,8 @@
 
 #pragma once
 
-#include <seqan3/std/concepts>
-#include <seqan3/std/iterator>
+#include <concepts>
+#include <iterator>
 #include <type_traits>
 
 #include <seqan3/alignment/matrix/detail/matrix_coordinate.hpp>
@@ -65,7 +65,6 @@ template <advanceable_alignment_coordinate_state state = advanceable_alignment_c
 class advanceable_alignment_coordinate
 {
 public:
-
     /*!\name Member types
      * \{
      */
@@ -77,7 +76,7 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr advanceable_alignment_coordinate() noexcept = default;                                    //!< Defaulted
+    constexpr advanceable_alignment_coordinate() noexcept = default; //!< Defaulted
     //!\brief Defaulted
     constexpr advanceable_alignment_coordinate(advanceable_alignment_coordinate const &) noexcept = default;
     constexpr advanceable_alignment_coordinate(advanceable_alignment_coordinate &&) noexcept = default; //!< Defaulted
@@ -85,13 +84,11 @@ public:
     constexpr advanceable_alignment_coordinate & operator=(advanceable_alignment_coordinate const &) noexcept = default;
     //!\brief Defaulted
     constexpr advanceable_alignment_coordinate & operator=(advanceable_alignment_coordinate &&) noexcept = default;
-    ~advanceable_alignment_coordinate() noexcept = default;                                             //!< Defaulted
+    ~advanceable_alignment_coordinate() noexcept = default; //!< Defaulted
 
     //!\brief Copy-constructs from another advanceable_alignment_coordinate with a different policy.
     template <advanceable_alignment_coordinate_state other_state>
-    //!\cond
         requires (other_state != state)
-    //!\endcond
     constexpr advanceable_alignment_coordinate(advanceable_alignment_coordinate<other_state> const & other) :
         first{other.first},
         second{other.second}
@@ -99,9 +96,7 @@ public:
 
     //!\brief Move-constructs from another advanceable_alignment_coordinate with a different policy.
     template <advanceable_alignment_coordinate_state other_state>
-    //!\cond
         requires (other_state != state)
-    //!\endcond
     constexpr advanceable_alignment_coordinate(advanceable_alignment_coordinate<other_state> && other) :
         first{std::move(other.first)},
         second{std::move(other.second)}
@@ -118,7 +113,7 @@ public:
     {}
     //!\}
 
-     //!\cond
+    //!\cond
     constexpr friend bool operator==(advanceable_alignment_coordinate const & lhs,
                                      advanceable_alignment_coordinate const & rhs) noexcept
     {
@@ -137,8 +132,8 @@ public:
         return std::tie(lhs.first, lhs.second) <= std::tie(rhs.first, rhs.second);
     }
 
-    constexpr friend bool operator< (advanceable_alignment_coordinate const & lhs,
-                                     advanceable_alignment_coordinate const & rhs) noexcept
+    constexpr friend bool operator<(advanceable_alignment_coordinate const & lhs,
+                                    advanceable_alignment_coordinate const & rhs) noexcept
     {
         return std::tie(lhs.first, lhs.second) < std::tie(rhs.first, rhs.second);
     }
@@ -149,12 +144,12 @@ public:
         return std::tie(lhs.first, lhs.second) >= std::tie(rhs.first, rhs.second);
     }
 
-    constexpr friend bool operator> (advanceable_alignment_coordinate const & lhs,
-                                     advanceable_alignment_coordinate const & rhs) noexcept
+    constexpr friend bool operator>(advanceable_alignment_coordinate const & lhs,
+                                    advanceable_alignment_coordinate const & rhs) noexcept
     {
         return std::tie(lhs.first, lhs.second) > std::tie(rhs.first, rhs.second);
     }
-     //!\endcond
+    //!\endcond
 
     /*!\name Member functions
      * \brief Advances or decrements the respective column or row coordinate depending on the set policy.
@@ -167,9 +162,7 @@ public:
      * \return `*this`
      */
     constexpr advanceable_alignment_coordinate & operator++(/*pre-increment*/) noexcept
-    //!\cond
         requires (state != advanceable_alignment_coordinate_state::none)
-    //!\endcond
     {
         if constexpr (state == advanceable_alignment_coordinate_state::column)
             ++this->first;
@@ -182,9 +175,7 @@ public:
      * \return a seqan3::detail::advanceable_alignment_coordinate that holds an unchanged value.
      */
     constexpr advanceable_alignment_coordinate operator++(int /*post-increment*/) noexcept
-    //!\cond
         requires (state != advanceable_alignment_coordinate_state::none)
-    //!\endcond
     {
         advanceable_alignment_coordinate tmp{*this};
         ++(*this);
@@ -195,9 +186,7 @@ public:
      * \return `*this`
      */
     constexpr advanceable_alignment_coordinate & operator--(/*pre-decrement*/) noexcept
-    //!\cond
         requires (state != advanceable_alignment_coordinate_state::none)
-    //!\endcond
     {
         if constexpr (state == advanceable_alignment_coordinate_state::column)
             --this->first;
@@ -210,9 +199,7 @@ public:
      * \return a seqan3::detail::advanceable_alignment_coordinate that holds an unchanged value.
      */
     constexpr advanceable_alignment_coordinate operator--(int /*post-decrement*/) noexcept
-    //!\cond
         requires (state != advanceable_alignment_coordinate_state::none)
-    //!\endcond
     {
         advanceable_alignment_coordinate tmp{*this};
         --(*this);
@@ -224,9 +211,7 @@ public:
      * \return `*this`
      */
     constexpr advanceable_alignment_coordinate & operator+=(difference_type const offset) noexcept
-    //!\cond
         requires (state != advanceable_alignment_coordinate_state::none)
-    //!\endcond
     {
         if constexpr (state == advanceable_alignment_coordinate_state::column)
             this->first += offset;
@@ -240,9 +225,7 @@ public:
      * \return `*this`
      */
     constexpr advanceable_alignment_coordinate & operator-=(difference_type const offset) noexcept
-    //!\cond
         requires (state != advanceable_alignment_coordinate_state::none)
-    //!\endcond
     {
         if constexpr (state == advanceable_alignment_coordinate_state::column)
             this->first -= offset;
@@ -256,9 +239,7 @@ public:
      * \return a seqan3::detail::advanceable_alignment_coordinate that holds the updated value.
      */
     constexpr advanceable_alignment_coordinate operator+(difference_type const offset) const noexcept
-    //!\cond
         requires (state != advanceable_alignment_coordinate_state::none)
-    //!\endcond
     {
         advanceable_alignment_coordinate tmp{*this};
         tmp += offset;
@@ -270,9 +251,7 @@ public:
      * \return a seqan3::detail::advanceable_alignment_coordinate that holds the updated value.
      */
     constexpr advanceable_alignment_coordinate operator-(difference_type const offset) const noexcept
-    //!\cond
         requires (state != advanceable_alignment_coordinate_state::none)
-    //!\endcond
     {
         advanceable_alignment_coordinate tmp{*this};
         tmp -= offset;
@@ -284,9 +263,7 @@ public:
      * \return the difference between the coordinates.
      */
     constexpr difference_type operator-(advanceable_alignment_coordinate const & other) const noexcept
-    //!\cond
         requires (state != advanceable_alignment_coordinate_state::none)
-    //!\endcond
     {
         if constexpr (state == advanceable_alignment_coordinate_state::column)
             return this->first - other.first;
@@ -303,9 +280,7 @@ public:
      */
     constexpr friend advanceable_alignment_coordinate operator+(difference_type const offset,
                                                                 advanceable_alignment_coordinate const & me) noexcept
-    //!\cond
         requires (state != advanceable_alignment_coordinate_state::none)
-    //!\endcond
     {
         return me + offset;
     }
@@ -333,10 +308,8 @@ namespace seqan3
  * Prints the alignment coordinate as a tuple.
  */
 template <typename char_t, typename coordinate_type>
-//!\cond
     requires detail::is_value_specialisation_of_v<std::remove_cvref_t<coordinate_type>,
                                                   detail::advanceable_alignment_coordinate>
-//!\endcond
 inline debug_stream_type<char_t> & operator<<(debug_stream_type<char_t> & s, coordinate_type && c)
 {
     s << std::tie(c.first, c.second);

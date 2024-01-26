@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include <seqan3/std/concepts>
+#include <concepts>
 
 #include <seqan3/alignment/configuration/detail.hpp>
 #include <seqan3/alignment/scoring/scoring_scheme_concept.hpp>
@@ -50,12 +50,12 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr scoring_scheme() = default; //!< Defaulted
-    constexpr scoring_scheme(scoring_scheme const &) = default; //!< Defaulted
-    constexpr scoring_scheme(scoring_scheme &&) = default; //!< Defaulted
+    constexpr scoring_scheme() = default;                                   //!< Defaulted
+    constexpr scoring_scheme(scoring_scheme const &) = default;             //!< Defaulted
+    constexpr scoring_scheme(scoring_scheme &&) = default;                  //!< Defaulted
     constexpr scoring_scheme & operator=(scoring_scheme const &) = default; //!< Defaulted
-    constexpr scoring_scheme & operator=(scoring_scheme &&) = default; //!< Defaulted
-    ~scoring_scheme() = default; //!< Defaulted
+    constexpr scoring_scheme & operator=(scoring_scheme &&) = default;      //!< Defaulted
+    ~scoring_scheme() = default;                                            //!< Defaulted
 
     /*!\brief Initialises the scoring scheme config with the given scheme.
      * \param[in] scheme The scoring scheme to be used in the alignment algorithm.

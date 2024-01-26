@@ -1,32 +1,30 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #include <gtest/gtest.h>
 
-#if __has_include(<charconv>)
 // make sure that including the std header does not produce any errors
 // see https://github.com/seqan/seqan3/issues/2352
 #include <charconv>
-#endif // __has_include(<charconv>)
-#include <seqan3/std/charconv>
 #include <cmath>
-#include <seqan3/std/concepts>
+#include <concepts>
 #include <iostream>
 #include <limits>
+#include <seqan3/std/charconv>
 
 // =============================================================================
 // std::from_chars for integral types
 // =============================================================================
 
 template <typename T>
-class integral_from_char_test: public ::testing::Test { };
+class integral_from_char_test : public ::testing::Test
+{};
 
-using integral_types = ::testing::Types<int8_t, uint8_t, int16_t, uint16_t,
-                                        int32_t, uint32_t, int64_t, uint64_t>;
+using integral_types = ::testing::Types<int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t>;
 
 TYPED_TEST_SUITE(integral_from_char_test, integral_types, );
 
@@ -86,8 +84,8 @@ TYPED_TEST(integral_from_char_test, negative_number)
 TYPED_TEST(integral_from_char_test, overflow_error)
 {
     TypeParam value{42};
-    std::vector<char> const str{'1', '2', '3', '0', '0', '0', '0', '0', '0', '0',
-                                '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'};
+    std::vector<char> const str{'1', '2', '3', '0', '0', '0', '0', '0', '0', '0', '0',
+                                '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'};
 
     auto res = std::from_chars(&str[0], &str[0] + str.size(), value);
 
@@ -111,7 +109,7 @@ TYPED_TEST(integral_from_char_test, partial_parsing)
     }
 
     value = 42; // reset
-    { // trailing char
+    {           // trailing char
         std::vector<char> const str{'1', '2', 'a'};
 
         auto res = std::from_chars(&str[0], &str[0] + str.size(), value);
@@ -122,7 +120,7 @@ TYPED_TEST(integral_from_char_test, partial_parsing)
     }
 
     value = 42; // reset
-    { // float
+    {           // float
         std::vector<char> const str{'1', '.', '3'};
 
         auto res = std::from_chars(&str[0], &str[0] + str.size(), value);

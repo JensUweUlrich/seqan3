@@ -1,13 +1,13 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #include <gtest/gtest.h>
 
-#include <seqan3/std/concepts>
+#include <concepts>
 #include <type_traits>
 
 #include <seqan3/io/sam_file/sam_tag_dictionary.hpp>
@@ -108,7 +108,7 @@ TEST(sam_tag_dictionary, get_function_unknown_tag)
 
     seqan3::sam_tag_dictionary dict{};
 
-    dict["nm"_tag] = 'a'; // lower case nm tag type is NOT defined so it can be either type
+    dict["nm"_tag] = 'a';                           // lower case nm tag type is NOT defined so it can be either type
     dict["nm"_tag] = std::vector<int32_t>{3, 4, 5}; // overwrites previous
     dict["co"_tag] = std::string("comment");
     dict["cg"_tag] = std::vector<int32_t>{3, 4, 5};

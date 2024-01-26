@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -57,46 +57,32 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr cigar_operation() noexcept = default; //!< Defaulted.
-    constexpr cigar_operation(cigar_operation const &) noexcept = default; //!< Defaulted.
-    constexpr cigar_operation(cigar_operation &&) noexcept = default; //!< Defaulted.
+    constexpr cigar_operation() noexcept = default;                                    //!< Defaulted.
+    constexpr cigar_operation(cigar_operation const &) noexcept = default;             //!< Defaulted.
+    constexpr cigar_operation(cigar_operation &&) noexcept = default;                  //!< Defaulted.
     constexpr cigar_operation & operator=(cigar_operation const &) noexcept = default; //!< Defaulted.
-    constexpr cigar_operation & operator=(cigar_operation &&) noexcept = default; //!< Defaulted.
-    ~cigar_operation() noexcept = default; //!< Defaulted.
+    constexpr cigar_operation & operator=(cigar_operation &&) noexcept = default;      //!< Defaulted.
+    ~cigar_operation() noexcept = default;                                             //!< Defaulted.
 
     //!\}
 
 private:
     //!\copydoc seqan3::dna4::rank_to_char_table
-    static constexpr char_type rank_to_char_table[alphabet_size]
-    {
-        'M',
-        'D',
-        'I',
-        'S',
-        'H',
-        'N',
-        'P',
-        'X',
-        '='
-    };
+    static constexpr char_type rank_to_char_table[alphabet_size]{'M', 'D', 'I', 'S', 'H', 'N', 'P', 'X', '='};
 
     //!\copydoc seqan3::dna4::char_to_rank_table
-    static constexpr std::array<rank_type, 256> char_to_rank_table
-    {
-        [] () constexpr
-        {
-            std::array<rank_type, 256> ret{};
+    static constexpr std::array<rank_type, 256> char_to_rank_table{[]() constexpr
+                                                                   {
+                                                                       std::array<rank_type, 256> ret{};
 
-            // reverse mapping for characters
-            for (size_t rnk = 0u; rnk < alphabet_size; ++rnk)
-            {
-                ret[rank_to_char_table[rnk]] = rnk;
-            }
+                                                                       // reverse mapping for characters
+                                                                       for (size_t rnk = 0u; rnk < alphabet_size; ++rnk)
+                                                                       {
+                                                                           ret[rank_to_char_table[rnk]] = rnk;
+                                                                       }
 
-            return ret;
-        }()
-    };
+                                                                       return ret;
+                                                                   }()}; // namespace seqan3::exposition_only
 
     //!\copydoc seqan3::dna4::rank_to_char
     static constexpr char_type rank_to_char(rank_type const rank)

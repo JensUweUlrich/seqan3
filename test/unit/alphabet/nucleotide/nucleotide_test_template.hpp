@@ -1,13 +1,13 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
-#include <sstream>
-
 #include <gtest/gtest.h>
+
+#include <sstream>
 
 #include <seqan3/alphabet/concept.hpp>
 #include <seqan3/alphabet/nucleotide/concept.hpp>
@@ -19,6 +19,8 @@ TYPED_TEST_SUITE_P(nucleotide);
 
 TYPED_TEST_P(nucleotide, concept_check)
 {
+    EXPECT_TRUE(std::is_trivial_v<TypeParam>);
+
     EXPECT_TRUE(seqan3::nucleotide_alphabet<TypeParam>);
     EXPECT_TRUE(seqan3::nucleotide_alphabet<TypeParam &>);
     EXPECT_TRUE(seqan3::nucleotide_alphabet<TypeParam const>);

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -13,7 +13,8 @@
 #pragma once
 
 #include <seqan3/alphabet/concept.hpp>
-#include <seqan3/utility/concept/exposition_only/core_language.hpp>
+#include <seqan3/alphabet/detail/concept.hpp>
+#include <seqan3/utility/concept.hpp>
 #include <seqan3/utility/type_list/type_list.hpp>
 #include <seqan3/utility/type_traits/lazy_conditional.hpp>
 
@@ -35,10 +36,7 @@ namespace seqan3::detail
  */
 //!\cond
 template <typename t>
-concept alphabet_tuple_like = requires
-{
-    requires t::seqan3_alphabet_tuple_like;
-};
+concept alphabet_tuple_like = requires { requires t::seqan3_alphabet_tuple_like; };
 //!\endcond
 
 // ------------------------------------------------------------------
@@ -71,9 +69,7 @@ struct required_types
  * Exposes for seqan3::alphabet_tuple_base its components and for seqan3::alphabet_variant its alternatives.
  */
 template <typename t>
-//!\cond
     requires requires { typename t::seqan3_required_types; }
-//!\endcond
 struct required_types<t>
 {
     //!\brief The returned type.
@@ -108,12 +104,7 @@ struct recursive_required_types
  * \ingroup alphabet_composite
  */
 template <typename t>
-//!\cond
-    requires requires
-    {
-        typename t::seqan3_recursive_required_types;
-    }
-//!\endcond
+    requires requires { typename t::seqan3_recursive_required_types; }
 struct recursive_required_types<t>
 {
     //!\brief The returned type.
@@ -131,6 +122,7 @@ using recursive_required_types_t = typename recursive_required_types<t>::type;
 // ------------------------------------------------------------------
 
 /*!\brief 'Callable' helper class that is invokable by meta::invoke.
+ * \ingroup alphabet_composite
  * Returns a std::true_type if the `type` is constructable from `T`.
  */
 template <typename T>
@@ -142,6 +134,7 @@ struct constructible_from
 };
 
 /*!\brief 'Callable' helper class that is invokable by meta::invoke.
+ * \ingroup alphabet_composite
  * Returns a std::true_type if the `T` is implicitly convertible to `type`.
  */
 template <typename T>
@@ -153,6 +146,7 @@ struct implicitly_convertible_from
 };
 
 /*!\brief 'Callable' helper class that is invokable by meta::invoke.
+ * \ingroup alphabet_composite
  * Returns a std::true_type if the `type` is assignable from `T`.
  */
 template <typename T>
@@ -164,6 +158,7 @@ struct assignable_from
 };
 
 /*!\brief 'Callable' helper class that is invokable by meta::invoke.
+ * \ingroup alphabet_composite
  * Returns a std::true_type if the `type` is weakly equality comparable to `T`.
  */
 template <typename T>
@@ -175,6 +170,7 @@ struct weakly_equality_comparable_with_
 };
 
 /*!\brief 'Callable' helper class that is invokable by meta::invoke.
+ * \ingroup alphabet_composite
  * Returns a std::true_type if the `type` is comparable via <,<=,>,>= to `T`.
  */
 template <typename T>
@@ -184,6 +180,25 @@ struct weakly_ordered_with_
     template <typename type>
     using invoke = std::integral_constant<bool, weakly_ordered_with<type, T>>;
 };
+
+// ------------------------------------------------------------------
+// Concept traits helper
+// ------------------------------------------------------------------
+
+/*!\brief Binary type trait that behaves like the seqan3::detail::weakly_equality_comparable_with concept.
+ * \ingroup alphabet_composite
+ */
+template <typename lhs_t, typename rhs_t>
+struct weakly_equality_comparable_with_trait :
+    std::integral_constant<bool, weakly_equality_comparable_with<lhs_t, rhs_t>>
+{};
+
+/*!\brief Binary type trait that behaves like the seqan3::detail::weakly_ordered_with concept.
+ * \ingroup alphabet_composite
+ */
+template <typename lhs_t, typename rhs_t>
+struct weakly_ordered_with_trait : std::integral_constant<bool, weakly_ordered_with<lhs_t, rhs_t>>
+{};
 
 } // namespace seqan3::detail
 
@@ -195,20 +210,13 @@ namespace seqan3
 {
 
 // forward
-template <typename ...alternative_types>
-//!\cond
-    requires (detail::writable_constexpr_alphabet<alternative_types> && ...) &&
-             (std::regular<alternative_types> && ...) &&
-             (sizeof...(alternative_types) >= 2)
-//!\endcond
+template <typename... alternative_types>
+    requires (detail::writable_constexpr_alphabet<alternative_types> && ...) && (std::regular<alternative_types> && ...)
+          && (sizeof...(alternative_types) >= 2)
 class alphabet_variant;
 
-template <typename derived_type,
-          typename ...component_types>
-//!\cond
-    requires (detail::writable_constexpr_semialphabet<component_types> && ...) &&
-             (std::regular<component_types> && ...)
-//!\endcond
+template <typename derived_type, typename... component_types>
+    requires (detail::writable_constexpr_semialphabet<component_types> && ...) && (std::regular<component_types> && ...)
 class alphabet_tuple_base;
 
 } // namespace seqan3

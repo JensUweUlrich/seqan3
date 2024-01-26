@@ -1,13 +1,13 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #include <gtest/gtest.h>
 
-#include <seqan3/std/concepts>
+#include <concepts>
 #include <functional>
 
 #include <seqan3/search/configuration/on_result.hpp>
@@ -18,7 +18,10 @@
 
 TEST(search_cfg_on_result, with_captureless_lambda)
 {
-    seqan3::search_cfg::on_result on_result_cfg{[] (auto && result) { return result; }};
+    seqan3::search_cfg::on_result on_result_cfg{[](auto && result)
+                                                {
+                                                    return result;
+                                                }};
 
     EXPECT_TRUE((std::invocable<decltype(on_result_cfg.callback), int>));
     EXPECT_EQ((std::invoke(on_result_cfg.callback, 10)), 10);
@@ -27,7 +30,10 @@ TEST(search_cfg_on_result, with_captureless_lambda)
 TEST(search_cfg_on_result, with_capturing_lambda)
 {
     int global_result = 0;
-    seqan3::search_cfg::on_result on_result_cfg{[&] (auto && result) { global_result = result; }};
+    seqan3::search_cfg::on_result on_result_cfg{[&](auto && result)
+                                                {
+                                                    global_result = result;
+                                                }};
 
     EXPECT_TRUE((std::invocable<decltype(on_result_cfg.callback), int>));
     EXPECT_EQ(global_result, 0);

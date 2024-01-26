@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------------------------------
-# Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-# Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+# Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+# Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 # This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 # shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 # -----------------------------------------------------------------------------------------------------
@@ -16,6 +16,7 @@ option (SEQAN3_GENERATE_SNIPPETS "Whether seqan3 snippets should be generated an
 
 add_library (snippet_main snippet_main.cpp)
 target_link_libraries (snippet_main PUBLIC seqan3::test gtest)
+target_compile_options (snippet_main PUBLIC "-Wno-unused-variable" "-Wno-unused-but-set-variable")
 
 macro (seqan3_snippet test_name_prefix snippet snippet_base_path)
     seqan3_test_component (snippet_target_name "${snippet}" TARGET_NAME)
@@ -24,7 +25,7 @@ macro (seqan3_snippet test_name_prefix snippet snippet_base_path)
     set (target "${snippet_target_name}_snippet")
 
     add_executable (${target} "${snippet_base_path}/${snippet}")
-    target_link_libraries (${target} PUBLIC snippet_main)
+    target_link_libraries (${target} PUBLIC seqan3::test snippet_main)
     set_target_properties (${target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                                                 "${CMAKE_CURRENT_BINARY_DIR}/${snippet_target_path}")
     collect_used_snippet (${target})

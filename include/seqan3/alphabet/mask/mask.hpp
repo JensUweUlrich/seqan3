@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -13,6 +13,7 @@
 #pragma once
 
 #include <cassert>
+
 #include <seqan3/alphabet/alphabet_base.hpp>
 
 namespace seqan3
@@ -74,6 +75,6 @@ public:
     //!\}
 };
 
-mask constexpr mask::unmasked{mask{}.assign_rank(0)};
-mask constexpr mask::masked{mask{}.assign_rank(1)};
+constexpr mask mask::unmasked{mask{}.assign_rank(0)};
+constexpr mask mask::masked{mask{}.assign_rank(1)};
 } // namespace seqan3

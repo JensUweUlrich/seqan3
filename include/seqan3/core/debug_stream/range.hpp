@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <seqan3/std/ranges>
+#include <ranges>
 
 #include <seqan3/alphabet/adaptation/char.hpp>
 #include <seqan3/alphabet/adaptation/uint.hpp>
@@ -36,12 +36,13 @@ namespace seqan3::detail
  * * `std::ranges::range_reference_t<rng_t>` is not `char`.
  */
 template <typename rng_t>
-concept debug_stream_range_guard =
-    !std::same_as<std::remove_cvref_t<std::ranges::range_reference_t<rng_t>>,
-                  std::remove_cvref_t<rng_t>> && // prevent recursive instantiation
+concept debug_stream_range_guard = !
+std::same_as<std::remove_cvref_t<std::ranges::range_reference_t<rng_t>>,
+             std::remove_cvref_t<rng_t>>
+    && // prevent recursive instantiation
     // exclude null-terminated strings:
-    !(std::is_pointer_v<std::decay_t<rng_t>> &&
-      std::same_as<std::remove_cvref_t<std::ranges::range_reference_t<rng_t>>, char>);
+    !(std::is_pointer_v<std::decay_t<rng_t>>
+      && std::same_as<std::remove_cvref_t<std::ranges::range_reference_t<rng_t>>, char>);
 
 /*!\brief Helper template variable that checks if the reference type of a range can be streamed into an instance of
  *        seqan3::debug_stream_type .
@@ -59,10 +60,14 @@ constexpr bool reference_type_is_streamable_v = false;
 
 //!\cond
 template <std::ranges::range rng_t, typename char_t>
-    requires requires (std::ranges::range_reference_t<rng_t> l, debug_stream_type<char_t> s) { { s << l }; }
+    requires requires (std::ranges::range_reference_t<rng_t> l, debug_stream_type<char_t> s) {
+                 {
+                     s << l
+                 };
+             }
 constexpr bool reference_type_is_streamable_v<rng_t, char_t> = true;
 //!\endcond
-}
+} // namespace seqan3::detail
 
 namespace seqan3
 {
@@ -90,9 +95,7 @@ namespace seqan3
  */
 template <typename char_t, std::ranges::input_range rng_t>
 inline debug_stream_type<char_t> & operator<<(debug_stream_type<char_t> & s, rng_t && r)
-//!\cond
     requires detail::debug_stream_range_guard<rng_t>
-//!\endcond
 {
     static_assert(detail::reference_type_is_streamable_v<rng_t, char_t>,
                   "The reference type of the passed range cannot be streamed into the debug_stream.");
@@ -134,10 +137,8 @@ inline debug_stream_type<char_t> & operator<<(debug_stream_type<char_t> & s, rng
  */
 template <typename char_t, sequence sequence_t>
 inline debug_stream_type<char_t> & operator<<(debug_stream_type<char_t> & s, sequence_t && sequence)
-//!\cond
-    requires detail::debug_stream_range_guard<sequence_t> &&
-             (!detail::is_uint_adaptation_v<std::remove_cvref_t<std::ranges::range_reference_t<sequence_t>>>)
-//!\endcond
+    requires detail::debug_stream_range_guard<sequence_t>
+          && (!detail::is_uint_adaptation_v<std::remove_cvref_t<std::ranges::range_reference_t<sequence_t>>>)
 {
     for (auto && chr : sequence)
         s << chr;

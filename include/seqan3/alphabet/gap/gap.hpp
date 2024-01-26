@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -60,7 +60,8 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr gap() noexcept : base_t{} {}            //!< Defaulted.
+    constexpr gap() noexcept : base_t{}
+    {}                                                //!< Defaulted.
     constexpr gap(gap const &) = default;             //!< Defaulted.
     constexpr gap(gap &&) = default;                  //!< Defaulted.
     constexpr gap & operator=(gap const &) = default; //!< Defaulted.
@@ -71,4 +72,4 @@ public:
     //!\}
 };
 
-}
+} // namespace seqan3

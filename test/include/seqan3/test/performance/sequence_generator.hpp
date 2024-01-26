@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -13,26 +13,24 @@
 
 #pragma once
 
-#include <seqan3/std/algorithm>
-#include <seqan3/std/ranges>
+#include <algorithm>
 #include <random>
+#include <ranges>
 
 #include <seqan3/alphabet/concept.hpp>
 #include <seqan3/test/seqan2.hpp>
 
 #ifdef SEQAN3_HAS_SEQAN2
-#include <seqan/basic.h>
-#include <seqan/sequence.h>
+#    include <seqan/basic.h>
+#    include <seqan/sequence.h>
 #endif
 
 namespace seqan3::test
 {
 
 template <typename sequence_t>
-//!\cond
     requires (std::ranges::output_range<sequence_t, std::ranges::range_value_t<sequence_t>> &&
               requires (sequence_t & s) { {s.resize(1)}; })
-//!\endcond
 class random_sequence_generator
 {
 public:
@@ -41,20 +39,18 @@ public:
     //!\brief Stores the variance of the random sequence.
     size_t size_variance{};
 
-    random_sequence_generator() = default; //!< Defaulted
-    random_sequence_generator(random_sequence_generator const &) = default; //!< Defaulted
-    random_sequence_generator(random_sequence_generator &&) = default; //!< Defaulted
+    random_sequence_generator() = default;                                              //!< Defaulted
+    random_sequence_generator(random_sequence_generator const &) = default;             //!< Defaulted
+    random_sequence_generator(random_sequence_generator &&) = default;                  //!< Defaulted
     random_sequence_generator & operator=(random_sequence_generator const &) = default; //!< Defaulted
-    random_sequence_generator & operator=(random_sequence_generator &&) = default; //!< Defaulted
-    ~random_sequence_generator() = default; //!< Defaulted
+    random_sequence_generator & operator=(random_sequence_generator &&) = default;      //!< Defaulted
+    ~random_sequence_generator() = default;                                             //!< Defaulted
 
     /*!\brief Initialises a random sequence generator which generates sequences with a given mean size.
      * \param[in] size The size of the random sequence.
      * \param[in] size_variance The variance of the random sequence size (defaults to `0`).
      */
-    explicit random_sequence_generator(size_t size, size_t size_variance = 0) :
-        size{size},
-        size_variance{size_variance}
+    explicit random_sequence_generator(size_t size, size_t size_variance = 0) : size{size}, size_variance{size_variance}
     {}
 
     /*!\name Element access
@@ -83,14 +79,16 @@ public:
         size_t const sequence_size = sequence_size_distribution(random_generator);
         sequence_t random_sequence;
         random_sequence.resize(sequence_size);
-        std::ranges::generate(random_sequence, [&] () -> alphabet_t
-        {
-            // uint64_t is not an alphabet, see https://github.com/seqan/product_backlog/issues/200
-            if constexpr (std::is_same_v<alphabet_t, uint64_t>)
-                return alphabet_rank_distribution(random_generator);
-            else
-                return seqan3::assign_rank_to(alphabet_rank_distribution(random_generator), alphabet_t{});
-        });
+        std::ranges::generate(random_sequence,
+                              [&]() -> alphabet_t
+                              {
+                                  // uint64_t is not an alphabet, see https://github.com/seqan/product_backlog/issues/200
+                                  if constexpr (std::is_same_v<alphabet_t, uint64_t>)
+                                      return alphabet_rank_distribution(random_generator);
+                                  else
+                                      return seqan3::assign_rank_to(alphabet_rank_distribution(random_generator),
+                                                                    alphabet_t{});
+                              });
 
         return random_sequence;
     }
@@ -98,9 +96,7 @@ public:
 };
 
 template <typename alphabet_t>
-auto generate_sequence(size_t const size = 500,
-                       size_t const size_variance = 0,
-                       size_t const seed = 0)
+auto generate_sequence(size_t const size = 500, size_t const size_variance = 0, size_t const seed = 0)
 {
     seqan3::test::random_sequence_generator<std::vector<alphabet_t>> random_sequence_gen{size, size_variance};
     std::mt19937_64 random_engine{seed};
@@ -117,7 +113,10 @@ auto generate_numeric_sequence(size_t const len = 500,
     std::mt19937_64 engine(seed);
     std::uniform_int_distribution<size_t> dist{min, max};
 
-    auto gen = [&dist, &engine]() { return dist(engine); };
+    auto gen = [&dist, &engine]()
+    {
+        return dist(engine);
+    };
     std::vector<number_type> sequence(len);
     std::ranges::generate(sequence, gen);
 
@@ -125,9 +124,7 @@ auto generate_numeric_sequence(size_t const len = 500,
 }
 
 template <typename alphabet_t>
-auto generate_sequence_pairs(size_t const size,
-                             size_t const set_size,
-                             size_t const size_variance = 0)
+auto generate_sequence_pairs(size_t const size, size_t const set_size, size_t const size_variance = 0)
 {
     using sequence_t = std::vector<alphabet_t>;
 
@@ -135,24 +132,23 @@ auto generate_sequence_pairs(size_t const size,
     std::mt19937_64 random_engine{0};
 
     std::vector<std::pair<sequence_t, sequence_t>> sequence_pairs(set_size);
-    std::ranges::generate(sequence_pairs, [&]() -> std::pair<sequence_t, sequence_t>
-    {
-        return {generator(random_engine), generator(random_engine)};
-    });
+    std::ranges::generate(sequence_pairs,
+                          [&]() -> std::pair<sequence_t, sequence_t>
+                          {
+                              return {generator(random_engine), generator(random_engine)};
+                          });
     return sequence_pairs;
 }
 
 #ifdef SEQAN3_HAS_SEQAN2
 template <typename alphabet_t>
-auto generate_sequence_seqan2(size_t const len = 500,
-                              size_t const variance = 0,
-                              size_t const seed = 0)
+auto generate_sequence_seqan2(size_t const len = 500, size_t const variance = 0, size_t const seed = 0)
 {
     std::mt19937 gen(seed);
-    std::uniform_int_distribution<size_t> dis_alpha(0, seqan::ValueSize<alphabet_t>::VALUE - 1);
+    std::uniform_int_distribution<size_t> dis_alpha(0, seqan2::ValueSize<alphabet_t>::VALUE - 1);
     std::uniform_int_distribution<size_t> dis_length(len - variance, len + variance);
 
-    seqan::String<alphabet_t> sequence;
+    seqan2::String<alphabet_t> sequence;
     size_t length = dis_length(gen);
 
     for (size_t l = 0; l < length; ++l)
@@ -168,8 +164,8 @@ auto generate_sequence_pairs_seqan2(size_t const sequence_length,
 {
     using sequence_t = decltype(generate_sequence_seqan2<alphabet_t>());
 
-    seqan::StringSet<sequence_t> vec1;
-    seqan::StringSet<sequence_t> vec2;
+    seqan2::StringSet<sequence_t> vec1;
+    seqan2::StringSet<sequence_t> vec2;
 
     for (unsigned i = 0; i < set_size; ++i)
     {

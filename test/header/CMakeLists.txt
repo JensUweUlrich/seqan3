@@ -1,11 +1,11 @@
 # -----------------------------------------------------------------------------------------------------
-# Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-# Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+# Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+# Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 # This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 # shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 # -----------------------------------------------------------------------------------------------------
 
-cmake_minimum_required (VERSION 3.10...3.22)
+cmake_minimum_required (VERSION 3.12...3.22)
 project (seqan3_header_test CXX)
 
 include (../seqan3-test.cmake)
@@ -84,7 +84,7 @@ macro (seqan3_header_test component header_base_path exclude_regex)
 
     file (WRITE "${PROJECT_BINARY_DIR}/${target}.cpp" "")
     add_executable (${target} ${PROJECT_BINARY_DIR}/${target}.cpp)
-    target_link_libraries (${target} seqan3::test::header)
+    target_link_libraries (${target} seqan3::test seqan3::test::header)
     add_test (NAME "header/${target}" COMMAND ${target})
 
     foreach (header ${header_files})
@@ -112,24 +112,10 @@ macro (seqan3_header_test component header_base_path exclude_regex)
                                         "${CMAKE_CURRENT_SOURCE_DIR}/generate_header_source.cmake")
 
             add_library (${header_target} OBJECT "${header_target_source}")
-
-            # NOTE: a simple target_link_libraries (${header_target} seqan3::test::header)
-            # is not possible for OBJECT libraries before cmake 3.12
-            if (CMAKE_VERSION VERSION_LESS 3.12)
-                target_compile_options (${header_target}
-                                        PRIVATE $<TARGET_PROPERTY:seqan3::test::header,INTERFACE_COMPILE_OPTIONS>)
-                target_compile_definitions (
-                    ${header_target} PRIVATE $<TARGET_PROPERTY:seqan3::test::header,INTERFACE_COMPILE_DEFINITIONS>)
-                target_include_directories (
-                    ${header_target} PRIVATE $<TARGET_PROPERTY:seqan3::test::header,INTERFACE_INCLUDE_DIRECTORIES>)
-                target_include_directories (
-                    ${header_target} SYSTEM
-                    PRIVATE $<TARGET_PROPERTY:seqan3::test::header,INTERFACE_SYSTEM_INCLUDE_DIRECTORIES>)
-                add_dependencies (${header_target} gtest gbenchmark)
-            else ()
-                target_link_libraries (${header_target} seqan3::test::header)
-            endif ()
-
+            # Link seqan3::test first, even though it is also linked by seqan3::test:header.
+            # Without this, the compile options of seqan3::test are appended, e.g.,
+            # `-Wno-error=... -Werror -Wall`, instead of `-Werror -Wall -Wno-error=...`
+            target_link_libraries (${header_target} seqan3::test seqan3::test::header)
             target_sources (${target} PRIVATE $<TARGET_OBJECTS:${header_target}>)
         endforeach ()
     endforeach ()
@@ -147,16 +133,12 @@ seqan3_require_ccache ()
 seqan3_require_benchmark ()
 seqan3_require_test ()
 
-# note: seqan3/std/* will not be tested, because the source files don't have any file extension
+# note: seqan3/contrib/std/* will not be tested, because they use local (#include "file") includes
 # note: seqan3/version.hpp is one of the only header that is not required to have a seqan3/core/platform.hpp include
-seqan3_header_test (seqan3 "${SEQAN3_CLONE_DIR}/include" "seqan3/version.hpp")
+seqan3_header_test (seqan3 "${SEQAN3_CLONE_DIR}/include" "seqan3/version.hpp|seqan3/contrib/std")
 seqan3_header_test (seqan3_test "${SEQAN3_CLONE_DIR}/test/include" "")
 
 if (SEQAN3_FULL_HEADER_TEST)
-
-    # contains deprecated headers that produce an error when included
-    seqan3_header_test (range-v3 "${SEQAN3_CLONE_DIR}/submodules/range-v3/include" "/detail/")
-    target_compile_definitions (range-v3_header_test INTERFACE RANGES_DISABLE_DEPRECATED_WARNINGS=1)
 
     # not self-contained headers; error: extra ‘;’ [-Werror=pedantic]
     # seqan3_header_test (lemon "${SEQAN3_CLONE_DIR}/submodules/lemon/include" "")

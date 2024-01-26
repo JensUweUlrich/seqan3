@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -48,12 +48,12 @@ private:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr nucleotide_base()                                    noexcept = default; //!< Defaulted.
-    constexpr nucleotide_base(nucleotide_base const &)             noexcept = default; //!< Defaulted.
-    constexpr nucleotide_base(nucleotide_base &&)                  noexcept = default; //!< Defaulted.
+    constexpr nucleotide_base() noexcept = default;                                    //!< Defaulted.
+    constexpr nucleotide_base(nucleotide_base const &) noexcept = default;             //!< Defaulted.
+    constexpr nucleotide_base(nucleotide_base &&) noexcept = default;                  //!< Defaulted.
     constexpr nucleotide_base & operator=(nucleotide_base const &) noexcept = default; //!< Defaulted.
-    constexpr nucleotide_base & operator=(nucleotide_base &&)      noexcept = default; //!< Defaulted.
-    ~nucleotide_base()                                             noexcept = default; //!< Defaulted.
+    constexpr nucleotide_base & operator=(nucleotide_base &&) noexcept = default;      //!< Defaulted.
+    ~nucleotide_base() noexcept = default;                                             //!< Defaulted.
 
     //!\}
 
@@ -78,11 +78,8 @@ public:
      * \experimentalapi{Experimental since version 3.1.}
      */
     template <typename other_nucl_type>
-    //!\cond
-        requires (!std::same_as<nucleotide_base, other_nucl_type>) &&
-                 (!std::same_as<derived_type, other_nucl_type>) &&
-                 nucleotide_alphabet<other_nucl_type>
-    //!\endcond
+        requires (!std::same_as<nucleotide_base, other_nucl_type>)
+              && (!std::same_as<derived_type, other_nucl_type>) && nucleotide_alphabet<other_nucl_type>
     explicit constexpr nucleotide_base(other_nucl_type const & other) noexcept
     {
         static_cast<derived_type &>(*this) =
@@ -145,13 +142,15 @@ public:
     }
 
 private:
-    //!\brief Implementation of #char_is_valid().
+    // clang-format off
+    //!\brief Implementation of seqan3::nucleotide_base::char_is_valid().
     static constexpr std::array<bool, 256> valid_char_table
     {
-        [] () constexpr
-        {
-            // init with false
+        []() constexpr {
             std::array<bool, 256> ret{};
+
+            // Value-initialisation of std::array does usually initialise. `fill` is explicit.
+            ret.fill(false);
 
             // the original valid chars and their lower cases
             for (size_t rank = 0u; rank < derived_type::alphabet_size; ++rank)
@@ -171,5 +170,6 @@ private:
         }()
     };
 };
+    // clang-format off
 
 } // namespace seqan3

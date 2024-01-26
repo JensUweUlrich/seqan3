@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -58,6 +58,6 @@ template <typename scalar_t,
           template <typename scalar_t_, size_t length_> typename simd_backend = detail::default_simd_backend>
 using simd_type_t = typename simd_type<scalar_t, length, simd_backend>::type;
 
-} // inline namespace simd
+} // namespace simd
 
 } // namespace seqan3

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -87,7 +87,8 @@ private:
 
     //!\brief Befriend seqan3::aminoacid_base.
     friend base_t;
-    //!\cond \brief Befriend seqan3::alphabet_base.
+    //!\cond
+    //!\brief Befriend seqan3::alphabet_base.
     friend base_t::base_t;
     //!\endcond
 
@@ -95,12 +96,12 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr aa10li()                           noexcept = default; //!< Defaulted.
-    constexpr aa10li(aa10li const &)             noexcept = default; //!< Defaulted.
-    constexpr aa10li(aa10li &&)                  noexcept = default; //!< Defaulted.
+    constexpr aa10li() noexcept = default;                           //!< Defaulted.
+    constexpr aa10li(aa10li const &) noexcept = default;             //!< Defaulted.
+    constexpr aa10li(aa10li &&) noexcept = default;                  //!< Defaulted.
     constexpr aa10li & operator=(aa10li const &) noexcept = default; //!< Defaulted.
-    constexpr aa10li & operator=(aa10li &&)      noexcept = default; //!< Defaulted.
-    ~aa10li()                                    noexcept = default; //!< Defaulted.
+    constexpr aa10li & operator=(aa10li &&) noexcept = default;      //!< Defaulted.
+    ~aa10li() noexcept = default;                                    //!< Defaulted.
 
     //!\brief Inherit the base class's Constructors.
     using base_t::base_t;
@@ -108,58 +109,7 @@ public:
 
 private:
     //!\copydoc seqan3::aa27::rank_to_char_table
-    static constexpr char_type rank_to_char_table[alphabet_size]
-    {
-        'A',
-        'B',
-        'C',
-        'F',
-        'G',
-        'H',
-        'I',
-        'J',
-        'K',
-        'P'
-    };
-
-    //!\copydoc seqan3::aa27::char_to_rank_table
-    static constexpr std::array<rank_type, 256> char_to_rank_table
-    {
-        [] () constexpr
-        {
-            std::array<rank_type, 256> ret{};
-
-            // initialize with UNKNOWN (std::array::fill unfortunately not constexpr)
-            for (auto & c : ret)
-                c = 0; // value of 'A', because S appears most frequently and gets converted to A in this alphabet
-
-            // reverse mapping for characters and their lowercase
-            for (rank_type rnk = 0u; rnk < alphabet_size; ++rnk)
-            {
-                ret[static_cast<rank_type>(rank_to_char_table[rnk])] = rnk;
-                ret[static_cast<rank_type>(to_lower(rank_to_char_table[rnk]))] = rnk;
-            }
-
-            ret['D'] = ret['B']; ret['d'] = ret['B']; // Convert D to B (either D/N).
-            ret['E'] = ret['B']; ret['e'] = ret['B']; // Convert E to B (either D/N).
-            ret['L'] = ret['J']; ret['l'] = ret['J']; // Convert L to J (either I/L).
-            ret['M'] = ret['J']; ret['m'] = ret['J']; // Convert M to J (either I/L).
-            ret['N'] = ret['H']; ret['n'] = ret['H']; // Convert N to H.
-            ret['O'] = ret['K']; ret['o'] = ret['K']; // Convert Pyrrolysine to K.
-            ret['Q'] = ret['B']; ret['q'] = ret['B']; // Convert Q to B (either D/N).
-            ret['R'] = ret['K']; ret['r'] = ret['K']; // Convert R to K.
-            ret['S'] = ret['A']; ret['s'] = ret['A']; // Convert S to A.
-            ret['T'] = ret['A']; ret['t'] = ret['A']; // Convert T to A.
-            ret['U'] = ret['C']; ret['u'] = ret['C']; // Convert Selenocysteine to C.
-            ret['V'] = ret['I']; ret['v'] = ret['I']; // Convert V to I.
-            ret['W'] = ret['F']; ret['w'] = ret['F']; // Convert W to F.
-            ret['X'] = ret['A']; ret['x'] = ret['A']; // Convert unknown amino acids to Alanine.
-            ret['Y'] = ret['F']; ret['y'] = ret['F']; // Convert Y to F.
-            ret['Z'] = ret['B']; ret['z'] = ret['B']; // Convert Z (either E/Q) to B (either D/N).
-            ret['*'] = ret['F']; // The most common stop codon is UGA. This is most similar to a Tryptophan which in this alphabet gets converted to Phenylalanine.
-            return ret;
-        }()
-    };
+    static constexpr char_type rank_to_char_table[alphabet_size]{'A', 'B', 'C', 'F', 'G', 'H', 'I', 'J', 'K', 'P'};
 
     //!\copydoc seqan3::aa27::char_to_rank
     static constexpr rank_type char_to_rank(char_type const chr)
@@ -173,7 +123,64 @@ private:
     {
         return rank_to_char_table[rank];
     }
+
+    // clang-format off
+    //!\copydoc seqan3::aa27::char_to_rank_table
+    static constexpr std::array<rank_type, 256> char_to_rank_table
+    {
+        []() constexpr {
+            std::array<rank_type, 256> ret{};
+
+            // initialize with 'A' because S appears most frequently and gets converted to A in this alphabet
+            ret.fill(0u); // Value-initialisation of std::array does usually initialise. `fill` is explicit.
+
+            // reverse mapping for characters and their lowercase
+            for (rank_type rnk = 0u; rnk < alphabet_size; ++rnk)
+            {
+                ret[static_cast<rank_type>(rank_to_char_table[rnk])] = rnk;
+                ret[static_cast<rank_type>(to_lower(rank_to_char_table[rnk]))] = rnk;
+            }
+
+            ret['D'] = ret['B'];
+            ret['d'] = ret['B']; // Convert D to B (either D/N).
+            ret['E'] = ret['B'];
+            ret['e'] = ret['B']; // Convert E to B (either D/N).
+            ret['L'] = ret['J'];
+            ret['l'] = ret['J']; // Convert L to J (either I/L).
+            ret['M'] = ret['J'];
+            ret['m'] = ret['J']; // Convert M to J (either I/L).
+            ret['N'] = ret['H'];
+            ret['n'] = ret['H']; // Convert N to H.
+            ret['O'] = ret['K'];
+            ret['o'] = ret['K']; // Convert Pyrrolysine to K.
+            ret['Q'] = ret['B'];
+            ret['q'] = ret['B']; // Convert Q to B (either D/N).
+            ret['R'] = ret['K'];
+            ret['r'] = ret['K']; // Convert R to K.
+            ret['S'] = ret['A'];
+            ret['s'] = ret['A']; // Convert S to A.
+            ret['T'] = ret['A'];
+            ret['t'] = ret['A']; // Convert T to A.
+            ret['U'] = ret['C'];
+            ret['u'] = ret['C']; // Convert Selenocysteine to C.
+            ret['V'] = ret['I'];
+            ret['v'] = ret['I']; // Convert V to I.
+            ret['W'] = ret['F'];
+            ret['w'] = ret['F']; // Convert W to F.
+            ret['X'] = ret['A'];
+            ret['x'] = ret['A']; // Convert unknown amino acids to Alanine.
+            ret['Y'] = ret['F'];
+            ret['y'] = ret['F']; // Convert Y to F.
+            ret['Z'] = ret['B'];
+            ret['z'] = ret['B']; // Convert Z (either E/Q) to B (either D/N).
+            ret['*'] = ret['F']; // The most common stop codon is UGA. This is most similar to a Tryptophan which in
+                                 // this alphabet gets converted to Phenylalanine.
+
+            return ret;
+        }()
+    };
 };
+// clang-format of
 
 // ------------------------------------------------------------------
 // containers
@@ -221,7 +228,7 @@ constexpr aa10li operator""_aa10li(char const c) noexcept
  *
  * \stableapi{Since version 3.1.}
  */
-inline aa10li_vector operator""_aa10li(char const * const s, size_t const n)
+SEQAN3_WORKAROUND_LITERAL aa10li_vector operator""_aa10li(char const * const s, size_t const n)
 {
     aa10li_vector r;
     r.resize(n);
@@ -233,6 +240,6 @@ inline aa10li_vector operator""_aa10li(char const * const s, size_t const n)
 }
 //!\}
 
-} // inline namespace literals
+} // namespace literals
 
 } // namespace seqan3

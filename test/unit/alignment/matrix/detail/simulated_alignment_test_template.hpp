@@ -1,13 +1,13 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #include <gtest/gtest.h>
 
-#include <seqan3/std/algorithm>
+#include <algorithm>
 
 template <typename t>
 struct simulated_alignment_test : public ::testing::Test
@@ -68,14 +68,20 @@ TYPED_TEST_P(simulated_alignment_test, linear_alignment)
     }
 
     // dump the computed column.
-    cmp_it = std::ranges::transform(col, cmp_it, [] (auto proxy) { return proxy.current; }).out;
+    cmp_it = std::ranges::transform(col,
+                                    cmp_it,
+                                    [](auto proxy)
+                                    {
+                                        return proxy.current;
+                                    })
+                 .out;
 
     // ----------------------------------------------------------------------------
     // Compute all columns where the first cell is at the top of the matrix
     // ----------------------------------------------------------------------------
 
     // The inner kernel as lambda to reduce duplicate code.
-    auto inner_kernel = [this] (auto col_it, auto const first_idx, auto const second_idx)
+    auto inner_kernel = [this](auto col_it, auto const first_idx, auto const second_idx)
     {
         auto proxy = *col_it;
         auto & [current, diagonal, r_left, w_left, up] = proxy;
@@ -103,7 +109,13 @@ TYPED_TEST_P(simulated_alignment_test, linear_alignment)
             inner_kernel(col_it, first_idx, second_idx);
 
         // dump the computed column.
-        cmp_it = std::ranges::transform(col, cmp_it, [] (auto proxy) { return proxy.current; }).out;
+        cmp_it = std::ranges::transform(col,
+                                        cmp_it,
+                                        [](auto proxy)
+                                        {
+                                            return proxy.current;
+                                        })
+                     .out;
     }
 
     // ----------------------------------------------------------------------------
@@ -128,7 +140,13 @@ TYPED_TEST_P(simulated_alignment_test, linear_alignment)
             inner_kernel(col_it, first_idx, second_idx);
 
         // dump the computed column.
-        cmp_it = std::ranges::transform(col, cmp_it, [] (auto proxy) { return proxy.current; }).out;
+        cmp_it = std::ranges::transform(col,
+                                        cmp_it,
+                                        [](auto proxy)
+                                        {
+                                            return proxy.current;
+                                        })
+                     .out;
     }
 
     EXPECT_TRUE(std::equal(cmp_matrix.begin(), cmp_matrix.end(), this->gold_matrix().begin()));

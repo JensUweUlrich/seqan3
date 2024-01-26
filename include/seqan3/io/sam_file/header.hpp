@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -13,7 +13,7 @@
 #pragma once
 
 #include <deque>
-#include <seqan3/std/ranges>
+#include <ranges>
 #include <unordered_map>
 #include <vector>
 
@@ -24,7 +24,22 @@
 namespace seqan3
 {
 
-/*!\brief Stores the header information of alignment files.
+/*!\brief Stores information of the program/tool that was used to create a SAM/BAM file.
+ * \ingroup io_sam_file
+ *
+ * \remark For a complete overview, take a look at \ref io_sam_file
+ */
+struct sam_file_program_info_t
+{
+    std::string id;                //!< A unique (file scope) id.
+    std::string name;              //!< The official name.
+    std::string command_line_call; //!< The command line call that produces the file.
+    std::string previous;          //!< The id of the previous program if program calls were chained.
+    std::string description;       //!< A description of the program and/or program call.
+    std::string version;           //!< The program/tool version.
+};
+
+/*!\brief Stores the header information of SAM/BAM files.
  * \ingroup io_sam_file
  *
  * \remark For a complete overview, take a look at \ref io_sam_file
@@ -36,24 +51,17 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    //!\brief Default constructor is defaulted.
-    sam_file_header() = default;
-    //!\brief Copy construction is defaulted.
-    sam_file_header(sam_file_header const &) = default;
-    //!\brief Copy assignment is defaulted.
-    sam_file_header & operator=(sam_file_header const &) = default;
-    //!\brief Move construction is defaulted.
-    sam_file_header(sam_file_header &&) = default;
-    //!\brief Move assignment is defaulted.
-    sam_file_header & operator=(sam_file_header &&) = default;
-    //!\brief Destructor is defaulted.
-    ~sam_file_header() = default;
+    sam_file_header() = default;                                   //!< Defaulted.
+    sam_file_header(sam_file_header const &) = delete;             //!< Deleted. Holds a unique_ptr.
+    sam_file_header & operator=(sam_file_header const &) = delete; //!< Deleted. Holds a unique_ptr.
+    sam_file_header(sam_file_header &&) = default;                 //!< Defaulted.
+    sam_file_header & operator=(sam_file_header &&) = default;     //!< Defaulted.
+    ~sam_file_header() = default;                                  //!< Defaulted.
 
     /*!\brief Construct from a range of reference ids which redirects the `ref_ids_ptr` member (non-owning).
      * \param[in] ref_ids The range over reference ids to redirect the pointer at.
      */
-    sam_file_header(ref_ids_type & ref_ids) :
-        ref_ids_ptr{&ref_ids, ref_ids_deleter_noop}
+    sam_file_header(ref_ids_type & ref_ids) : ref_ids_ptr{&ref_ids, ref_ids_deleter_noop}
     {}
 
     /*!\brief Construct from a rvalue range of reference ids which is moved into the `ref_ids_ptr` (owning).
@@ -64,37 +72,33 @@ public:
     {}
     //!\}
 
-    //!\brief Stores information of the program/tool that was used to create the file.
-    struct program_info_t
-    {
-        std::string id;                //!< A unique (file scope) id.
-        std::string name;              //!< The official name.
-        std::string command_line_call; //!< The command line call that produces the file.
-        std::string previous;          //!< The id of the previous program if program calls were chained.
-        std::string description;       //!< A description of the program and/or program call.
-        std::string version;           //!< The program/tool version.
-    };
-
-    std::string format_version; //!< The file format version. Note: this is overwritten by our formats on output.
-    std::string sorting;        //!< The sorting of the file. SAM: [unknown, unsorted, queryname, coordinate].
-    std::string subsorting;     //!< The sub-sorting of the file. SAM: [unknown, unsorted, queryname, coordinate](:[A-Za-z0-9_-]+)+.
-    std::string grouping;       //!< The grouping of the file. SAM: [none, query, reference].
+    using program_info_t =
+        sam_file_program_info_t; //!< Stores information of the program/tool that was used to create the file.
+    std::string format_version;  //!< The file format version. Note: this is overwritten by our formats on output.
+    std::string sorting;         //!< The sorting of the file. SAM: [unknown, unsorted, queryname, coordinate].
+    std::string
+        subsorting; //!< The sub-sorting of the file. SAM: [unknown, unsorted, queryname, coordinate](:[A-Za-z0-9_-]+)+.
+    std::string grouping; //!< The grouping of the file. SAM: [none, query, reference].
 
     std::vector<program_info_t> program_infos; //!< The list of program information.
 
-    std::vector<std::string> comments;         //!< The list of comments.
+    std::vector<std::string> comments; //!< The list of comments.
 
 private:
     //!\brief The type of the internal ref_ids pointer. Allows dynamically setting ownership management.
-    using ref_ids_ptr_t = std::unique_ptr<ref_ids_type, std::function<void(ref_ids_type*)>>;
+    using ref_ids_ptr_t = std::unique_ptr<ref_ids_type, std::function<void(ref_ids_type *)>>;
     //!\brief Stream deleter that does nothing (no ownership assumed).
-    static void ref_ids_deleter_noop(ref_ids_type *) {}
+    static void ref_ids_deleter_noop(ref_ids_type *)
+    {}
     //!\brief Stream deleter with default behaviour (ownership assumed).
-    static void ref_ids_deleter_default(ref_ids_type * ptr) { delete ptr; }
+    static void ref_ids_deleter_default(ref_ids_type * ptr)
+    {
+        delete ptr;
+    }
     //!\brief The key's type of ref_dict.
     using key_type = std::conditional_t<std::ranges::contiguous_range<std::ranges::range_reference_t<ref_ids_type>>,
-                        std::span<range_innermost_value_t<ref_ids_type> const>,
-                        type_reduce_t<std::ranges::range_reference_t<ref_ids_type>>>;
+                                        std::span<range_innermost_value_t<ref_ids_type> const>,
+                                        type_reduce_t<std::ranges::range_reference_t<ref_ids_type>>>;
     //!\brief The pointer to reference ids information (non-owning if reference information is given).
     ref_ids_ptr_t ref_ids_ptr{new ref_ids_type{}, ref_ids_deleter_default};
 
@@ -164,7 +168,7 @@ public:
      *           primary assembly.
      * * **AN:** Alternative reference sequence names. A comma-separated list of alternative names that tools may use
      *           when referring to this reference sequence. These alternative names are not used elsewhere within the
-     *           SAM file; in  particular, they must not appear in alignment records’ RNAME or RNEXT fields. regular
+     *           SAM file; in  particular, they must not appear in SAM records’ RNAME or RNEXT fields. regular
      *           expression : name (, name )* where name is [0-9A-Za-z][0-9A-Za-z*+.@ \|-]*
      * * **AS:** Genome assembly identifier.
      * * **M5:** MD5 checksum of the sequence.  See Section 1.3.1

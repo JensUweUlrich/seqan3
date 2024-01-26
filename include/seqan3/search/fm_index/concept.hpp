@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <seqan3/std/concepts>
+#include <concepts>
 #include <type_traits>
 
 #include <sdsl/suffix_arrays.hpp>
@@ -32,25 +32,44 @@ namespace seqan3::detail
  */
 //!\cond
 template <typename t>
-concept sdsl_index = requires (t sdsl_index)
-{
-    typename t::size_type;
+concept sdsl_index = requires (t sdsl_index) {
+                         typename t::size_type;
 
-    SEQAN3_RETURN_TYPE_CONSTRAINT(sdsl_index.size(), std::same_as, typename t::size_type);
-    { sdsl_index[0] }; // suffix array access
-    SEQAN3_RETURN_TYPE_CONSTRAINT(sdsl_index.comp2char[0], std::same_as, uint8_t);
-    SEQAN3_RETURN_TYPE_CONSTRAINT(sdsl_index.char2comp[0], std::same_as, uint8_t);
-    { sdsl_index.sigma };
-    { sdsl_index.C[0] };
+                         {
+                             sdsl_index.size()
+                             } -> std::same_as<typename t::size_type>;
+                         {
+                             sdsl_index[0]
+                         }; // suffix array access
+                         {
+                             sdsl_index.comp2char[0]
+                             } -> std::same_as<uint8_t>;
+                         {
+                             sdsl_index.char2comp[0]
+                             } -> std::same_as<uint8_t>;
+                         {
+                             sdsl_index.sigma
+                         };
+                         {
+                             sdsl_index.C[0]
+                         };
 
-    requires requires (t sdsl_index, typename t::char_type const c, typename t::size_type const lb,
-                                     typename t::size_type const rb, sdsl::int_vector<8> const text)
-    {
-        { sdsl_index.bwt.rank(lb, c) };
-        { sdsl_index.wavelet_tree.lex_count(lb, rb, c) };
-        { sdsl::construct_im(sdsl_index, text, 0) };
-    };
-};
+                         requires requires (t sdsl_index,
+                                            typename t::char_type const c,
+                                            typename t::size_type const lb,
+                                            typename t::size_type const rb,
+                                            sdsl::int_vector<8> const text) {
+                                      {
+                                          sdsl_index.bwt.rank(lb, c)
+                                      };
+                                      {
+                                          sdsl_index.wavelet_tree.lex_count(lb, rb, c)
+                                      };
+                                      {
+                                          sdsl::construct_im(sdsl_index, text, 0)
+                                      };
+                                  };
+                     };
 //!\endcond
 /*!\name Requirements for seqan3::detail::sdsl_index
  * \relates seqan3::detail::sdsl_index

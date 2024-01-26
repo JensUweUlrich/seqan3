@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -14,7 +14,7 @@
  * \brief A special sub namespace for the alignment configurations.
  */
 
- /*!\if DEV
+/*!\if DEV
   * \namespace seqan3::align_cfg::detail
   * \copydoc seqan3::detail
   * \endif
@@ -23,7 +23,10 @@
 /*!\defgroup alignment_configuration Configuration
  * \ingroup alignment
  * \brief Provides configuration elements for the pairwise alignment configuration.
- * \see alignment
+ *
+ * See the detailed \ref alignment_pairwise documentation for more details.
+ *
+ * \see alignment_pairwise
  */
 
 #pragma once

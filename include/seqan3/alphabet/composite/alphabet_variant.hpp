@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <span>
 #include <utility>
 #include <variant>
 
@@ -28,22 +29,35 @@
 namespace seqan3::detail
 {
 
+//!\brief Helper to determine whether a type is a std::span.
+template <typename t, size_t extent = std::dynamic_extent>
+struct is_span : std::false_type
+{};
+
+//!\cond
+template <typename t, size_t extent>
+struct is_span<std::span<t, extent>> : std::true_type
+{};
+//!\endcond
+
 //!\brief Prevents wrong instantiations of std::alphabet_variant's constructors.
-template <typename other_t, typename ... alternative_types>
+template <typename other_t, typename... alternative_types>
 inline constexpr bool variant_general_guard =
-    (!std::same_as<other_t, alphabet_variant<alternative_types...>>) &&
-    (!std::is_base_of_v<alphabet_variant<alternative_types...>, other_t>) &&
-    (!(std::same_as<other_t, alternative_types> || ...)) &&
-    (!list_traits::contains<alphabet_variant<alternative_types...>, recursive_required_types_t<other_t>>);
+    (!std::same_as<other_t, alphabet_variant<alternative_types...>>)&&(
+        !std::is_base_of_v<alphabet_variant<alternative_types...>,
+                           other_t>)&&(!(std::same_as<other_t, alternative_types> || ...))
+    && (!list_traits::contains<alphabet_variant<alternative_types...>, recursive_required_types_t<other_t>>);
 
 //!\brief Prevents wrong instantiations of std::alphabet_variant's comparison operators.
-template <typename lhs_t, typename rhs_t, bool lhs_rhs_switched, typename ... alternative_types>
+template <typename lhs_t, typename rhs_t, bool lhs_rhs_switched, typename... alternative_types>
 inline constexpr bool variant_comparison_guard =
-    (instantiate_if_v<lazy<weakly_equality_comparable_with_trait, rhs_t, alternative_types>,
-                      (std::same_as<lhs_t, alphabet_variant<alternative_types...>>) &&
-                      (variant_general_guard<rhs_t, alternative_types...>)          &&
-                      !(lhs_rhs_switched && is_type_specialisation_of_v<rhs_t, alphabet_variant>)
-                      > || ...);
+    (instantiate_if_v<
+         lazy<weakly_equality_comparable_with_trait, rhs_t, alternative_types>,
+         (std::same_as<lhs_t, alphabet_variant<alternative_types...>>)&&(
+             variant_general_guard<rhs_t, alternative_types...>)&&!(lhs_rhs_switched
+                                                                    && is_type_specialisation_of_v<rhs_t,
+                                                                                                   alphabet_variant>)>
+     || ...);
 } // namespace seqan3::detail
 
 namespace seqan3
@@ -108,21 +122,19 @@ namespace seqan3
  *
  * \stableapi{Since version 3.1.}
  */
-template <typename ...alternative_types>
-//!\cond
-    requires (detail::writable_constexpr_alphabet<alternative_types> && ...) &&
-             (std::regular<alternative_types> && ...) &&
-             (sizeof...(alternative_types) >= 2)
-//!\endcond
-class alphabet_variant : public alphabet_base<alphabet_variant<alternative_types...>,
-                                              (static_cast<size_t>(alphabet_size<alternative_types>) + ...),
-                                              char>
+template <typename... alternative_types>
+    requires (detail::writable_constexpr_alphabet<alternative_types> && ...) && (std::regular<alternative_types> && ...)
+          && (sizeof...(alternative_types) >= 2)
+class alphabet_variant :
+    public alphabet_base<alphabet_variant<alternative_types...>,
+                         (static_cast<size_t>(alphabet_size<alternative_types>) + ...),
+                         char>
 {
 private:
     //!\brief The base type.
     using base_t = alphabet_base<alphabet_variant<alternative_types...>,
-                                                  (static_cast<size_t>(alphabet_size<alternative_types>) + ...),
-                                                  char>;
+                                 (static_cast<size_t>(alphabet_size<alternative_types>) + ...),
+                                 char>;
 
     static_assert((std::is_same_v<alphabet_char_t<alternative_types>, char> && ...),
                   "The alphabet_variant is currently only tested for alphabets with char_type char. "
@@ -139,27 +151,27 @@ private:
 
     using typename base_t::char_type;
     using typename base_t::rank_type;
+
 public:
     using base_t::alphabet_size;
+    using base_t::assign_rank;
     using base_t::to_char;
     using base_t::to_rank;
-    using base_t::assign_rank;
 
-   /*!\brief Expose the alternative types to concept checks in metaprogramming.
+    /*!\brief Expose the alternative types to concept checks in metaprogramming.
     * \private
     * \details
     * \noapi
     */
     using seqan3_required_types = type_list<alternative_types...>;
-   /*!\brief Expose the recursive alternative types to concept checks in metaprogramming.
+    /*!\brief Expose the recursive alternative types to concept checks in metaprogramming.
     * \private
     * \details
     * \noapi
     */
-    using seqan3_recursive_required_types =
-        list_traits::concat<seqan3_required_types,
-                            detail::transformation_trait_or_t<detail::recursive_required_types<alternative_types>,
-                                                              type_list<>>...>;
+    using seqan3_recursive_required_types = list_traits::concat<
+        seqan3_required_types,
+        detail::transformation_trait_or_t<detail::recursive_required_types<alternative_types>, type_list<>>...>;
 
     /*!\brief Returns true if alternative_t is one of the given alternative types.
      * \tparam alternative_t The type to check.
@@ -177,12 +189,12 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr alphabet_variant()                                     noexcept = default; //!< Defaulted.
-    constexpr alphabet_variant(alphabet_variant const &)             noexcept = default; //!< Defaulted.
-    constexpr alphabet_variant(alphabet_variant &&)                  noexcept = default; //!< Defaulted.
+    constexpr alphabet_variant() noexcept = default;                                     //!< Defaulted.
+    constexpr alphabet_variant(alphabet_variant const &) noexcept = default;             //!< Defaulted.
+    constexpr alphabet_variant(alphabet_variant &&) noexcept = default;                  //!< Defaulted.
     constexpr alphabet_variant & operator=(alphabet_variant const &) noexcept = default; //!< Defaulted.
-    constexpr alphabet_variant & operator=(alphabet_variant &&)      noexcept = default; //!< Defaulted.
-    ~alphabet_variant()                                              noexcept = default; //!< Defaulted.
+    constexpr alphabet_variant & operator=(alphabet_variant &&) noexcept = default;      //!< Defaulted.
+    ~alphabet_variant() noexcept = default;                                              //!< Defaulted.
 
     /*!\brief Construction via the value of an alternative.
      * \tparam alternative_t One of the alternative types.
@@ -193,13 +205,12 @@ public:
      * \stableapi{Since version 3.1.}
      */
     template <typename alternative_t>
-    //!\cond
-        requires (!std::same_as<alternative_t, alphabet_variant>) &&
-                 (!std::is_base_of_v<alphabet_variant, alternative_t>) &&
-                 (!list_traits::contains<alphabet_variant,
-                  detail::transformation_trait_or_t<detail::recursive_required_types<alternative_t>, type_list<>>>) &&
-                 (is_alternative<alternative_t>())
-    //!\endcond
+        requires (!std::same_as<alternative_t, alphabet_variant>) && (!detail::is_span<alternative_t>::value)
+              && (!std::is_base_of_v<alphabet_variant, alternative_t>)
+              && (!list_traits::contains<
+                  alphabet_variant,
+                  detail::transformation_trait_or_t<detail::recursive_required_types<alternative_t>, type_list<>>>)
+              && (is_alternative<alternative_t>())
     constexpr alphabet_variant(alternative_t const alternative) noexcept
     {
         assign_rank(rank_by_type_(alternative));
@@ -224,16 +235,16 @@ public:
      * \experimentalapi{Experimental since version 3.1.}
      */
     template <typename indirect_alternative_t>
-    //!\cond
-        requires ((detail::instantiate_if_v<
-                        detail::lazy<std::is_convertible, indirect_alternative_t, alternative_types>,
-                        detail::variant_general_guard<indirect_alternative_t, alternative_types...>> || ...))
-    //!\endcond
+        requires (!detail::is_span<indirect_alternative_t>::value)
+              && ((
+                  detail::instantiate_if_v<detail::lazy<std::is_convertible, indirect_alternative_t, alternative_types>,
+                                           detail::variant_general_guard<indirect_alternative_t, alternative_types...>>
+                  || ...))
     constexpr alphabet_variant(indirect_alternative_t const rhs) noexcept
     {
         using alternative_predicate = detail::implicitly_convertible_from<indirect_alternative_t>;
-        constexpr auto alternative_position = seqan3::list_traits::find_if<alternative_predicate::template invoke,
-                                                                           alternatives>;
+        constexpr auto alternative_position =
+            seqan3::list_traits::find_if<alternative_predicate::template invoke, alternatives>;
         using alternative_t = seqan3::list_traits::at<alternative_position, alternatives>;
         assign_rank(rank_by_type_(alternative_t(rhs)));
     }
@@ -255,19 +266,18 @@ public:
      * \experimentalapi{Experimental since version 3.1.}
      */
     template <typename indirect_alternative_t>
-    //!\cond
-        requires ((!(detail::instantiate_if_v<
-                        detail::lazy<std::is_convertible, indirect_alternative_t, alternative_types>,
-                        detail::variant_general_guard<indirect_alternative_t, alternative_types...>> || ...)) &&
-                    (detail::instantiate_if_v<
-                        detail::lazy<std::is_constructible, alternative_types, indirect_alternative_t>,
-                        detail::variant_general_guard<indirect_alternative_t, alternative_types...>> || ...))
-    //!\endcond
+        requires (
+            (!(detail::instantiate_if_v<detail::lazy<std::is_convertible, indirect_alternative_t, alternative_types>,
+                                        detail::variant_general_guard<indirect_alternative_t, alternative_types...>>
+               || ...))
+            && (detail::instantiate_if_v<detail::lazy<std::is_constructible, alternative_types, indirect_alternative_t>,
+                                         detail::variant_general_guard<indirect_alternative_t, alternative_types...>>
+                || ...))
     constexpr explicit alphabet_variant(indirect_alternative_t const rhs) noexcept
     {
         using alternative_predicate = detail::constructible_from<indirect_alternative_t>;
-        constexpr auto alternative_position = seqan3::list_traits::find_if<alternative_predicate::template invoke,
-                                                                           alternatives>;
+        constexpr auto alternative_position =
+            seqan3::list_traits::find_if<alternative_predicate::template invoke, alternatives>;
         using alternative_t = seqan3::list_traits::at<alternative_position, alternatives>;
         assign_rank(rank_by_type_(alternative_t(rhs)));
     }
@@ -284,15 +294,13 @@ public:
      * \experimentalapi{Experimental since version 3.1.}
      */
     template <typename indirect_alternative_t>
-    //!\cond
-        requires (detail::variant_general_guard<indirect_alternative_t, alternative_types...> &&
-                  (weakly_assignable_from<alternative_types, indirect_alternative_t> || ...))
-    //!\endcond
+        requires (detail::variant_general_guard<indirect_alternative_t, alternative_types...>
+                  && (weakly_assignable_from<alternative_types, indirect_alternative_t> || ...))
     constexpr alphabet_variant & operator=(indirect_alternative_t const & rhs) noexcept
     {
         using alternative_predicate = detail::assignable_from<indirect_alternative_t>;
-        constexpr auto alternative_position = seqan3::list_traits::find_if<alternative_predicate::template invoke,
-                                                                           alternatives>;
+        constexpr auto alternative_position =
+            seqan3::list_traits::find_if<alternative_predicate::template invoke, alternatives>;
         using alternative_t = seqan3::list_traits::at<alternative_position, alternatives>;
         alternative_t alternative{};
         alternative = rhs;
@@ -351,9 +359,7 @@ public:
      */
     template <typename alternative_t>
     constexpr bool holds_alternative() const noexcept
-    //!\cond
         requires (is_alternative<alternative_t>())
-    //!\endcond
     {
         constexpr size_t index = seqan3::list_traits::find<alternative_t, alternatives>;
         return holds_alternative<index>();
@@ -367,9 +373,7 @@ public:
      */
     template <typename alternative_t>
     constexpr alternative_t convert_to() const
-    //!\cond
         requires (is_alternative<alternative_t>())
-    //!\endcond
     {
         constexpr size_t index = seqan3::list_traits::find<alternative_t, alternatives>;
         return convert_impl<index, true>();
@@ -382,9 +386,7 @@ public:
      */
     template <typename alternative_t>
     constexpr alternative_t convert_unsafely_to() const noexcept
-    //!\cond
         requires (is_alternative<alternative_t>())
-    //!\endcond
     {
         constexpr size_t index = seqan3::list_traits::find<alternative_t, alternatives>;
         return convert_impl<index, false>();
@@ -414,40 +416,39 @@ public:
      * \stableapi{Since version 3.1.}
      */
     template <typename alphabet_variant_t, typename indirect_alternative_type>
-    friend constexpr auto operator==(alphabet_variant_t const lhs, indirect_alternative_type const rhs) noexcept
-        -> std::enable_if_t<detail::variant_comparison_guard<alphabet_variant_t,
-                                                             indirect_alternative_type,
-                                                             false,
-                                                             alternative_types...>,
-                            bool>
+        requires (!detail::is_span<alphabet_variant_t>::value)
+              && (detail::variant_comparison_guard<alphabet_variant_t,
+                                                   indirect_alternative_type,
+                                                   false,
+                                                   alternative_types...>)
+    friend constexpr bool operator==(alphabet_variant_t const lhs, indirect_alternative_type const rhs) noexcept
     {
         using alternative_predicate = detail::weakly_equality_comparable_with_<indirect_alternative_type>;
-        constexpr auto alternative_position = seqan3::list_traits::find_if<alternative_predicate::template invoke,
-                                                                           alternatives>;
+        constexpr auto alternative_position =
+            seqan3::list_traits::find_if<alternative_predicate::template invoke, alternatives>;
         using alternative_t = seqan3::list_traits::at<alternative_position, alternatives>;
-        return lhs.template holds_alternative<alternative_t>() && (lhs.template convert_unsafely_to<alternative_t>() == rhs);
+        return lhs.template holds_alternative<alternative_t>()
+            && (lhs.template convert_unsafely_to<alternative_t>() == rhs);
     }
 
     //!\copydoc operator==(alphabet_variant_t const lhs, indirect_alternative_type const rhs)
     template <typename alphabet_variant_t, typename indirect_alternative_type>
-    friend constexpr auto operator!=(alphabet_variant_t const lhs, indirect_alternative_type const rhs) noexcept
-        -> std::enable_if_t<detail::variant_comparison_guard<alphabet_variant_t,
-                                                             indirect_alternative_type,
-                                                             false,
-                                                             alternative_types...>,
-                            bool>
+    friend constexpr auto
+    operator!=(alphabet_variant_t const lhs, indirect_alternative_type const rhs) noexcept -> std::enable_if_t<
+        detail::variant_comparison_guard<alphabet_variant_t, indirect_alternative_type, false, alternative_types...>,
+        bool>
     {
         return !(lhs == rhs);
     }
 
     //!\copydoc operator==(alphabet_variant_t const lhs, indirect_alternative_type const rhs)
     template <typename alphabet_variant_t, typename indirect_alternative_type, typename = void>
-    friend constexpr auto operator==(indirect_alternative_type const lhs, alphabet_variant_t const rhs) noexcept
-        -> std::enable_if_t<detail::variant_comparison_guard<alphabet_variant_t,
-                                                             indirect_alternative_type,
-                                                             true,
-                                                             alternative_types...>,
-                            bool>
+        requires (!detail::is_span<alphabet_variant_t>::value)
+              && (detail::variant_comparison_guard<alphabet_variant_t,
+                                                   indirect_alternative_type,
+                                                   true,
+                                                   alternative_types...>)
+    friend constexpr bool operator==(indirect_alternative_type const lhs, alphabet_variant_t const rhs) noexcept
     {
         return rhs == lhs;
     }
@@ -455,11 +456,9 @@ public:
     //!\copydoc operator==(alphabet_variant_t const lhs, indirect_alternative_type const rhs)
     template <typename alphabet_variant_t, typename indirect_alternative_type, typename = void>
     friend constexpr auto operator!=(indirect_alternative_type const lhs, alphabet_variant_t const rhs) noexcept
-        -> std::enable_if_t<detail::variant_comparison_guard<alphabet_variant_t,
-                                                             indirect_alternative_type,
-                                                             true,
-                                                             alternative_types...>,
-                            bool>
+        -> std::enable_if_t<
+            detail::variant_comparison_guard<alphabet_variant_t, indirect_alternative_type, true, alternative_types...>,
+            bool>
     {
         return rhs != lhs;
     }
@@ -499,135 +498,30 @@ protected:
         return seqan3::assign_rank_to(to_rank() - partial_sum_sizes[index], alternative_t{});
     }
 
-    /*!\brief Compile-time generated lookup table which contains the partial
-     * sum up to the position of each alternative.
-     *
-     * An array which contains the prefix sum over all
-     * alternative_types::alphabet_size's.
-     *
+    /*!\brief Converts an object of one of the given alternatives into the internal representation.
+     * \tparam index The position of `alternative_t` in the template pack `alternative_types`.
+     * \tparam alternative_t One of the alternative types.
+     * \param alternative The value of a alternative.
      */
-    static constexpr std::array<rank_type, sizeof...(alternative_types) + 1> partial_sum_sizes = []() constexpr
-    {
-        constexpr size_t N = sizeof...(alternative_types) + 1;
-
-        std::array<rank_type, N> partial_sum{0, seqan3::alphabet_size<alternative_types>...};
-        for (size_t i = 1u; i < N; ++i)
-            partial_sum[i] += partial_sum[i-1];
-
-        return partial_sum;
-    }();
-
-    //!\copydoc seqan3::alphabet_variant::rank_to_char
-    static constexpr std::array<char_type, alphabet_size> rank_to_char_table = []() constexpr
-    {
-        // Explicitly writing assign_rank_to_char within assign_rank_to_char
-        // causes this bug (g++-7 and g++-8):
-        // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=84684
-        auto assign_rank_to_char = [](auto alternative, size_t rank) constexpr
-        {
-            return seqan3::to_char(seqan3::assign_rank_to(rank, alternative));
-        };
-
-        auto assign_value_to_char = [assign_rank_to_char] (auto alternative, auto & value_to_char, auto & value) constexpr
-        {
-            using alternative_t = std::decay_t<decltype(alternative)>;
-            for (size_t i = 0u; i < seqan3::alphabet_size<alternative_t>; ++i, ++value)
-                value_to_char[value] = assign_rank_to_char(alternative, i);
-        };
-
-        unsigned value = 0u;
-        std::array<char_type, alphabet_size> value_to_char{};
-
-        // initializer lists guarantee sequencing;
-        // the following expression behaves as:
-        // for(auto alternative: alternative_types)
-        //    assign_rank_to_char(alternative, rank_to_char, value);
-        ((assign_value_to_char(alternative_types{}, value_to_char, value)),...);
-
-        return value_to_char;
-    }();
-
-    //!\brief Converts an object of one of the given alternatives into the internal representation.
-    //!\tparam index The position of `alternative_t` in the template pack `alternative_types`.
-    //!\tparam alternative_t One of the alternative types.
-    //!\param alternative The value of a alternative.
     template <size_t index, typename alternative_t>
-    //!\cond
         requires (is_alternative<alternative_t>())
-    //!\endcond
     static constexpr rank_type rank_by_index_(alternative_t const & alternative) noexcept
     {
         return partial_sum_sizes[index] + static_cast<rank_type>(seqan3::to_rank(alternative));
     }
 
-    //!\brief Converts an object of one of the given alternatives into the internal representation.
-    //!\details Finds the index of alternative_t in the given types.
-    //!\tparam alternative_t One of the alternative types.
-    //!\param alternative The value of a alternative.
+    /*!\brief Converts an object of one of the given alternatives into the internal representation.
+     * \details Finds the index of alternative_t in the given types.
+     * \tparam alternative_t One of the alternative types.
+     * \param alternative The value of a alternative.
+     */
     template <typename alternative_t>
-    //!\cond
         requires (is_alternative<alternative_t>())
-    //!\endcond
     static constexpr rank_type rank_by_type_(alternative_t const & alternative) noexcept
     {
         constexpr size_t index = seqan3::list_traits::find<alternative_t, alternatives>;
         return rank_by_index_<index>(alternative);
     }
-
-    /*!\brief Compile-time generated lookup table which maps the char to the index of the first alphabet that fulfils
-     *        char_is_valid_for.
-     */
-    static constexpr auto first_valid_char_table
-    {
-        [] () constexpr
-        {
-            constexpr size_t alternative_size = sizeof...(alternative_types);
-            constexpr size_t table_size = detail::size_in_values_v<char_type>;
-            using first_alphabet_t = detail::min_viable_uint_t<alternative_size>;
-
-            std::array<first_alphabet_t, table_size> lookup_table{};
-
-            for (size_t i = 0u; i < table_size; ++i)
-            {
-                char_type chr = static_cast<char_type>(i);
-
-                std::array<bool, alternative_size> valid_chars{char_is_valid_for<alternative_types>(chr)...};
-
-#if defined(__cpp_lib_constexpr_algorithms) && __cpp_lib_constexpr_algorithms >= 201806L
-                // the following lines only works beginning from c++20
-                auto found_it = std::find(valid_chars.begin(), valid_chars.end(), true);
-                lookup_table[i] = found_it - valid_chars.begin();
-#else
-                size_t found_index = 0u;
-                for (; found_index < valid_chars.size() && !valid_chars[found_index]; ++found_index);
-                lookup_table[i] = found_index;
-#endif // defined(__cpp_lib_constexpr_algorithms) && __cpp_lib_constexpr_algorithms >= 201806L
-            }
-
-            return lookup_table;
-        }()
-    };
-
-    //!\copydoc seqan3::alphabet_variant::char_to_rank
-    static constexpr std::array<rank_type, detail::size_in_values_v<char_type>> char_to_rank_table = []() constexpr
-    {
-        constexpr size_t alternative_size = sizeof...(alternative_types);
-        constexpr size_t table_size = detail::size_in_values_v<char_type>;
-
-        std::array<rank_type, table_size> char_to_rank{};
-
-        for (size_t i = 0u; i < table_size; ++i)
-        {
-            char_type chr = static_cast<char_type>(i);
-
-            std::array<rank_type, alternative_size> ranks{rank_by_type_(assign_char_to(chr, alternative_types{}))...};
-
-            // if no char_is_valid_for any alternative use the rank of the first alternative
-            char_to_rank[i] = first_valid_char_table[i] < alternative_size ? ranks[first_valid_char_table[i]] : 0;
-        }
-
-        return char_to_rank;
-    }();
 
     /*!\brief Compile-time generated lookup table which maps the rank to char.
      *
@@ -641,16 +535,112 @@ protected:
     }
 
     /*!\brief Compile-time generated lookup table which maps the char to rank.
-     *
-     * A map generated at compile time where the key is the char of one of the
-     * alternatives and the value is the corresponding rank over all alternatives (by
-     * conflict will default to the first).
-     */
+        *
+        * A map generated at compile time where the key is the char of one of the
+        * alternatives and the value is the corresponding rank over all alternatives (by
+        * conflict will default to the first).
+        */
     static constexpr rank_type char_to_rank(char_type const chr)
     {
         using index_t = std::make_unsigned_t<char_type>;
         return char_to_rank_table[static_cast<index_t>(chr)];
     }
+
+    // clang-format off
+    /*!\brief Compile-time generated lookup table which contains the partial
+     * sum up to the position of each alternative.
+     *
+     * An array which contains the prefix sum over all
+     * alternative_types::alphabet_size's.
+     *
+     */
+    static constexpr std::array<rank_type, sizeof...(alternative_types) + 1> partial_sum_sizes
+    {
+        []() constexpr {
+            constexpr size_t N = sizeof...(alternative_types) + 1;
+
+            std::array<rank_type, N> partial_sum{0, seqan3::alphabet_size<alternative_types>...};
+
+            for (size_t i = 1u; i < N; ++i)
+                partial_sum[i] += partial_sum[i - 1];
+
+            return partial_sum;
+        }()
+    };
+
+    //!\copydoc seqan3::alphabet_variant::rank_to_char
+    static constexpr std::array<char_type, alphabet_size> rank_to_char_table
+    {
+        []() constexpr {
+            auto assign_value_to_char = [](auto alternative, auto & value_to_char, auto & value) constexpr
+            {
+                using alternative_t = std::decay_t<decltype(alternative)>;
+                for (size_t i = 0u; i < seqan3::alphabet_size<alternative_t>; ++i, ++value)
+                    value_to_char[value] = seqan3::to_char(seqan3::assign_rank_to(i, alternative));
+            };
+
+            size_t value{};
+            std::array<char_type, alphabet_size> value_to_char{};
+
+            // initializer lists guarantee sequencing;
+            // the following expression behaves as:
+            // for(auto alternative: alternative_types)
+            //    assign_rank_to_char(alternative, rank_to_char, value);
+            ((assign_value_to_char(alternative_types{}, value_to_char, value)), ...);
+
+            return value_to_char;
+        }()
+    };
+
+    /*!\brief Compile-time generated lookup table which maps the char to the index of the first alphabet that fulfils
+     *        char_is_valid_for.
+     */
+    static constexpr auto first_valid_char_table
+    {
+        []() constexpr {
+            constexpr size_t alternative_size = sizeof...(alternative_types);
+            constexpr size_t table_size = detail::size_in_values_v<char_type>;
+            using first_alphabet_t = detail::min_viable_uint_t<alternative_size>;
+
+            std::array<first_alphabet_t, table_size> lookup_table{};
+
+            for (size_t i = 0u; i < table_size; ++i)
+            {
+                char_type chr = static_cast<char_type>(i);
+
+                std::array<bool, alternative_size> valid_chars{char_is_valid_for<alternative_types>(chr)...};
+
+                auto found_it = std::find(valid_chars.begin(), valid_chars.end(), true);
+                lookup_table[i] = found_it - valid_chars.begin();
+            }
+
+            return lookup_table;
+        }()
+    };
+
+    //!\copydoc seqan3::alphabet_variant::char_to_rank
+    static constexpr std::array<rank_type, detail::size_in_values_v<char_type>> char_to_rank_table
+    {
+        []() constexpr {
+            constexpr size_t alternative_size = sizeof...(alternative_types);
+            constexpr size_t table_size = detail::size_in_values_v<char_type>;
+
+            std::array<rank_type, table_size> char_to_rank{};
+
+            for (size_t i = 0u; i < table_size; ++i)
+            {
+                char_type chr = static_cast<char_type>(i);
+
+                std::array<rank_type, alternative_size> ranks{rank_by_type_(assign_char_to(chr, alternative_types{}))...};
+
+                // if no char_is_valid_for any alternative, use the rank of the first alternative
+                char_to_rank[i] = first_valid_char_table[i] < alternative_size ? ranks[first_valid_char_table[i]] : 0;
+            }
+
+            return char_to_rank;
+        }()
+    };
 };
+// clang-format on
 
 } // namespace seqan3

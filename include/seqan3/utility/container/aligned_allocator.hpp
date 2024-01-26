@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -82,7 +82,7 @@ public:
     //!\brief The value type of the allocation.
     using value_type = value_t;
     //!\brief The pointer type of the allocation.
-    using pointer = value_type*;
+    using pointer = value_type *;
     //!\brief The difference type of the allocation.
     using difference_type = typename std::pointer_traits<pointer>::difference_type;
     //!\brief The size type of the allocation.
@@ -94,12 +94,12 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    aligned_allocator()                                     = default; //!< Defaulted.
-    aligned_allocator(aligned_allocator const &)            = default; //!< Defaulted.
-    aligned_allocator(aligned_allocator &&)                 = default; //!< Defaulted.
-    aligned_allocator& operator=(aligned_allocator const &) = default; //!< Defaulted.
-    aligned_allocator& operator=(aligned_allocator &&)      = default; //!< Defaulted.
-    ~aligned_allocator()                                    = default; //!< Defaulted.
+    aligned_allocator() = default;                                      //!< Defaulted.
+    aligned_allocator(aligned_allocator const &) = default;             //!< Defaulted.
+    aligned_allocator(aligned_allocator &&) = default;                  //!< Defaulted.
+    aligned_allocator & operator=(aligned_allocator const &) = default; //!< Defaulted.
+    aligned_allocator & operator=(aligned_allocator &&) = default;      //!< Defaulted.
+    ~aligned_allocator() = default;                                     //!< Defaulted.
 
     //!\brief Copy constructor with different value type and alignment.
     template <class other_value_type, size_t other_alignment>
@@ -138,8 +138,7 @@ public:
      *
      * Strong exception guarantee.
      */
-    [[nodiscard]]
-    pointer allocate(size_type const n) const
+    [[nodiscard]] pointer allocate(size_type const n) const
     {
         constexpr size_type max_size = std::numeric_limits<size_type>::max() / sizeof(value_type);
         if (n > max_size)
@@ -192,8 +191,9 @@ public:
             ::operator delete(p, bytes_to_deallocate);
         else // Use alignment aware deallocator function.
             ::operator delete(p, bytes_to_deallocate, static_cast<std::align_val_t>(alignment));
-#else // __cpp_sized_deallocation >= 201309
+#else  /*__cpp_sized_deallocation >= 201309*/
         // e.g. clang++
+        (void)bytes_to_deallocate;
         if constexpr (alignment <= __STDCPP_DEFAULT_NEW_ALIGNMENT__)
             ::operator delete(p);
         else // Use alignment aware deallocator function.

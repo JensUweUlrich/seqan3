@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <seqan3/std/type_traits>
+#include <type_traits>
 
 #include <seqan3/core/platform.hpp>
 
@@ -35,24 +35,24 @@ struct transfer_type_modifier_onto
 {
 private:
     //!\brief Transfers the `const` type modifier to the target type.
-    using maybe_const_target_t = std::conditional_t<std::is_const_v<std::remove_reference_t<source_t>> ||
-                                                    std::is_const_v<std::remove_reference_t<target_t>>,
+    using maybe_const_target_t = std::conditional_t<std::is_const_v<std::remove_reference_t<source_t>>
+                                                        || std::is_const_v<std::remove_reference_t<target_t>>,
                                                     std::add_const_t<std::remove_cvref_t<target_t>>,
                                                     std::remove_cvref_t<target_t>>;
 
     //!\brief Transfers the `&&` type modifier to the target type.
-    using maybe_rvalue_reference_t = std::conditional_t<std::is_rvalue_reference_v<source_t> ||
-                                                        std::is_rvalue_reference_v<target_t>,
-                                                        std::add_rvalue_reference_t<maybe_const_target_t>,
-                                                        maybe_const_target_t>;
+    using maybe_rvalue_reference_t =
+        std::conditional_t<std::is_rvalue_reference_v<source_t> || std::is_rvalue_reference_v<target_t>,
+                           std::add_rvalue_reference_t<maybe_const_target_t>,
+                           maybe_const_target_t>;
 
     //!\brief Transfers the `&` type modifier to the target type.
-    using maybe_lvalue_reference_target_t = std::conditional_t<std::is_lvalue_reference_v<source_t> ||
-                                                               std::is_lvalue_reference_v<target_t>,
-                                                               std::add_lvalue_reference_t<maybe_rvalue_reference_t>,
-                                                               maybe_rvalue_reference_t>;
-public:
+    using maybe_lvalue_reference_target_t =
+        std::conditional_t<std::is_lvalue_reference_v<source_t> || std::is_lvalue_reference_v<target_t>,
+                           std::add_lvalue_reference_t<maybe_rvalue_reference_t>,
+                           maybe_rvalue_reference_t>;
 
+public:
     //!\brief Transfers the type modifier `&`, `&&` and `const` (and any combination) to the target type.
     using type = maybe_lvalue_reference_target_t;
 };

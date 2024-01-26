@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,8 +12,8 @@
 
 #pragma once
 
-#include <seqan3/std/concepts>
-#include <seqan3/std/type_traits>
+#include <concepts>
+#include <type_traits>
 #include <utility>
 
 #include <seqan3/core/platform.hpp>
@@ -55,11 +55,9 @@ namespace seqan3::detail
  *
  * \sa https://en.cppreference.com/w/cpp/language/parameter_pack
  */
-template <typename unary_predicate_t, typename ...pack_t>
-//!\cond
+template <typename unary_predicate_t, typename... pack_t>
     requires (std::predicate<unary_predicate_t, pack_t> && ...)
-//!\endcond
-constexpr bool all_of(unary_predicate_t && fn, pack_t && ...args)
+constexpr bool all_of(unary_predicate_t && fn, pack_t &&... args)
 {
     return (fn(std::forward<pack_t>(args)) && ...);
 }
@@ -95,13 +93,11 @@ constexpr bool all_of(unary_predicate_t && fn, pack_t && ...args)
  *
  * \sa https://en.cppreference.com/w/cpp/language/parameter_pack
  */
-template <typename unary_function_t, typename ...pack_t>
-//!\cond
+template <typename unary_function_t, typename... pack_t>
     requires (std::invocable<unary_function_t, pack_t> && ...)
-//!\endcond
-constexpr void for_each(unary_function_t && fn, pack_t && ...args)
+constexpr void for_each(unary_function_t && fn, pack_t &&... args)
 {
     (fn(std::forward<pack_t>(args)), ...);
 }
 
-}  // namespace seqan3::detail
+} // namespace seqan3::detail

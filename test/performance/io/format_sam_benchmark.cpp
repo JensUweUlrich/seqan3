@@ -1,20 +1,21 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #include <benchmark/benchmark.h>
 
+#include <seqan3/alignment/cigar_conversion/cigar_from_alignment.hpp>
 #include <seqan3/alignment/pairwise/align_pairwise.hpp>
 #include <seqan3/io/sam_file/input.hpp>
 #include <seqan3/io/sam_file/output.hpp>
 #include <seqan3/test/performance/sequence_generator.hpp>
-#include <seqan3/test/tmp_filename.hpp>
+#include <seqan3/test/tmp_directory.hpp>
 
 #if SEQAN3_HAS_SEQAN2
-#include <seqan/bam_io.h>
+#    include <seqan/bam_io.h>
 #endif
 
 // ============================================================================
@@ -38,23 +39,25 @@ static std::string create_sam_file_string(size_t const n_queries)
         auto reference = seqan3::test::generate_sequence<seqan3::dna4>(reference_size, length_variance, seed);
 
         // align
-        constexpr auto nt_score_scheme = seqan3::nucleotide_scoring_scheme{seqan3::match_score{4},
-                                                                           seqan3::mismatch_score{-2}};
-        auto config = seqan3::align_cfg::method_global{
-                          seqan3::align_cfg::free_end_gaps_sequence1_leading{true},
-                          seqan3::align_cfg::free_end_gaps_sequence2_leading{false},
-                          seqan3::align_cfg::free_end_gaps_sequence1_trailing{true},
-                          seqan3::align_cfg::free_end_gaps_sequence2_trailing{false}} |
-                      seqan3::align_cfg::scoring_scheme{nt_score_scheme} |
-                      seqan3::align_cfg::gap_cost_affine{seqan3::align_cfg::open_score{-10},
-                                                         seqan3::align_cfg::extension_score{-1}} |
-                      seqan3::align_cfg::output_begin_position{} |
-                      seqan3::align_cfg::output_alignment{} |
-                      seqan3::align_cfg::output_score{};
+        constexpr auto nt_score_scheme =
+            seqan3::nucleotide_scoring_scheme{seqan3::match_score{4}, seqan3::mismatch_score{-2}};
+        auto config = seqan3::align_cfg::method_global{seqan3::align_cfg::free_end_gaps_sequence1_leading{true},
+                                                       seqan3::align_cfg::free_end_gaps_sequence2_leading{false},
+                                                       seqan3::align_cfg::free_end_gaps_sequence1_trailing{true},
+                                                       seqan3::align_cfg::free_end_gaps_sequence2_trailing{false}}
+                    | seqan3::align_cfg::scoring_scheme{nt_score_scheme}
+                    | seqan3::align_cfg::gap_cost_affine{seqan3::align_cfg::open_score{-10},
+                                                         seqan3::align_cfg::extension_score{-1}}
+                    | seqan3::align_cfg::output_begin_position{} | seqan3::align_cfg::output_alignment{}
+                    | seqan3::align_cfg::output_score{};
 
-        using sam_fields = seqan3::fields<seqan3::field::seq, seqan3::field::id, seqan3::field::offset,
-                                          seqan3::field::ref_id, seqan3::field::ref_offset,
-                                          seqan3::field::alignment, seqan3::field::mapq, seqan3::field::qual,
+        using sam_fields = seqan3::fields<seqan3::field::seq,
+                                          seqan3::field::id,
+                                          seqan3::field::ref_id,
+                                          seqan3::field::ref_offset,
+                                          seqan3::field::cigar,
+                                          seqan3::field::mapq,
+                                          seqan3::field::qual,
                                           seqan3::field::flag>;
         std::ostringstream stream;
         seqan3::sam_file_output sam_out{stream, seqan3::format_sam{}, sam_fields{}};
@@ -66,15 +69,14 @@ static std::string create_sam_file_string(size_t const n_queries)
             auto align_result = *(seqan3::align_pairwise(std::tie(reference, query), config).begin());
             std::string const current_query_id = query_prefix + std::to_string(i);
 
-            sam_out.emplace_back(query,                                   // field::seq
-                                 current_query_id,                        // field::id
-                                 align_result.sequence2_begin_position(), // field::offset
-                                 reference_id,                            // field::ref_id
-                                 align_result.sequence1_begin_position(), // field::ref_offset
-                                 align_result.alignment(),                // field::alignment
-                                 align_result.score(),                    // field::mapq
-                                 qualities,                               // field::qual
-                                 seqan3::sam_flag::none);                 // field::flag
+            sam_out.emplace_back(query,                                                  // field::seq
+                                 current_query_id,                                       // field::id
+                                 reference_id,                                           // field::ref_id
+                                 align_result.sequence1_begin_position(),                // field::ref_offset
+                                 seqan3::cigar_from_alignment(align_result.alignment()), // field::cigar
+                                 align_result.score(),                                   // field::mapq
+                                 qualities,                                              // field::qual
+                                 seqan3::sam_flag::none);                                // field::flag
         }
 
         file_dict[n_queries] = stream.str();
@@ -94,7 +96,7 @@ void write_file(std::string const & file_name, size_t const n_queries)
 // seqan3
 // ============================================================================
 
-void sam_file_read_from_stream(benchmark::State &state)
+void sam_file_read_from_stream(benchmark::State & state)
 {
     size_t const n_queries = state.range(0);
 
@@ -115,11 +117,12 @@ void sam_file_read_from_stream(benchmark::State &state)
     }
 }
 
-void sam_file_read_from_disk(benchmark::State &state)
+void sam_file_read_from_disk(benchmark::State & state)
 {
     size_t const n_queries = state.range(0);
-    seqan3::test::tmp_filename file_name{"tmp.sam"};
-    auto tmp_path = file_name.get_path();
+
+    seqan3::test::tmp_directory tmp{};
+    auto tmp_path = tmp.path() / "tmp.sam";
 
     write_file(tmp_path, n_queries);
 
@@ -139,21 +142,23 @@ void sam_file_read_from_disk(benchmark::State &state)
 // seqan2 read from stream
 // ============================================================================
 
-void seqan2_sam_file_read_from_stream(benchmark::State &state)
+void seqan2_sam_file_read_from_stream(benchmark::State & state)
 {
     size_t const n_queries = state.range(0);
-    seqan3::test::tmp_filename file_name{"tmp.sam"};
+    seqan3::test::tmp_directory tmp{};
+    auto filename = tmp.path() / "tmp.sam";
+
     std::string sam_file = create_sam_file_string(n_queries);
 
     // create temporary BamFileIn and read from disk to get the context...
-    write_file(file_name.get_path(), n_queries);
-    seqan::BamHeader tmp_header;
-    seqan::BamFileIn tmp_bam_file_in(file_name.get_path().c_str());
-    seqan::readHeader(tmp_header, tmp_bam_file_in);
-    auto cxt = seqan::context(tmp_bam_file_in);
+    write_file(filename, n_queries);
+    seqan2::BamHeader tmp_header;
+    seqan2::BamFileIn tmp_bam_file_in(filename.c_str());
+    seqan2::readHeader(tmp_header, tmp_bam_file_in);
+    auto cxt = seqan2::context(tmp_bam_file_in);
 
-    seqan::BamAlignmentRecord record;
-    seqan::BamHeader header;
+    seqan2::BamAlignmentRecord record;
+    seqan2::BamHeader header;
 
     std::istringstream istream{sam_file};
 
@@ -162,42 +167,43 @@ void seqan2_sam_file_read_from_stream(benchmark::State &state)
         istream.clear();
         istream.seekg(0, std::ios::beg);
 
-        auto it = seqan::Iter<std::istringstream, seqan::StreamIterator<seqan::Input> >(istream);
+        auto it = seqan2::Iter<std::istringstream, seqan2::StreamIterator<seqan2::Input>>(istream);
 
-        seqan::readHeader(header, cxt, it, seqan::Sam());
+        seqan2::readHeader(header, cxt, it, seqan2::Sam());
 
         for (size_t i = 0; i < n_queries; ++i)
         {
-            seqan::readRecord(record, cxt, it, seqan::Sam());
-            seqan::clear(record);
+            seqan2::readRecord(record, cxt, it, seqan2::Sam());
+            seqan2::clear(record);
         }
 
         clear(header);
     }
 }
 
-void seqan2_sam_file_read_from_disk(benchmark::State &state)
+void seqan2_sam_file_read_from_disk(benchmark::State & state)
 {
     size_t const n_queries = state.range(0);
-    seqan3::test::tmp_filename file_name{"tmp.sam"};
-    auto tmp_path = file_name.get_path();
+
+    seqan3::test::tmp_directory tmp{};
+    auto tmp_path = tmp.path() / "tmp.sam";
 
     write_file(tmp_path, n_queries);
 
-    seqan::BamHeader header;
-    seqan::BamAlignmentRecord record;
+    seqan2::BamHeader header;
+    seqan2::BamAlignmentRecord record;
 
     for (auto _ : state)
     {
-        seqan::BamFileIn bamFileIn(tmp_path.c_str());
+        seqan2::BamFileIn bamFileIn(tmp_path.c_str());
 
-        seqan::readHeader(header, bamFileIn);
+        seqan2::readHeader(header, bamFileIn);
 
-        while (!seqan::atEnd(bamFileIn))
-            seqan::readRecord(record, bamFileIn);
+        while (!seqan2::atEnd(bamFileIn))
+            seqan2::readRecord(record, bamFileIn);
 
-        seqan::clear(header);
-        seqan::clear(record);
+        seqan2::clear(header);
+        seqan2::clear(record);
     }
 }
 

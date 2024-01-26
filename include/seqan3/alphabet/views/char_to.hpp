@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <seqan3/std/ranges>
+#include <ranges>
 
 #include <seqan3/alphabet/concept.hpp>
 #include <seqan3/utility/type_traits/basic.hpp>
@@ -64,12 +64,14 @@ namespace seqan3::views
  * \stableapi{Since version 3.1.}
  */
 template <alphabet alphabet_type>
-inline auto const char_to = deep{std::views::transform([] (auto && in)
-{
-    static_assert(std::common_reference_with<decltype(in), alphabet_char_t<alphabet_type>>,
-                  "The innermost value type must have a common reference to underlying char type of alphabet_type.");
-    // call element-wise assign_char from the alphabet
-    return assign_char_to(in, alphabet_type{});
-})};
+inline auto const char_to = deep{std::views::transform(
+    [](auto && in)
+    {
+        static_assert(
+            std::common_reference_with<decltype(in), alphabet_char_t<alphabet_type>>,
+            "The innermost value type must have a common reference to underlying char type of alphabet_type.");
+        // call element-wise assign_char from the alphabet
+        return assign_char_to(in, alphabet_type{});
+    })};
 
 } // namespace seqan3::views

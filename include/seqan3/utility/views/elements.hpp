@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <seqan3/std/ranges>
+#include <ranges>
 
 #include <seqan3/utility/tuple/concept.hpp>
 #include <seqan3/utility/type_traits/basic.hpp>
@@ -77,21 +77,22 @@ namespace seqan3::views
  * \experimentalapi{Experimental since version 3.1.}
  */
 template <auto index>
-inline constexpr auto elements = std::views::transform([] (auto && in) -> decltype(auto)
-{
-    using std::get;
-    using seqan3::get;
+inline constexpr auto elements = std::views::transform(
+    [](auto && in) -> decltype(auto)
+    {
+        using std::get;
+        using seqan3::get;
 
-    using element_t = decltype(in);
+        using element_t = decltype(in);
 
-    static_assert(tuple_like<element_t>,
-                  "You may only pass ranges to views::element_t whose reference_t models tuple_like.");
+        static_assert(tuple_like<element_t>,
+                      "You may only pass ranges to views::element_t whose reference_t models tuple_like.");
 
-    // we need to explicitly remove && around temporaries to return values as values (and not as rvalue references)
-    // we cannot simply cast to std::tuple_element_t (or set that as return value), because some tuples, like
-    // our alphabet_tuple_base alphabets do not return that type when get is called on them (they return a proxy)
-    using ret_type = remove_rvalue_reference_t<decltype(get<index>(std::forward<element_t>(in)))>;
-    return static_cast<ret_type>(get<index>(std::forward<element_t>(in)));
-});
+        // we need to explicitly remove && around temporaries to return values as values (and not as rvalue references)
+        // we cannot simply cast to std::tuple_element_t (or set that as return value), because some tuples, like
+        // our alphabet_tuple_base alphabets do not return that type when get is called on them (they return a proxy)
+        using ret_type = remove_rvalue_reference_t<decltype(get<index>(std::forward<element_t>(in)))>;
+        return static_cast<ret_type>(get<index>(std::forward<element_t>(in)));
+    });
 
 } // namespace seqan3::views

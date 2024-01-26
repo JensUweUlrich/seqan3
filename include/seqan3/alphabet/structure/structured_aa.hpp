@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -47,17 +47,18 @@ namespace seqan3
  * \experimentalapi{Experimental since version 3.1.}
  */
 template <writable_alphabet sequence_alphabet_t = aa27, writable_alphabet structure_alphabet_t = dssp9>
-//!\cond
     requires (!std::is_reference_v<sequence_alphabet_t>) && (!std::is_reference_v<structure_alphabet_t>)
-//!\endcond
 class structured_aa :
     public alphabet_tuple_base<structured_aa<sequence_alphabet_t, structure_alphabet_t>,
-                               sequence_alphabet_t, structure_alphabet_t>
+                               sequence_alphabet_t,
+                               structure_alphabet_t>
 {
 private:
     //!\brief The base type.
     using base_type = alphabet_tuple_base<structured_aa<sequence_alphabet_t, structure_alphabet_t>,
-                                          sequence_alphabet_t, structure_alphabet_t>;
+                                          sequence_alphabet_t,
+                                          structure_alphabet_t>;
+
 public:
     /*!\brief First template parameter as member type.
      * \details
@@ -79,16 +80,16 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr structured_aa()                                    noexcept = default; //!< Defaulted.
-    constexpr structured_aa(structured_aa const &)               noexcept = default; //!< Defaulted.
-    constexpr structured_aa(structured_aa &&)                    noexcept = default; //!< Defaulted.
-    constexpr structured_aa & operator =(structured_aa const &)  noexcept = default; //!< Defaulted.
-    constexpr structured_aa & operator =(structured_aa &&)       noexcept = default; //!< Defaulted.
-    ~structured_aa()                                             noexcept = default; //!< Defaulted.
+    constexpr structured_aa() noexcept = default;                                  //!< Defaulted.
+    constexpr structured_aa(structured_aa const &) noexcept = default;             //!< Defaulted.
+    constexpr structured_aa(structured_aa &&) noexcept = default;                  //!< Defaulted.
+    constexpr structured_aa & operator=(structured_aa const &) noexcept = default; //!< Defaulted.
+    constexpr structured_aa & operator=(structured_aa &&) noexcept = default;      //!< Defaulted.
+    ~structured_aa() noexcept = default;                                           //!< Defaulted.
 
     using base_type::base_type; // Inherit non-default constructors
 
-#if SEQAN3_DOXYGEN_ONLY(1)0
+#if SEQAN3_DOXYGEN_ONLY(1) 0
     /*!\copybrief alphabet_tuple_base::alphabet_tuple_base(component_type const alph)
      * \details
      * \sa seqan3::alphabet_tuple_base::alphabet_tuple_base(component_type const alph)
@@ -96,7 +97,8 @@ public:
      * \experimentalapi{Experimental since version 3.1.}
      */
     template <typename component_type>
-    constexpr structured_aa(component_type const alph) {}
+    constexpr structured_aa(component_type const alph)
+    {}
 
     /*!\copybrief alphabet_tuple_base::alphabet_tuple_base(indirect_component_type const alph)
      * \details
@@ -105,7 +107,8 @@ public:
      * \experimentalapi{Experimental since version 3.1.}
      */
     template <typename indirect_component_type>
-    constexpr structured_aa(indirect_component_type const alph) {}
+    constexpr structured_aa(indirect_component_type const alph)
+    {}
 
     /*!\copybrief alphabet_tuple_base::operator=(component_type const alph)
      * \details
@@ -114,7 +117,8 @@ public:
      * \experimentalapi{Experimental since version 3.1.}
      */
     template <typename component_type>
-    constexpr structured_aa & operator=(component_type const alph) {}
+    constexpr structured_aa & operator=(component_type const alph)
+    {}
 
     /*!\copybrief alphabet_tuple_base::operator=(indirect_component_type const alph)
      * \details
@@ -123,7 +127,8 @@ public:
      * \experimentalapi{Experimental since version 3.1.}
      */
     template <typename indirect_component_type>
-    constexpr structured_aa & operator=(indirect_component_type const alph) {}
+    constexpr structured_aa & operator=(indirect_component_type const alph)
+    {}
 #endif
 
     /*!\brief Inherit operators from base

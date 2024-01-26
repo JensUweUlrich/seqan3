@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -18,15 +18,15 @@
 
 #include <seqan3/core/concept/cereal.hpp>
 #include <seqan3/core/platform.hpp>
-#include <seqan3/test/tmp_filename.hpp>
+#include <seqan3/test/tmp_directory.hpp>
 #include <seqan3/utility/type_traits/basic.hpp>
 
 #if SEQAN3_WITH_CEREAL
-#include <cereal/archives/binary.hpp>
-#include <cereal/archives/json.hpp>
-#include <cereal/archives/portable_binary.hpp>
-#include <cereal/archives/xml.hpp>
-#include <cereal/types/vector.hpp>
+#    include <cereal/archives/binary.hpp>
+#    include <cereal/archives/json.hpp>
+#    include <cereal/archives/portable_binary.hpp>
+#    include <cereal/archives/xml.hpp>
+#    include <cereal/types/vector.hpp>
 #endif // SEQAN3_WITH_CEREAL
 
 namespace seqan3
@@ -42,22 +42,21 @@ namespace test
  * \param value The object to cerealise.
  */
 template <cereal_input_archive in_archive_t, cereal_output_archive out_archive_t, typename value_t>
-//!\cond
     requires cerealisable<value_t, in_archive_t, out_archive_t>
-//!\endcond
 void do_cerealisation(value_t && value)
 {
-    tmp_filename filename{"cereal_test"};
+    tmp_directory tmp{};
+    auto filename = tmp.path() / "cereal_test";
 
     {
-        std::ofstream os{filename.get_path(), std::ios::binary};
+        std::ofstream os{filename, std::ios::binary};
         out_archive_t oarchive{os};
         oarchive(value);
     }
 
     {
         std::remove_cvref_t<value_t> value_from_archive{};
-        std::ifstream is{filename.get_path(), std::ios::binary};
+        std::ifstream is{filename, std::ios::binary};
         in_archive_t iarchive{is};
         iarchive(value_from_archive);
         EXPECT_TRUE(value == value_from_archive);
@@ -75,14 +74,14 @@ template <typename value_t>
 void do_serialisation([[maybe_unused]] value_t && value)
 {
 #if SEQAN3_WITH_CEREAL
-    do_cerealisation<cereal::BinaryInputArchive,         cereal::BinaryOutputArchive>        (value);
+    do_cerealisation<cereal::BinaryInputArchive, cereal::BinaryOutputArchive>(value);
     do_cerealisation<cereal::PortableBinaryInputArchive, cereal::PortableBinaryOutputArchive>(value);
-    do_cerealisation<cereal::JSONInputArchive,           cereal::JSONOutputArchive>          (value);
-    do_cerealisation<cereal::XMLInputArchive,            cereal::XMLOutputArchive>           (value);
+    do_cerealisation<cereal::JSONInputArchive, cereal::JSONOutputArchive>(value);
+    do_cerealisation<cereal::XMLInputArchive, cereal::XMLOutputArchive>(value);
 #endif // SEQAN3_WITH_CEREAL
 }
 //!\endcond
 
-} // namespace seqan3::test
+} // namespace test
 
 } //namespace seqan3

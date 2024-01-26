@@ -1,19 +1,19 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #include <gtest/gtest.h>
 
+#include <concepts>
 #include <fstream>
 #include <iostream>
 #include <string>
 
 #include <seqan3/io/stream/concept.hpp>
-#include <seqan3/std/concepts>
-#include <seqan3/test/tmp_filename.hpp>
+#include <seqan3/test/tmp_directory.hpp>
 
 template <typename T>
 class ostream : public ::testing::Test
@@ -30,16 +30,17 @@ TYPED_TEST_P(ostream, concept_check)
 
 TYPED_TEST_P(ostream, output)
 {
-    seqan3::test::tmp_filename filename{"ostream_test"};
+    seqan3::test::tmp_directory tmp{};
+    auto filename = tmp.path() / "ostream_test";
 
     {
-        std::ofstream of{filename.get_path()};
+        std::ofstream of{filename};
         TypeParam ogzf{of};
 
         ogzf << uncompressed << std::flush;
     }
 
-    std::ifstream fi{filename.get_path(), std::ios::binary};
+    std::ifstream fi{filename, std::ios::binary};
     std::string buffer{std::istreambuf_iterator<char>{fi}, std::istreambuf_iterator<char>{}};
 
     if constexpr (TestFixture::zero_out_os_byte)
@@ -50,17 +51,18 @@ TYPED_TEST_P(ostream, output)
 
 TYPED_TEST_P(ostream, output_type_erased)
 {
-    seqan3::test::tmp_filename filename{"ostream_test"};
+    seqan3::test::tmp_directory tmp{};
+    auto filename = tmp.path() / "ostream_test";
 
     {
-        std::ofstream of{filename.get_path()};
+        std::ofstream of{filename};
 
         std::unique_ptr<std::ostream> ogzf{new TypeParam{of}};
 
         *ogzf << uncompressed << std::flush;
     }
 
-    std::ifstream fi{filename.get_path(), std::ios::binary};
+    std::ifstream fi{filename, std::ios::binary};
     std::string buffer{std::istreambuf_iterator<char>{fi}, std::istreambuf_iterator<char>{}};
 
     if constexpr (TestFixture::zero_out_os_byte)

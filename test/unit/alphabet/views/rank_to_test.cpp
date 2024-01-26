@@ -1,13 +1,13 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #include <gtest/gtest.h>
 
-#include <seqan3/std/ranges>
+#include <ranges>
 
 #include <seqan3/alphabet/detail/debug_stream_alphabet.hpp>
 #include <seqan3/alphabet/nucleotide/dna5.hpp>
@@ -19,7 +19,7 @@ TEST(view_rank_to, basic)
 {
     using seqan3::operator""_dna5;
 
-    std::vector<unsigned> vec{0,1,4,4,4,2,0,4,0};
+    std::vector<unsigned> vec{0, 1, 4, 4, 4, 2, 0, 4, 0};
 
     // pipe notation
     EXPECT_RANGE_EQ("ACTTTGATA"_dna5, vec | seqan3::views::rank_to<seqan3::dna5>);
@@ -33,7 +33,7 @@ TEST(view_rank_to, basic)
 
 TEST(view_rank_to, concepts)
 {
-    std::vector<unsigned> vec{0,1,3,3,3,2,0,3,0};
+    std::vector<unsigned> vec{0, 1, 3, 3, 3, 2, 0, 3, 0};
     EXPECT_TRUE(std::ranges::input_range<decltype(vec)>);
     EXPECT_TRUE(std::ranges::forward_range<decltype(vec)>);
     EXPECT_TRUE(std::ranges::bidirectional_range<decltype(vec)>);

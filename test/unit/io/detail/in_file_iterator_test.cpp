@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -8,7 +8,7 @@
 #include <gtest/gtest.h>
 
 #include <iostream>
-#include <seqan3/std/iterator>
+#include <iterator>
 #include <memory>
 
 #include <seqan3/io/detail/in_file_iterator.hpp>
@@ -51,8 +51,7 @@ struct fake_file_t
         return {*this};
     }
 
-    fake_file_t(std::istringstream in) :
-        secondary_stream{new std::istringstream{std::move(in)}}
+    fake_file_t(std::istringstream in) : secondary_stream{new std::istringstream{std::move(in)}}
     {}
 };
 
@@ -107,7 +106,17 @@ TEST(in_file_iterator, comparison)
     EXPECT_FALSE(it == std::default_sentinel);
 
     // consume the entire range
-    ++it; ++it; ++it; ++it; ++it; ++it; ++it; ++it; ++it; ++it; ++it;
+    ++it;
+    ++it;
+    ++it;
+    ++it;
+    ++it;
+    ++it;
+    ++it;
+    ++it;
+    ++it;
+    ++it;
+    ++it;
 
     // at end
     EXPECT_TRUE(it == std::default_sentinel);
@@ -122,7 +131,11 @@ TEST(in_file_iterator, file_position)
     auto beginning = it.file_position();
 
     // Go to the 6th character (w) and store it.
-    ++it; ++it; ++it; ++it; ++it;
+    ++it;
+    ++it;
+    ++it;
+    ++it;
+    ++it;
     EXPECT_EQ(*it, 'w');
     auto w_position = it.file_position();
 

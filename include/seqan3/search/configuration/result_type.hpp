@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <seqan3/std/type_traits>
+#include <type_traits>
 
 #include <seqan3/core/configuration/pipeable_config_element.hpp>
 #include <seqan3/core/detail/template_inspection.hpp>
@@ -40,9 +40,7 @@ namespace seqan3::search_cfg::detail
  *       public use.
  */
 template <typename search_result_t>
-//!\cond
     requires seqan3::detail::is_type_specialisation_of_v<search_result_t, search_result>
-//!\endcond
 class result_type : private pipeable_config_element
 {
 public:
@@ -52,16 +50,16 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr result_type() = default; //!< Defaulted.
-    constexpr result_type(result_type const &) = default; //!< Defaulted.
-    constexpr result_type(result_type &&) = default; //!< Defaulted.
+    constexpr result_type() = default;                                //!< Defaulted.
+    constexpr result_type(result_type const &) = default;             //!< Defaulted.
+    constexpr result_type(result_type &&) = default;                  //!< Defaulted.
     constexpr result_type & operator=(result_type const &) = default; //!< Defaulted.
-    constexpr result_type & operator=(result_type &&) = default; //!< Defaulted.
-    ~result_type() = default; //!< Defaulted.
+    constexpr result_type & operator=(result_type &&) = default;      //!< Defaulted.
+    ~result_type() = default;                                         //!< Defaulted.
 
     //!\}
 
     //!\brief Internal id to check for consistent configuration settings.
     static constexpr seqan3::detail::search_config_id id{seqan3::detail::search_config_id::result_type};
 };
-}  // namespace seqan3::search_cfg::detail
+} // namespace seqan3::search_cfg::detail

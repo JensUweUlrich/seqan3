@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,11 +12,11 @@
 
 #pragma once
 
+#include <concepts>
 #include <cstddef>
 #include <limits>
 
 #include <seqan3/alignment/matrix/detail/matrix_coordinate.hpp>
-#include <seqan3/std/concepts>
 
 namespace seqan3::detail
 {
@@ -31,55 +31,61 @@ constexpr score_type matrix_inf = std::numeric_limits<score_type>::max();
  * \tparam matrix_t The type the concept check is performed on (the putative matrix).
  * \ingroup alignment_matrix
  */
+//!\cond
+template <typename matrix_t>
+concept matrix = requires (std::remove_cvref_t<matrix_t> m) {
+                     typename std::remove_cvref_t<matrix_t>::value_type;
+
+                     typename std::remove_cvref_t<matrix_t>::reference;
+
+                     typename std::remove_cvref_t<matrix_t>::size_type;
+
+                     {
+                         m.cols()
+                         } -> std::same_as<typename std::remove_cvref_t<matrix_t>::size_type>;
+
+                     {
+                         m.rows()
+                         } -> std::same_as<typename std::remove_cvref_t<matrix_t>::size_type>;
+
+                     {
+                         m.at(matrix_coordinate{})
+                         } -> std::same_as<typename std::remove_cvref_t<matrix_t>::reference>;
+                 };
+//!\endcond
+
+// Workaround for https://github.com/doxygen/doxygen/issues/9379
+#if SEQAN3_DOXYGEN_ONLY(1) 0
+template <typename matrix_t>
+class matrix
+{};
+#endif
+
 /*!\name Requirements for seqan3::detail::matrix
  * \brief You can expect these members on all types that implement seqan3::detail::matrix.
  * \relates seqan3::detail::matrix
  * \{
  */
-//!\cond
-template <typename matrix_t>
-concept matrix = requires(std::remove_cvref_t<matrix_t> m)
-{
-//!\endcond
 
-    /*!\typedef typedef IMPLEMENTATION_DEFINED value_type;
-     * \brief The type of an entry in the matrix.
-     */
-    typename std::remove_cvref_t<matrix_t>::value_type;
-    /*!\typedef typedef IMPLEMENTATION_DEFINED reference;
-     * \brief The type of a reference to an entry in the matrix.
-     */
-    typename std::remove_cvref_t<matrix_t>::reference;
-    /*!\typedef typedef IMPLEMENTATION_DEFINED size_type;
-     * \brief The size type of the matrix.
-     */
-    typename std::remove_cvref_t<matrix_t>::size_type;
+/*!\typedef typedef IMPLEMENTATION_DEFINED value_type;
+ * \brief The type of an entry in the matrix.
+ */
+/*!\typedef typedef IMPLEMENTATION_DEFINED reference;
+ * \brief The type of a reference to an entry in the matrix.
+ */
+/*!\typedef typedef IMPLEMENTATION_DEFINED size_type;
+ * \brief The size type of the matrix.
+ */
+/*!\fn size_type cols() const noexcept;
+ * \brief The number of columns in the matrix.
+ */
+/*!\fn size_type rows() const noexcept;
+ * \brief The number of rows in the matrix.
+ */
+/*!\fn reference at(matrix_coordinate coordinate) noexcept;
+ * \brief A reference to the entry of the matrix at the given coordinate.
+ */
 
-    /*!\fn size_type cols() const noexcept;
-     * \brief The number of columns in the matrix.
-     */
-    //!\cond
-    SEQAN3_RETURN_TYPE_CONSTRAINT(m.cols(), std::same_as, typename std::remove_cvref_t<matrix_t>::size_type);
-    //!\endcond
-
-    /*!\fn size_type rows() const noexcept;
-     * \brief The number of rows in the matrix.
-     */
-    //!\cond
-    SEQAN3_RETURN_TYPE_CONSTRAINT(m.rows(), std::same_as, typename std::remove_cvref_t<matrix_t>::size_type);
-    //!\endcond
-
-    /*!\fn reference at(matrix_coordinate coordinate) noexcept;
-     * \brief A reference to the entry of the matrix at the given coordinate.
-     */
-    //!\cond
-    SEQAN3_RETURN_TYPE_CONSTRAINT(m.at(matrix_coordinate{}),
-                                  std::same_as, typename std::remove_cvref_t<matrix_t>::reference);
-    //!\endcond
-
-//!\cond
-};
-//!\endcond
 //!\}
 
 /*!\name Comparison operators
@@ -94,9 +100,7 @@ concept matrix = requires(std::remove_cvref_t<matrix_t> m)
  * \param[in] rhs       with the right hand side matrix.
  */
 template <matrix matrix1_t, matrix matrix2_t>
-//!\cond
     requires std::equality_comparable_with<typename matrix1_t::reference, typename matrix2_t::reference>
-//!\endcond
 inline bool operator==(matrix1_t const & lhs, matrix2_t const & rhs) noexcept
 {
     if (lhs.rows() != rhs.rows())
@@ -120,9 +124,7 @@ inline bool operator==(matrix1_t const & lhs, matrix2_t const & rhs) noexcept
  * \param[in] rhs       with the right hand side matrix.
  */
 template <matrix matrix1_t, matrix matrix2_t>
-//!\cond
     requires std::equality_comparable_with<typename matrix1_t::reference, typename matrix2_t::reference>
-//!\endcond
 inline bool operator!=(matrix1_t const & lhs, matrix2_t const & rhs) noexcept
 {
     return !(lhs == rhs);

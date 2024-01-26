@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -29,9 +29,7 @@ namespace seqan3
  */
 template <typename char_t, alphabet alphabet_t>
 inline debug_stream_type<char_t> & operator<<(debug_stream_type<char_t> & s, alphabet_t && l)
-//!\cond
     requires (!output_stream_over<std::basic_ostream<char_t>, alphabet_t>)
-//!\endcond
 {
     return s << to_char(l);
 }
@@ -47,9 +45,7 @@ class mask;
  */
 template <typename char_t, seqan3::semialphabet alphabet_t>
 inline debug_stream_type<char_t> & operator<<(debug_stream_type<char_t> & s, alphabet_t && l)
-//!\cond
     requires std::same_as<std::remove_cvref_t<alphabet_t>, mask>
-//!\endcond
 {
     return s << (l == alphabet_t{} ? "UNMASKED" : "MASKED");
 }

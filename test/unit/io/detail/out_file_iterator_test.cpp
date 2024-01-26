@@ -1,15 +1,14 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #include <gtest/gtest.h>
 
+#include <iterator>
 #include <vector>
-
-#include <seqan3/std/iterator>
 
 #include <seqan3/io/detail/out_file_iterator.hpp>
 
@@ -25,18 +24,12 @@ TEST(out_file_iterator, concepts)
 TEST(out_file_iterator, member_types)
 {
     using it_t = seqan3::detail::out_file_iterator<std::vector<int>>;
-    EXPECT_TRUE((std::is_same_v<typename it_t::value_type,
-                                void>));
-    EXPECT_TRUE((std::is_same_v<typename it_t::reference,
-                                void>));
-    EXPECT_TRUE((std::is_same_v<typename it_t::const_reference,
-                                void>));
-    EXPECT_TRUE((std::is_same_v<typename it_t::difference_type,
-                                std::ptrdiff_t>));
-    EXPECT_TRUE((std::is_same_v<typename it_t::size_type,
-                                void>));
-    EXPECT_TRUE((std::is_same_v<typename it_t::iterator_category,
-                                std::output_iterator_tag>));
+    EXPECT_TRUE((std::is_same_v<typename it_t::value_type, void>));
+    EXPECT_TRUE((std::is_same_v<typename it_t::reference, void>));
+    EXPECT_TRUE((std::is_same_v<typename it_t::const_reference, void>));
+    EXPECT_TRUE((std::is_same_v<typename it_t::difference_type, std::ptrdiff_t>));
+    EXPECT_TRUE((std::is_same_v<typename it_t::size_type, void>));
+    EXPECT_TRUE((std::is_same_v<typename it_t::iterator_category, std::output_iterator_tag>));
 }
 
 TEST(out_file_iterator, operations)

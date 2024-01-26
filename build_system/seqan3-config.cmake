@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------------------------------
-# Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-# Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+# Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+# Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 # This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 # shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 # -----------------------------------------------------------------------------------------------------
@@ -15,30 +15,25 @@
 #
 # SeqAn has the following platform requirements:
 #
-#   C++17
-#   C++ Concepts (either via Concepts TS or C++20)
-#   C++ Filesystem (part of C++17 but needs extra linking on some platforms)
+#   C++20
 #   pthread
 #
 # SeqAn requires the following libraries:
 #
 #   SDSL      -- the succinct data structure library
-#   Range-V3  -- Ranges Library by Eric Niebler
 #
 # SeqAn has the following optional dependencies:
 #
 #   ZLIB      -- zlib compression library
 #   BZip2     -- libbz2 compression library
 #   Cereal    -- Serialisation library
-#   Lemon     -- Graph library
 #
 # If you don't wish for these to be detected (and used), you may define SEQAN3_NO_ZLIB,
-# SEQAN3_NO_BZIP2, SEQAN3_NO_CEREAL and SEQAN3_NO_LEMON respectively.
+# SEQAN3_NO_BZIP2, and SEQAN3_NO_CEREAL respectively.
 #
 # If you wish to require the presence of ZLIB or BZip2, just check for the module before
-# finding SeqAn3, e.g. "find_package (ZLIB REQUIRED)".
+# finding SeqAn3, e.g. "find_package (ZLIB REQUIRED)" and "find_package (BZip2 REQUIRED)".
 # If you wish to require the presence of CEREAL, you may define SEQAN3_CEREAL.
-# If you wish to require the presence of LEMON, you may define SEQAN3_LEMON.
 #
 # Once the search has been performed, the following variables will be set.
 #
@@ -69,7 +64,7 @@
 #
 # ============================================================================
 
-cmake_minimum_required (VERSION 3.4...3.12)
+cmake_minimum_required (VERSION 3.5...3.12)
 
 # ----------------------------------------------------------------------------
 # Set initial variables
@@ -188,29 +183,22 @@ elseif (SEQAN3_NO_CEREAL)
     set (SEQAN3_DEFINITIONS ${SEQAN3_DEFINITIONS} "-DSEQAN3_WITH_CEREAL=0")
 endif ()
 
-# Lemon is auto-detected by default, i.e. used if found, not used if not found.
-# You can optionally set a hard requirement so a build fails without Lemon,
-# or you can force-disable Lemon even if present on the system.
-option (SEQAN3_LEMON "Require Lemon and fail if not present." OFF)
-option (SEQAN3_NO_LEMON "Don't use Lemon, even if present." OFF)
-
-if (SEQAN3_LEMON AND SEQAN3_NO_LEMON)
-    # this is always a user error, therefore we always error-out, even if SeqAn is not required
-    message (FATAL_ERROR "You may not specify SEQAN3_LEMON and SEQAN3_NO_LEMON at the same time.\n\
-                          You can specify neither (use auto-detection), or specify either to force on/off.")
-    return ()
-endif ()
-
-if (SEQAN3_LEMON)
-    set (SEQAN3_DEFINITIONS ${SEQAN3_DEFINITIONS} "-DSEQAN3_WITH_LEMON=1")
-elseif (SEQAN3_NO_LEMON)
-    set (SEQAN3_DEFINITIONS ${SEQAN3_DEFINITIONS} "-DSEQAN3_WITH_LEMON=0")
-endif ()
-
 # These two are "opt-in", because detected by CMake
 # If you want to force-require these, just do find_package (zlib REQUIRED) before find_package (seqan3)
 option (SEQAN3_NO_ZLIB "Don't use ZLIB, even if present." OFF)
 option (SEQAN3_NO_BZIP2 "Don't use BZip2, even if present." OFF)
+
+# ----------------------------------------------------------------------------
+# Check supported compilers
+# ----------------------------------------------------------------------------
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10)
+    message (FATAL_ERROR "GCC < 10 is not supported. The detected compiler version is ${CMAKE_CXX_COMPILER_VERSION}.")
+endif ()
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 17)
+    message (FATAL_ERROR "Clang < 17 is not supported. The detected compiler version is ${CMAKE_CXX_COMPILER_VERSION}.")
+endif ()
 
 # ----------------------------------------------------------------------------
 # Require C++20
@@ -219,18 +207,17 @@ option (SEQAN3_NO_BZIP2 "Don't use BZip2, even if present." OFF)
 set (CMAKE_REQUIRED_FLAGS_SAVE ${CMAKE_REQUIRED_FLAGS})
 
 set (CXXSTD_TEST_SOURCE
-     "#if !defined (__cplusplus) || (__cplusplus < 201709)
+     "#if !defined (__cplusplus) || (__cplusplus < 202002L)
       #error NOCXX20
       #endif
       int main() {}")
 
 set (SEQAN3_FEATURE_CPP20_FLAG_BUILTIN "")
 set (SEQAN3_FEATURE_CPP20_FLAG_STD20 "-std=c++20")
-set (SEQAN3_FEATURE_CPP20_FLAG_STD2a "-std=c++2a")
 
 set (SEQAN3_CPP20_FLAG "")
 
-foreach (_FLAG BUILTIN STD20 STD2a)
+foreach (_FLAG BUILTIN STD20)
     set (CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_SAVE} ${SEQAN3_FEATURE_CPP20_FLAG_${_FLAG}}")
 
     check_cxx_source_compiles ("${CXXSTD_TEST_SOURCE}" CPP20_FLAG_${_FLAG})
@@ -253,44 +240,6 @@ else ()
 endif ()
 
 # ----------------------------------------------------------------------------
-# Require C++ Concepts
-# ----------------------------------------------------------------------------
-
-set (CMAKE_REQUIRED_FLAGS_SAVE ${CMAKE_REQUIRED_FLAGS})
-
-set (CXXSTD_TEST_SOURCE "static_assert (__cpp_concepts >= 201507);\
-                         int main() {}")
-
-set (SEQAN3_FEATURE_CONCEPT_FLAG_BUILTIN "")
-set (SEQAN3_FEATURE_CONCEPT_FLAG_STD20 "-std=c++20")
-set (SEQAN3_FEATURE_CONCEPT_FLAG_STD2a "-std=c++2a")
-set (SEQAN3_FEATURE_CONCEPT_FLAG_GCC_TS "-fconcepts")
-
-set (SEQAN3_CONCEPTS_FLAG "")
-
-foreach (_FLAG BUILTIN STD20 STD2a GCC_TS)
-    set (CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_SAVE} ${SEQAN3_FEATURE_CONCEPT_FLAG_${_FLAG}}")
-
-    check_cxx_source_compiles ("${CXXSTD_TEST_SOURCE}" CONCEPTS_FLAG_${_FLAG})
-
-    if (CONCEPTS_FLAG_${_FLAG})
-        set (SEQAN3_CONCEPTS_FLAG ${_FLAG})
-        break ()
-    endif ()
-endforeach ()
-
-set (CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS_SAVE})
-
-if (SEQAN3_CONCEPTS_FLAG STREQUAL "BUILTIN")
-    seqan3_config_print ("C++ Concepts support:       builtin")
-elseif (SEQAN3_CONCEPTS_FLAG)
-    set (SEQAN3_CXX_FLAGS "${SEQAN3_CXX_FLAGS} ${SEQAN3_FEATURE_CONCEPT_FLAG_${SEQAN3_CONCEPTS_FLAG}}")
-    seqan3_config_print ("C++ Concepts support:       via ${SEQAN3_FEATURE_CONCEPT_FLAG_${SEQAN3_CONCEPTS_FLAG}}")
-else ()
-    seqan3_config_error ("SeqAn3 requires C++ Concepts, but your compiler does not support them.")
-endif ()
-
-# ----------------------------------------------------------------------------
 # thread support (pthread, windows threads)
 # ----------------------------------------------------------------------------
 
@@ -309,17 +258,8 @@ else ()
 endif ()
 
 # ----------------------------------------------------------------------------
-# Require Ranges and SDSL
+# Require SDSL
 # ----------------------------------------------------------------------------
-
-check_include_file_cxx (range/v3/version.hpp _SEQAN3_HAVE_RANGEV3)
-
-if (_SEQAN3_HAVE_RANGEV3)
-    seqan3_config_print ("Required dependency:        Range-V3 found.")
-else ()
-    seqan3_config_error (
-        "The range-v3 library is required, but wasn't found. Get it from https://github.com/ericniebler/range-v3/")
-endif ()
 
 check_include_file_cxx (sdsl/version.hpp _SEQAN3_HAVE_SDSL)
 
@@ -348,28 +288,6 @@ if (NOT SEQAN3_NO_CEREAL)
             seqan3_config_error ("The (optional) cereal library was marked as required, but wasn't found.")
         else ()
             seqan3_config_print ("Optional dependency:        Cereal not found.")
-        endif ()
-    endif ()
-endif ()
-
-# ----------------------------------------------------------------------------
-# Lemon dependency is optional, but may set as required
-# ----------------------------------------------------------------------------
-
-if (NOT SEQAN3_NO_LEMON)
-    check_include_file_cxx (lemon/config.h _SEQAN3_HAVE_LEMON)
-
-    if (_SEQAN3_HAVE_LEMON)
-        if (SEQAN3_LEMON)
-            seqan3_config_print ("Required dependency:        Lemon found.")
-        else ()
-            seqan3_config_print ("Optional dependency:        Lemon found.")
-        endif ()
-    else ()
-        if (SEQAN3_LEMON)
-            seqan3_config_error ("The (optional) Lemon library was marked as required, but wasn't found.")
-        else ()
-            seqan3_config_print ("Optional dependency:        Lemon not found.")
         endif ()
     endif ()
 endif ()

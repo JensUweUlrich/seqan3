@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -24,7 +24,7 @@ namespace seqan3
 #define SEQAN_NOT_POD "If you are not going to insert a POD type, use std::tuple instead."
 //!\endcond
 
-template <typename ...types>
+template <typename... types>
 struct pod_tuple
 {};
 
@@ -39,16 +39,14 @@ struct pod_tuple
  * actually enforces this on all types in the tuple (if you want to add non POD types, just use
  * std::tuple instead).
  *
- * It (only) supports [aggregate initialization](https://en.cppreference.com/w/cpp/language/aggregate_initialization),
- * i.e. you must use brace-initializiers and cannot
- * use paranthesis. You can use seqan3::get or std::get and also
+ * You can use seqan3::get or std::get and also
  * [structured bindings](https://en.cppreference.com/w/cpp/language/declarations#Structured_binding_declaration)
  * to access the elements in the tuple.
  *
  * \include test/snippet/utility/tuple/pod_tuple.cpp
  *
  */
-template <typename type0, typename ...types>
+template <typename type0, typename... types>
 struct pod_tuple<type0, types...>
 {
     static_assert(std::is_standard_layout_v<type0> && std::is_trivial_v<type0>, SEQAN_NOT_POD);
@@ -57,6 +55,17 @@ struct pod_tuple<type0, types...>
     type0 _head;
     //!\brief The rest of the elements defined as a "recursive member".
     pod_tuple<types...> _tail;
+
+    constexpr pod_tuple() noexcept = default;                              //!< Defaulted.
+    constexpr pod_tuple(pod_tuple const &) noexcept = default;             //!< Defaulted.
+    constexpr pod_tuple & operator=(pod_tuple const &) noexcept = default; //!< Defaulted.
+    constexpr pod_tuple(pod_tuple &&) noexcept = default;                  //!< Defaulted.
+    constexpr pod_tuple & operator=(pod_tuple &&) noexcept = default;      //!< Defaulted.
+    constexpr ~pod_tuple() noexcept = default;                             //!< Defaulted.
+
+    //!\brief Construct from arguments.
+    constexpr pod_tuple(type0 v0, types... args) noexcept : _head{v0}, _tail{args...}
+    {}
     //!\endcond
 
     /*!\name Comparison operators
@@ -161,8 +170,8 @@ struct pod_tuple<type0>
 
 //!\brief User defined deduction guide enables easy use.
 //!\relates pod_tuple
-template <typename ...types>
-pod_tuple(types && ...) -> pod_tuple<types...>;
+template <typename... types>
+pod_tuple(types &&...) -> pod_tuple<types...>;
 
 /*!\name Access an element of a pod_tuple by index
  * \{
@@ -172,59 +181,51 @@ pod_tuple(types && ...) -> pod_tuple<types...>;
  */
 //!\brief The same as [std::get](https://en.cppreference.com/w/cpp/utility/tuple/get) on a std::tuple.
 //!\relates seqan3::pod_tuple
-template <std::size_t i, typename ...types>
+template <std::size_t i, typename... types>
 constexpr auto & get(seqan3::pod_tuple<types...> & t) noexcept
-//!\cond
     requires (i < sizeof...(types))
-//!\endcond
 {
     if constexpr (i == 0)
         return t._head;
     else
-        return seqan3::get<i-1>(t._tail);
+        return seqan3::get<i - 1>(t._tail);
 }
 
 //!\brief The same as [std::get](https://en.cppreference.com/w/cpp/utility/tuple/get) on a std::tuple.
 //!\relates seqan3::pod_tuple
-template <std::size_t i, typename ...types>
+template <std::size_t i, typename... types>
 constexpr auto const & get(seqan3::pod_tuple<types...> const & t) noexcept
-//!\cond
     requires (i < sizeof...(types))
-//!\endcond
 {
     if constexpr (i == 0)
         return t._head;
     else
-        return seqan3::get<i-1>(t._tail);
+        return seqan3::get<i - 1>(t._tail);
 }
 
 // extra overloads for temporaries required, because members of temporaries may only be returned as temporaries
 //!\brief The same as [std::get](https://en.cppreference.com/w/cpp/utility/tuple/get) on a std::tuple.
 //!\relates seqan3::pod_tuple
-template <std::size_t i, typename ...types>
+template <std::size_t i, typename... types>
 constexpr auto && get(seqan3::pod_tuple<types...> && t) noexcept
-//!\cond
     requires (i < sizeof...(types))
-//!\endcond
 {
     if constexpr (i == 0)
         return std::move(t._head);
     else
-        return seqan3::get<i-1>(std::move(t._tail));
+        return seqan3::get<i - 1>(std::move(t._tail));
 }
 
 //!\brief The same as [std::get](https://en.cppreference.com/w/cpp/utility/tuple/get) on a std::tuple.
 //!\relates seqan3::pod_tuple
-template <std::size_t i, typename ...types>
+template <std::size_t i, typename... types>
 constexpr auto const && get(seqan3::pod_tuple<types...> const && t) noexcept
-//!\cond
     requires (i < sizeof...(types))
-//!\endcond
 {
     if constexpr (i == 0)
         return std::move(t._head);
     else
-        return seqan3::get<i-1>(std::move(t._tail));
+        return seqan3::get<i - 1>(std::move(t._tail));
 }
 //!\}
 
@@ -238,44 +239,36 @@ constexpr auto const && get(seqan3::pod_tuple<types...> const && t) noexcept
  */
 //!\brief The same as [std::get](https://en.cppreference.com/w/cpp/utility/tuple/get) on a std::tuple.
 //!\relates seqan3::pod_tuple
-template <typename type, typename ...arg_types>
+template <typename type, typename... arg_types>
 constexpr auto & get(seqan3::pod_tuple<arg_types...> & t) noexcept
-//!\cond
     requires (seqan3::pack_traits::count<type, arg_types...> == 1)
-//!\endcond
 {
     return seqan3::get<seqan3::pack_traits::find<type, arg_types...>>(t);
 }
 
 //!\brief The same as [std::get](https://en.cppreference.com/w/cpp/utility/tuple/get) on a std::tuple.
 //!\relates seqan3::pod_tuple
-template <typename type, typename ...arg_types>
+template <typename type, typename... arg_types>
 constexpr auto const & get(seqan3::pod_tuple<arg_types...> const & t) noexcept
-//!\cond
     requires (seqan3::pack_traits::count<type, arg_types...> == 1)
-//!\endcond
 {
     return seqan3::get<seqan3::pack_traits::find<type, arg_types...>>(t);
 }
 
 //!\brief The same as [std::get](https://en.cppreference.com/w/cpp/utility/tuple/get) on a std::tuple.
 //!\relates seqan3::pod_tuple
-template <typename type, typename ...arg_types>
+template <typename type, typename... arg_types>
 constexpr auto && get(seqan3::pod_tuple<arg_types...> && t) noexcept
-//!\cond
     requires (seqan3::pack_traits::count<type, arg_types...> == 1)
-//!\endcond
 {
     return seqan3::get<seqan3::pack_traits::find<type, arg_types...>>(std::move(t));
 }
 
 //!\brief The same as [std::get](https://en.cppreference.com/w/cpp/utility/tuple/get) on a std::tuple.
 //!\relates seqan3::pod_tuple
-template <typename type, typename ...arg_types>
+template <typename type, typename... arg_types>
 constexpr auto const && get(seqan3::pod_tuple<arg_types...> const && t) noexcept
-//!\cond
     requires (seqan3::pack_traits::count<type, arg_types...> == 1)
-//!\endcond
 {
     return seqan3::get<seqan3::pack_traits::find<type, arg_types...>>(std::move(t));
 }
@@ -287,56 +280,56 @@ namespace std
 {
 
 //!\cond
-template <std::size_t i, typename ...types>
+template <std::size_t i, typename... types>
 constexpr auto & get(seqan3::pod_tuple<types...> & t) noexcept
     requires (i < sizeof...(types))
 {
     return seqan3::get<i>(t);
 }
 
-template <std::size_t i, typename ...types>
+template <std::size_t i, typename... types>
 constexpr auto const & get(seqan3::pod_tuple<types...> const & t) noexcept
     requires (i < sizeof...(types))
 {
     return seqan3::get<i>(t);
 }
 
-template <std::size_t i, typename ...types>
+template <std::size_t i, typename... types>
 constexpr auto && get(seqan3::pod_tuple<types...> && t) noexcept
     requires (i < sizeof...(types))
 {
     return seqan3::get<i>(std::move(t));
 }
 
-template <std::size_t i, typename ...types>
+template <std::size_t i, typename... types>
 constexpr auto const && get(seqan3::pod_tuple<types...> const && t) noexcept
     requires (i < sizeof...(types))
 {
     return seqan3::get<i>(std::move(t));
 }
 
-template <typename type, typename ...types>
+template <typename type, typename... types>
 constexpr auto & get(seqan3::pod_tuple<types...> & t) noexcept
     requires (seqan3::pack_traits::count<type, types...> == 1)
 {
     return seqan3::get<type>(t);
 }
 
-template <typename type, typename ...types>
+template <typename type, typename... types>
 constexpr auto const & get(seqan3::pod_tuple<types...> const & t) noexcept
     requires (seqan3::pack_traits::count<type, types...> == 1)
 {
     return seqan3::get<type>(t);
 }
 
-template <typename type, typename ...types>
+template <typename type, typename... types>
 constexpr auto && get(seqan3::pod_tuple<types...> && t) noexcept
     requires (seqan3::pack_traits::count<type, types...> == 1)
 {
     return seqan3::get<type>(std::move(t));
 }
 
-template <typename type, typename ...types>
+template <typename type, typename... types>
 constexpr auto const && get(seqan3::pod_tuple<types...> const && t) noexcept
     requires (seqan3::pack_traits::count<type, types...> == 1)
 {
@@ -349,11 +342,8 @@ constexpr auto const && get(seqan3::pod_tuple<types...> const && t) noexcept
  * \relates seqan3::pod_tuple
  * \see [std::tuple_element](https://en.cppreference.com/w/cpp/utility/tuple/tuple_element)
  */
-template <std::size_t i, template <typename ...> typename t, typename ...types>
-//!\cond
-    requires (i < sizeof...(types)) &&
-            std::is_base_of_v<seqan3::pod_tuple<types...>, t<types...>>
-//!\endcond
+template <std::size_t i, template <typename...> typename t, typename... types>
+    requires (i < sizeof...(types)) && std::is_base_of_v<seqan3::pod_tuple<types...>, t<types...>>
 struct tuple_element<i, t<types...>>
 {
     //!\brief Element type.
@@ -365,10 +355,9 @@ struct tuple_element<i, t<types...>>
  * \see std::tuple_size_v
  * \relates seqan3::pod_tuple
  */
-template <template <typename ...> typename t, typename ...types>
+template <template <typename...> typename t, typename... types>
     requires std::is_base_of_v<seqan3::pod_tuple<types...>, t<types...>>
-struct tuple_size<t<types...>> :
-    public std::integral_constant<std::size_t, sizeof...(types)>
+struct tuple_size<t<types...>> : public std::integral_constant<std::size_t, sizeof...(types)>
 {};
 
 } // namespace std

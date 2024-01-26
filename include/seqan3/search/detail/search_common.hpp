@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -35,8 +35,8 @@ struct search_param
     //!\brief Returns `true` if all member variables of `lhs` and `rhs` are equal, `false` otherwise.
     constexpr friend bool operator==(search_param const & lhs, search_param const & rhs) noexcept
     {
-        return std::tie(lhs.total, lhs.substitution, lhs.insertion, lhs.deletion) ==
-               std::tie(rhs.total, rhs.substitution, rhs.insertion, rhs.deletion);
+        return std::tie(lhs.total, lhs.substitution, lhs.insertion, lhs.deletion)
+            == std::tie(rhs.total, rhs.substitution, rhs.insertion, rhs.deletion);
     }
 
     //!\brief Returns `true` if any member variable of `lhs` and `rhs` are not equal, `false` otherwise.

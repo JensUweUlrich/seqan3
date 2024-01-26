@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -31,13 +31,13 @@ class minimiser
 {
 private:
     //!\brief The alphabet type.
-    using alphabet_t = seqan::Dna;
+    using alphabet_t = seqan2::Dna;
     //!\brief The text type.
-    using text_t = seqan::String<alphabet_t>;
+    using text_t = seqan2::String<alphabet_t>;
     //!\brief The type of the complemented text.
-    using complement_t = seqan::ModifiedString<text_t const, seqan::ModComplementDna>;
+    using complement_t = seqan2::ModifiedString<text_t const, seqan2::ModComplementDna>;
     //!\brief The type of the reverse complemented text.
-    using reverse_complement_t = seqan::ModifiedString<complement_t, seqan::ModReverse>;
+    using reverse_complement_t = seqan2::ModifiedString<complement_t, seqan2::ModReverse>;
 
     //!\brief The window size of the minimiser.
     uint64_t w{};
@@ -84,7 +84,7 @@ public:
 
     void compute(text_t const & text)
     {
-        uint64_t text_length = seqan::length(text);
+        uint64_t text_length = seqan2::length(text);
 
         forward_hashes.clear();
         reverse_hashes.clear();
@@ -111,15 +111,15 @@ public:
 
         forward_hashes.reserve(possible_kmers);
         reverse_hashes.reserve(possible_kmers);
-        auto it1 = seqan::begin(text);
-        auto it2 = seqan::begin(rc_text);
-        seqan::hashInit(forward_shape, it1);
-        seqan::hashInit(reverse_shape, it2);
+        auto it1 = seqan2::begin(text);
+        auto it2 = seqan2::begin(rc_text);
+        seqan2::hashInit(forward_shape, it1);
+        seqan2::hashInit(reverse_shape, it2);
 
         for (uint64_t i = 0; i < possible_kmers; ++i, ++it1, ++it2)
         {
-            forward_hashes.push_back(hash_impl(seqan::hashNext(forward_shape, it1)));
-            reverse_hashes.push_back(hash_impl(seqan::hashNext(reverse_shape, it2)));
+            forward_hashes.push_back(hash_impl(seqan2::hashNext(forward_shape, it1)));
+            reverse_hashes.push_back(hash_impl(seqan2::hashNext(reverse_shape, it2)));
         }
 
         // Choose the minimisers.

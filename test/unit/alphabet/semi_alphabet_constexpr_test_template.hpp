@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -76,7 +76,7 @@ TYPED_TEST_P(semi_alphabet_constexpr, copy_assignment)
     constexpr size_t rank = 1 % seqan3::alphabet_size<TypeParam>;
     constexpr TypeParam t0{seqan3::assign_rank_to(rank, TypeParam{})};
     // constexpr context:
-    constexpr TypeParam t3 = [&] () constexpr
+    constexpr TypeParam t3 = [&]() constexpr
     {
         TypeParam t1{seqan3::assign_rank_to(rank, TypeParam{})};
         TypeParam t2{};
@@ -92,7 +92,7 @@ TYPED_TEST_P(semi_alphabet_constexpr, move_assignment)
     constexpr size_t rank = 1 % seqan3::alphabet_size<TypeParam>;
     constexpr TypeParam t0{seqan3::assign_rank_to(rank, TypeParam{})};
     // constexpr context:
-    constexpr TypeParam t3 = [&] () constexpr
+    constexpr TypeParam t3 = [&]() constexpr
     {
         TypeParam t1{seqan3::assign_rank_to(rank, TypeParam{})};
         TypeParam t2{};
@@ -125,13 +125,13 @@ TYPED_TEST_P(semi_alphabet_constexpr, comparison_operators)
     {
         constexpr TypeParam t0{seqan3::assign_rank_to(0, TypeParam{})};
         constexpr TypeParam t1{seqan3::assign_rank_to(1, TypeParam{})};
-        constexpr bool b1 = (t0 <  t1);
+        constexpr bool b1 = (t0 < t1);
         constexpr bool b2 = (t0 <= t1);
         constexpr bool b3 = (t1 <= t1);
         constexpr bool b4 = (t1 == t1);
         constexpr bool b5 = (t1 >= t1);
         constexpr bool b6 = (t1 >= t0);
-        constexpr bool b7 = (t1 >  t0);
+        constexpr bool b7 = (t1 > t0);
         constexpr bool b8 = (t0 != t1);
 
         EXPECT_TRUE(b1);

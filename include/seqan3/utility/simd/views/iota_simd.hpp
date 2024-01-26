@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,9 +12,9 @@
 
 #pragma once
 
-#include <seqan3/std/ranges>
+#include <ranges>
 
-#include <seqan3/utility/concept/exposition_only/core_language.hpp>
+#include <seqan3/utility/concept.hpp>
 #include <seqan3/utility/simd/algorithm.hpp>
 #include <seqan3/utility/simd/concept.hpp>
 #include <seqan3/utility/simd/simd_traits.hpp>
@@ -59,12 +59,12 @@ public:
     /*!\name Constructor, assignment and destructor
      * \{
      */
-    counted_simd_iterator() = default; //!< Defaulted.
-    counted_simd_iterator(counted_simd_iterator const &) = default; //!< Defaulted.
-    counted_simd_iterator(counted_simd_iterator &&) = default; //!< Defaulted.
+    counted_simd_iterator() = default;                                          //!< Defaulted.
+    counted_simd_iterator(counted_simd_iterator const &) = default;             //!< Defaulted.
+    counted_simd_iterator(counted_simd_iterator &&) = default;                  //!< Defaulted.
     counted_simd_iterator & operator=(counted_simd_iterator const &) = default; //!< Defaulted.
-    counted_simd_iterator & operator=(counted_simd_iterator &&) = default; //!< Defaulted.
-    ~counted_simd_iterator() = default; //!< Defaulted.
+    counted_simd_iterator & operator=(counted_simd_iterator &&) = default;      //!< Defaulted.
+    ~counted_simd_iterator() = default;                                         //!< Defaulted.
 
     /*!\brief Constructs and initialises the iterator with the given index.
      *
@@ -155,12 +155,12 @@ public:
     /*!\name Constructor, assignment and destructor
      * \{
      */
-    iota_simd_view() = default; //!< Defaulted.
-    iota_simd_view(iota_simd_view const &) noexcept = default; //!< Defaulted.
-    iota_simd_view(iota_simd_view &&) = default; //!< Defaulted.
+    iota_simd_view() = default;                                   //!< Defaulted.
+    iota_simd_view(iota_simd_view const &) noexcept = default;    //!< Defaulted.
+    iota_simd_view(iota_simd_view &&) = default;                  //!< Defaulted.
     iota_simd_view & operator=(iota_simd_view const &) = default; //!< Defaulted.
-    iota_simd_view & operator=(iota_simd_view &&) = default; //!< Defaulted.
-    ~iota_simd_view() = default; //!< Defaulted.
+    iota_simd_view & operator=(iota_simd_view &&) = default;      //!< Defaulted.
+    ~iota_simd_view() = default;                                  //!< Defaulted.
 
     /*!\brief Constructs the iota view from the given index pair.
      *
@@ -274,14 +274,6 @@ template <simd_concept index_simd_t>
 inline constexpr detail::iota_simd_view_fn<index_simd_t> iota_simd{};
 
 } // namespace seqan3::views
-
-namespace ranges
-{
-//!\cond
-template <seqan3::simd_concept index_simd_t>
-inline constexpr bool enable_borrowed_range<seqan3::detail::iota_simd_view<index_simd_t>> = true;
-//!\endcond
-} // namespace ranges
 
 #ifdef __cpp_lib_ranges
 namespace std::ranges

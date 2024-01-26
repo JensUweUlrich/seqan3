@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -14,8 +14,8 @@
 
 #include <vector>
 
-#include <seqan3/alphabet/concept.hpp>
 #include <seqan3/alphabet/alphabet_base.hpp>
+#include <seqan3/alphabet/concept.hpp>
 #include <seqan3/utility/char_operations/transform.hpp>
 
 // ------------------------------------------------------------------
@@ -26,7 +26,6 @@ namespace seqan3
 {
 
 /*!\brief The protein structure alphabet of the characters "HGIEBTSCX".
- * \implements seqan3::writable_alphabet
  * \implements seqan3::writable_alphabet
  * \if DEV \implements seqan3::detail::writable_constexpr_alphabet \endif
  * \implements seqan3::trivially_copyable
@@ -72,42 +71,18 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr dssp9()                           noexcept = default; //!< Defaulted.
-    constexpr dssp9(dssp9 const &)              noexcept = default; //!< Defaulted.
-    constexpr dssp9(dssp9 &&)                   noexcept = default; //!< Defaulted.
-    constexpr dssp9 & operator=(dssp9 const &)  noexcept = default; //!< Defaulted.
-    constexpr dssp9 & operator=(dssp9 &&)       noexcept = default; //!< Defaulted.
-    ~dssp9()                                    noexcept = default; //!< Defaulted.
+    constexpr dssp9() noexcept = default;                          //!< Defaulted.
+    constexpr dssp9(dssp9 const &) noexcept = default;             //!< Defaulted.
+    constexpr dssp9(dssp9 &&) noexcept = default;                  //!< Defaulted.
+    constexpr dssp9 & operator=(dssp9 const &) noexcept = default; //!< Defaulted.
+    constexpr dssp9 & operator=(dssp9 &&) noexcept = default;      //!< Defaulted.
+    ~dssp9() noexcept = default;                                   //!< Defaulted.
 
     //!\}
 
 private:
     //!\copydoc seqan3::dna4::rank_to_char_table
-    static constexpr char_type rank_to_char_table[alphabet_size]
-    {
-        'H', 'B', 'E', 'G', 'I', 'T', 'S', 'C', 'X'
-    };
-
-    //!\copydoc seqan3::dna4::char_to_rank_table
-    static constexpr std::array<rank_type, 256> char_to_rank_table
-    {
-        [] () constexpr
-        {
-            std::array<rank_type, 256> ret{};
-
-            // initialize with X (std::array::fill unfortunately not constexpr)
-            for (rank_type & rnk : ret)
-                rnk = 8u;
-
-            // reverse mapping for characters
-            for (rank_type rnk = 0u; rnk < alphabet_size; ++rnk)
-            {
-                ret[static_cast<rank_type>(rank_to_char_table[rnk])] = rnk;
-            }
-
-            return ret;
-        } ()
-    };
+    static constexpr char_type rank_to_char_table[alphabet_size]{'H', 'B', 'E', 'G', 'I', 'T', 'S', 'C', 'X'};
 
     //!\copydoc seqan3::dna4::rank_to_char
     static constexpr char_type rank_to_char(rank_type const rank)
@@ -121,7 +96,25 @@ private:
         using index_t = std::make_unsigned_t<char_type>;
         return char_to_rank_table[static_cast<index_t>(chr)];
     }
+
+    // clang-format off
+    //!\copydoc seqan3::dna4::char_to_rank_table
+    static constexpr std::array<rank_type, 256> char_to_rank_table
+    {
+        []() constexpr {
+            std::array<rank_type, 256> ret{};
+
+            ret.fill(8u);
+
+            // reverse mapping for characters
+            for (rank_type rnk = 0u; rnk < alphabet_size; ++rnk)
+                ret[static_cast<rank_type>(rank_to_char_table[rnk])] = rnk;
+
+            return ret;
+        }()
+    };
 };
+// clang-format on
 
 inline namespace literals
 {
@@ -155,7 +148,7 @@ constexpr dssp9 operator""_dssp9(char const ch) noexcept
  *
  * \experimentalapi{Experimental since version 3.1.}
  */
-inline std::vector<dssp9> operator""_dssp9(const char * str, std::size_t len)
+SEQAN3_WORKAROUND_LITERAL std::vector<dssp9> operator""_dssp9(char const * str, std::size_t len)
 {
     std::vector<dssp9> vec;
     vec.resize(len);
@@ -167,6 +160,6 @@ inline std::vector<dssp9> operator""_dssp9(const char * str, std::size_t len)
 }
 //!\}
 
-} // inline namespace literals
+} // namespace literals
 
 } // namespace seqan3

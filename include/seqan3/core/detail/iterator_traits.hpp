@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <seqan3/std/iterator>
+#include <iterator>
 #include <type_traits>
 
 #include <seqan3/core/platform.hpp>
@@ -40,7 +40,7 @@ namespace seqan3::detail
 template <typename underlying_iterator_t>
 struct maybe_iterator_category
 {
-#if SEQAN3_DOXYGEN_ONLY(1)0
+#if SEQAN3_DOXYGEN_ONLY(1) 0
     /*!\brief The iterator category tag. (not always present!)
      * \details
      *
@@ -53,23 +53,8 @@ struct maybe_iterator_category
 
 //!\cond
 template <typename t>
-concept has_iterator_category = requires ()
-{
-    typename t::iterator_category;
-};
+concept has_iterator_category = requires () { typename t::iterator_category; };
 //!\endcond
-
-#if SEQAN3_WORKAROUND_GCC_96070
-/*!\brief This is a workaround for gcc 10.x, x < 4. That version of the stdlib always expects an iterator_category
- *        to be defined. There are some view combinations that do not work with this "fix".
- */
-template <typename underlying_iterator_t>
-    requires (!has_iterator_category<std::iterator_traits<underlying_iterator_t>>)
-struct maybe_iterator_category<underlying_iterator_t>
-{
-    using iterator_category = void;
-};
-#endif // SEQAN3_WORKAROUND_GCC_96070
 
 //!\cond
 template <typename underlying_iterator_t>
@@ -110,26 +95,19 @@ struct maybe_inherited_iterator_category<underling_iterator_t>
  * \tparam it_t The type to operate on.
  */
 template <typename it_t>
-//!\cond
     requires std::input_or_output_iterator<it_t>
-//!\endcond
-using iterator_concept_tag_t =
-    std::conditional_t<
-        std::contiguous_iterator<it_t>,
-        std::contiguous_iterator_tag,
-        std::conditional_t<
-            std::random_access_iterator<it_t>,
-            std::random_access_iterator_tag,
-            std::conditional_t<
-                std::bidirectional_iterator<it_t>,
-                std::bidirectional_iterator_tag,
-                std::conditional_t<
-                    std::forward_iterator<it_t>,
-                    std::forward_iterator_tag,
-                    std::conditional_t<
-                        std::input_iterator<it_t>,
-                        std::input_iterator_tag,
-                        std::output_iterator_tag>>>>>;
+using iterator_concept_tag_t = std::conditional_t<
+    std::contiguous_iterator<it_t>,
+    std::contiguous_iterator_tag,
+    std::conditional_t<std::random_access_iterator<it_t>,
+                       std::random_access_iterator_tag,
+                       std::conditional_t<std::bidirectional_iterator<it_t>,
+                                          std::bidirectional_iterator_tag,
+                                          std::conditional_t<std::forward_iterator<it_t>,
+                                                             std::forward_iterator_tag,
+                                                             std::conditional_t<std::input_iterator<it_t>,
+                                                                                std::input_iterator_tag,
+                                                                                std::output_iterator_tag>>>>>;
 
 } // namespace seqan3::detail
 

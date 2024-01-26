@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -25,7 +25,12 @@ TEST(integration_test, take_until_and_take_exactly)
     std::array<char, 10> arithmetic_buffer{};
 
     stream_view_t stream_view{iterator_t{*stream.rdbuf()}, sentinel_t{}};
-    auto stream_view_until = stream_view | seqan3::detail::take_until_or_throw([](auto) { return false; });
+    auto stream_view_until = stream_view
+                           | seqan3::detail::take_until_or_throw(
+                                 [](auto)
+                                 {
+                                     return false;
+                                 });
     auto stream_view_take2 = stream_view_until | seqan3::detail::take_exactly_or_throw(2);
 
     std::ranges::copy(stream_view_take2, arithmetic_buffer.data());

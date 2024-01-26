@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -31,7 +31,6 @@ TYPED_TEST_SUITE(container_of_container, container_of_container_types, );
 TYPED_TEST(container_of_container, concepts)
 {
     EXPECT_TRUE(seqan3::container<TypeParam>);
-    EXPECT_TRUE(seqan3::container<std::ranges::range_value_t<TypeParam>>);
 }
 
 TYPED_TEST(container_of_container, construction)
@@ -100,15 +99,15 @@ TYPED_TEST(container_of_container, iterators)
     TypeParam const t2{"ACGT"_dna4, "ACGT"_dna4, "GAGGA"_dna4};
 
     // begin
-    EXPECT_RANGE_EQ(*t1.begin(),  "ACGT"_dna4);
+    EXPECT_RANGE_EQ(*t1.begin(), "ACGT"_dna4);
     EXPECT_RANGE_EQ(*t1.cbegin(), "ACGT"_dna4);
-    EXPECT_RANGE_EQ(*t2.begin(),  "ACGT"_dna4);
+    EXPECT_RANGE_EQ(*t2.begin(), "ACGT"_dna4);
     EXPECT_RANGE_EQ(*t2.cbegin(), "ACGT"_dna4);
 
     // end and arithmetic
-    EXPECT_RANGE_EQ(*(t1.end()  - 1), "GAGGA"_dna4);
+    EXPECT_RANGE_EQ(*(t1.end() - 1), "GAGGA"_dna4);
     EXPECT_RANGE_EQ(*(t1.cend() - 1), "GAGGA"_dna4);
-    EXPECT_RANGE_EQ(*(t2.end()  - 1), "GAGGA"_dna4);
+    EXPECT_RANGE_EQ(*(t2.end() - 1), "GAGGA"_dna4);
     EXPECT_RANGE_EQ(*(t2.cend() - 1), "GAGGA"_dna4);
 
     // convertibility between const and non-const
@@ -154,7 +153,6 @@ TYPED_TEST(container_of_container, element_access)
         EXPECT_EQ(std::get<1>(t1.raw_data()), (std::vector<size_type>{0, 4, 8, 13}));
         EXPECT_EQ(std::get<1>(t2.raw_data()), (std::vector<size_type>{0, 4, 8, 13}));
     }
-
 }
 
 TYPED_TEST(container_of_container, capacity)
@@ -190,9 +188,9 @@ TYPED_TEST(container_of_container, capacity)
 
     // shrink_to_fit
     t1.reserve(1000);
-    EXPECT_GT(t1.capacity(), t1.size()*2);
+    EXPECT_GT(t1.capacity(), t1.size() * 2);
     t1.shrink_to_fit();
-    EXPECT_LE(t1.capacity(), t1.size()*2);
+    EXPECT_LE(t1.capacity(), t1.size() * 2);
 
     if constexpr (std::is_same_v<TypeParam, seqan3::concatenated_sequences<std::vector<seqan3::dna4>>>)
     {
@@ -246,7 +244,7 @@ TYPED_TEST(container_of_container, insert)
     t1 = {"GAGGA"_dna4, "ACGT"_dna4, "ACGT"_dna4, "GAGGA"_dna4};
     t0.insert(t0.cend(), t1.begin() + 1, t1.begin() + 3);
 
-    t0.insert(t0.cend(),   t1.cend() - 1, t1.cend());
+    t0.insert(t0.cend(), t1.cend() - 1, t1.cend());
     t0.insert(t0.cbegin(), t1.cend() - 1, t1.cend());
     EXPECT_EQ(t0, t1);
 
@@ -295,7 +293,7 @@ TYPED_TEST(container_of_container, resize)
 
     // enlarge without values
     t0.resize(3);
-    EXPECT_EQ(t0,( TypeParam{{}, {}, {}}));
+    EXPECT_EQ(t0, (TypeParam{{}, {}, {}}));
 
     // enlarge with value
     t0.resize(5, "ACGT"_dna4);
@@ -324,4 +322,125 @@ TYPED_TEST(container_of_container, serialisation)
 {
     TypeParam t1{"ACGT"_dna4, "ACGT"_dna4, "GAGGA"_dna4};
     seqan3::test::do_serialisation(t1);
+}
+
+template <typename T>
+class concatenated_sequences : public ::testing::Test
+{};
+
+using concatenated_sequences_types =
+    ::testing::Types<seqan3::concatenated_sequences<std::vector<seqan3::dna4>>,
+                     seqan3::concatenated_sequences<seqan3::bitpacked_sequence<seqan3::dna4>>>;
+
+TYPED_TEST_SUITE(concatenated_sequences, concatenated_sequences_types, );
+
+TYPED_TEST(concatenated_sequences, last_push_back)
+{
+    TypeParam t0{};
+
+    t0.push_back("ACGT"_dna4);
+    t0.push_back("GAGGA"_dna4);
+    EXPECT_EQ(t0, (TypeParam{"ACGT"_dna4, "GAGGA"_dna4}));
+
+    t0.last_push_back('C'_dna4);
+    EXPECT_EQ(t0, (TypeParam{"ACGT"_dna4, "GAGGAC"_dna4}));
+    t0.last_push_back('G'_dna4);
+    EXPECT_EQ(t0, (TypeParam{"ACGT"_dna4, "GAGGACG"_dna4}));
+    t0.last_push_back('T'_dna4);
+    EXPECT_EQ(t0, (TypeParam{"ACGT"_dna4, "GAGGACGT"_dna4}));
+
+    t0.push_back("ACGT"_dna4);
+    EXPECT_EQ(t0, (TypeParam{"ACGT"_dna4, "GAGGACGT"_dna4, "ACGT"_dna4}));
+    t0.last_push_back('C'_dna4);
+    EXPECT_EQ(t0, (TypeParam{"ACGT"_dna4, "GAGGACGT"_dna4, "ACGTC"_dna4}));
+    t0.last_push_back('G'_dna4);
+    EXPECT_EQ(t0, (TypeParam{"ACGT"_dna4, "GAGGACGT"_dna4, "ACGTCG"_dna4}));
+    t0.last_push_back('T'_dna4);
+    EXPECT_EQ(t0, (TypeParam{"ACGT"_dna4, "GAGGACGT"_dna4, "ACGTCGT"_dna4}));
+}
+
+TYPED_TEST(concatenated_sequences, push_back_empty)
+{
+    TypeParam t0{};
+
+    t0.push_back("ACGT"_dna4);
+    EXPECT_EQ(t0, (TypeParam{"ACGT"_dna4}));
+
+    t0.push_back();
+    EXPECT_EQ(t0, (TypeParam{"ACGT"_dna4, ""_dna4}));
+    t0.last_push_back('C'_dna4);
+    EXPECT_EQ(t0, (TypeParam{"ACGT"_dna4, "C"_dna4}));
+    t0.last_push_back('G'_dna4);
+    EXPECT_EQ(t0, (TypeParam{"ACGT"_dna4, "CG"_dna4}));
+    t0.last_push_back('T'_dna4);
+    EXPECT_EQ(t0, (TypeParam{"ACGT"_dna4, "CGT"_dna4}));
+
+    t0.push_back();
+    EXPECT_EQ(t0, (TypeParam{"ACGT"_dna4, "CGT"_dna4, ""_dna4}));
+    t0.last_push_back('C'_dna4);
+    EXPECT_EQ(t0, (TypeParam{"ACGT"_dna4, "CGT"_dna4, "C"_dna4}));
+    t0.last_push_back('G'_dna4);
+    EXPECT_EQ(t0, (TypeParam{"ACGT"_dna4, "CGT"_dna4, "CG"_dna4}));
+    t0.last_push_back('T'_dna4);
+    EXPECT_EQ(t0, (TypeParam{"ACGT"_dna4, "CGT"_dna4, "CGT"_dna4}));
+}
+
+TYPED_TEST(concatenated_sequences, last_append)
+{
+    TypeParam t0{};
+
+    t0.push_back("ACGT"_dna4);
+    EXPECT_EQ(t0, (TypeParam{"ACGT"_dna4}));
+
+    t0.push_back();
+    EXPECT_EQ(t0, (TypeParam{"ACGT"_dna4, ""_dna4}));
+    t0.last_append("C"_dna4);
+    EXPECT_EQ(t0, (TypeParam{"ACGT"_dna4, "C"_dna4}));
+    t0.last_append("GT"_dna4);
+    EXPECT_EQ(t0, (TypeParam{"ACGT"_dna4, "CGT"_dna4}));
+
+    t0.push_back();
+    EXPECT_EQ(t0, (TypeParam{"ACGT"_dna4, "CGT"_dna4, ""_dna4}));
+    t0.last_append("C"_dna4);
+    EXPECT_EQ(t0, (TypeParam{"ACGT"_dna4, "CGT"_dna4, "C"_dna4}));
+    t0.last_append("GT"_dna4);
+    EXPECT_EQ(t0, (TypeParam{"ACGT"_dna4, "CGT"_dna4, "CGT"_dna4}));
+}
+
+TEST(concatenated_sequences_, associated_types)
+{
+    {
+        using t = seqan3::concatenated_sequences<std::vector<int>>;
+
+        EXPECT_TRUE((std::same_as<std::ranges::range_value_t<t>, std::span<int>>));
+        EXPECT_TRUE((std::same_as<std::ranges::range_reference_t<t>, std::span<int>>));
+
+        EXPECT_TRUE((std::same_as<std::ranges::range_value_t<t const>, std::span<int>>));
+        EXPECT_TRUE((std::same_as<std::ranges::range_reference_t<t const>, std::span<int const>>));
+    }
+
+    {
+        using t = seqan3::concatenated_sequences<std::string>;
+
+        EXPECT_TRUE((std::same_as<std::ranges::range_value_t<t>, std::span<char>>));
+        EXPECT_TRUE((std::same_as<std::ranges::range_reference_t<t>, std::span<char>>));
+
+        EXPECT_TRUE((std::same_as<std::ranges::range_value_t<t const>, std::span<char>>));
+        EXPECT_TRUE((std::same_as<std::ranges::range_reference_t<t const>, std::string_view>));
+    }
+
+    {
+        using t = seqan3::concatenated_sequences<seqan3::bitpacked_sequence<seqan3::dna4>>;
+        using it_t = std::ranges::iterator_t<seqan3::bitpacked_sequence<seqan3::dna4>>;
+        using sen_t = std::ranges::sentinel_t<seqan3::bitpacked_sequence<seqan3::dna4>>;
+
+        using c_it_t = std::ranges::iterator_t<seqan3::bitpacked_sequence<seqan3::dna4> const>;
+        using c_sen_t = std::ranges::sentinel_t<seqan3::bitpacked_sequence<seqan3::dna4> const>;
+
+        EXPECT_TRUE((std::same_as<std::ranges::range_value_t<t>, std::ranges::subrange<it_t, sen_t>>));
+        EXPECT_TRUE((std::same_as<std::ranges::range_reference_t<t>, std::ranges::subrange<it_t, sen_t>>));
+
+        EXPECT_TRUE((std::same_as<std::ranges::range_value_t<t const>, std::ranges::subrange<it_t, sen_t>>));
+        EXPECT_TRUE((std::same_as<std::ranges::range_reference_t<t const>, std::ranges::subrange<c_it_t, c_sen_t>>));
+    }
 }

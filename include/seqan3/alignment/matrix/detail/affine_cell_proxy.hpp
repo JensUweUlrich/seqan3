@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,13 +12,13 @@
 
 #pragma once
 
-#include <seqan3/std/concepts>
+#include <concepts>
 #include <tuple>
 #include <type_traits>
 
 #include <seqan3/alignment/matrix/detail/trace_directions.hpp>
 #include <seqan3/core/detail/empty_type.hpp>
-#include <seqan3/utility/concept/exposition_only/core_language.hpp>
+#include <seqan3/utility/concept.hpp>
 #include <seqan3/utility/simd/concept.hpp>
 #include <seqan3/utility/tuple/concept.hpp>
 
@@ -56,11 +56,10 @@ concept tracedirections_or_simd = std::same_as<std::remove_cvref_t<t>, trace_dir
  */
 //!\cond
 template <typename t>
-concept affine_score_cell = tuple_like<t> &&
-                            std::tuple_size_v<t> == 3 &&
-                            arithmetic_or_simd<std::remove_reference_t<std::tuple_element_t<0, t>>> &&
-                            arithmetic_or_simd<std::remove_reference_t<std::tuple_element_t<1, t>>> &&
-                            arithmetic_or_simd<std::remove_reference_t<std::tuple_element_t<2, t>>>;
+concept affine_score_cell = tuple_like<t> && std::tuple_size_v<t> == 3
+                         && arithmetic_or_simd<std::remove_reference_t<std::tuple_element_t<0, t>>>
+                         && arithmetic_or_simd<std::remove_reference_t<std::tuple_element_t<1, t>>>
+                         && arithmetic_or_simd<std::remove_reference_t<std::tuple_element_t<2, t>>>;
 //!\endcond
 
 /*!\interface seqan3::detail::affine_trace_cell <>
@@ -75,11 +74,10 @@ concept affine_score_cell = tuple_like<t> &&
  */
 //!\cond
 template <typename t>
-concept affine_trace_cell = tuple_like<t> &&
-                            std::tuple_size_v<t> == 3 &&
-                            tracedirections_or_simd<std::remove_reference_t<std::tuple_element_t<0, t>>> &&
-                            tracedirections_or_simd<std::remove_reference_t<std::tuple_element_t<1, t>>> &&
-                            tracedirections_or_simd<std::remove_reference_t<std::tuple_element_t<2, t>>>;
+concept affine_trace_cell = tuple_like<t> && std::tuple_size_v<t> == 3
+                         && tracedirections_or_simd<std::remove_reference_t<std::tuple_element_t<0, t>>>
+                         && tracedirections_or_simd<std::remove_reference_t<std::tuple_element_t<1, t>>>
+                         && tracedirections_or_simd<std::remove_reference_t<std::tuple_element_t<2, t>>>;
 //!\endcond
 
 /*!\interface seqan3::detail::affine_score_and_trace_cell <>
@@ -94,10 +92,9 @@ concept affine_trace_cell = tuple_like<t> &&
  */
 //!\cond
 template <typename t>
-concept affine_score_and_trace_cell = tuple_like<t> &&
-                                      std::tuple_size_v<t> == 2 &&
-                                      affine_score_cell<std::tuple_element_t<0, t>> &&
-                                      affine_trace_cell<std::tuple_element_t<1, t>>;
+concept affine_score_and_trace_cell =
+    tuple_like<t> && std::tuple_size_v<t> == 2
+    && affine_score_cell<std::tuple_element_t<0, t>> && affine_trace_cell<std::tuple_element_t<1, t>>;
 //!\endcond
 
 /*!\brief A proxy for an affine score matrix cell.
@@ -115,65 +112,53 @@ concept affine_score_and_trace_cell = tuple_like<t> &&
  * value.
  */
 template <typename tuple_t>
-//!\cond
     requires (affine_score_cell<tuple_t> || affine_score_and_trace_cell<tuple_t>)
-//!\endcond
 class affine_cell_proxy : public tuple_t
 {
 private:
     //!\brief The type of the score cell.
     using score_cell_type = std::conditional_t<affine_score_cell<tuple_t>, tuple_t, std::tuple_element_t<0, tuple_t>>;
     //!\brief The type of the trace cell (might be seqan3::detail::empty_type if not defined).
-    using trace_cell_type = std::conditional_t<affine_score_and_trace_cell<tuple_t>,
-                                               std::tuple_element_t<1, tuple_t>,
-                                               empty_type>;
+    using trace_cell_type =
+        std::conditional_t<affine_score_and_trace_cell<tuple_t>, std::tuple_element_t<1, tuple_t>, empty_type>;
 
 public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    affine_cell_proxy() = default; //!< Defaulted.
-    affine_cell_proxy(affine_cell_proxy const &) = default; //!< Defaulted.
-    affine_cell_proxy(affine_cell_proxy &&) = default; //!< Defaulted.
+    affine_cell_proxy() = default;                                      //!< Defaulted.
+    affine_cell_proxy(affine_cell_proxy const &) = default;             //!< Defaulted.
+    affine_cell_proxy(affine_cell_proxy &&) = default;                  //!< Defaulted.
     affine_cell_proxy & operator=(affine_cell_proxy const &) = default; //!< Defaulted.
-    affine_cell_proxy & operator=(affine_cell_proxy &&) = default; //!< Defaulted.
-    ~affine_cell_proxy() = default; //!< Defaulted.
+    affine_cell_proxy & operator=(affine_cell_proxy &&) = default;      //!< Defaulted.
+    ~affine_cell_proxy() = default;                                     //!< Defaulted.
 
     // Inherit the base class's constructor to enable element-wise initialisation (direct and converting constructor).
     using tuple_t::tuple_t;
 
     //!\brief Converting constructor. Initialises from another tuple type.
     template <typename other_tuple_t>
-    //!\cond
         requires std::constructible_from<tuple_t, other_tuple_t &&>
-    //!\endcond
-    explicit affine_cell_proxy(other_tuple_t && other) :
-        tuple_t{std::forward<other_tuple_t>(other)}
+    explicit affine_cell_proxy(other_tuple_t && other) : tuple_t{std::forward<other_tuple_t>(other)}
     {}
 
     //!\brief Converting copy-constructor.
     template <typename other_tuple_t>
-    //!\cond
         requires std::constructible_from<tuple_t, other_tuple_t const &>
-    //!\endcond
     explicit affine_cell_proxy(affine_cell_proxy<other_tuple_t> const & other) :
         tuple_t{static_cast<other_tuple_t const &>(other)}
     {}
 
     //!\brief Converting move-constructor.
     template <typename other_tuple_t>
-    //!\cond
         requires std::constructible_from<tuple_t, other_tuple_t>
-    //!\endcond
     explicit affine_cell_proxy(affine_cell_proxy<other_tuple_t> && other) :
         tuple_t{static_cast<other_tuple_t &&>(std::move(other))}
     {}
 
     //!\brief Converting assignment. Initialises from another tuple type.
     template <typename other_tuple_t>
-    //!\cond
         requires std::assignable_from<tuple_t &, other_tuple_t &&>
-    //!\endcond
     affine_cell_proxy & operator=(other_tuple_t && other)
     {
         as_base() = std::forward<other_tuple_t>(other);
@@ -182,9 +167,7 @@ public:
 
     //!\brief Converting copy-assignment.
     template <typename other_tuple_t>
-    //!\cond
         requires std::assignable_from<tuple_t &, other_tuple_t const &>
-    //!\endcond
     affine_cell_proxy & operator=(affine_cell_proxy<other_tuple_t> const & other)
     {
         as_base() = static_cast<other_tuple_t const &>(other);
@@ -193,9 +176,7 @@ public:
 
     //!\brief Converting move-assignment.
     template <typename other_tuple_t>
-    //!\cond
         requires std::assignable_from<tuple_t &, other_tuple_t>
-    //!\endcond
     affine_cell_proxy & operator=(affine_cell_proxy<other_tuple_t> && other)
     {
         as_base() = static_cast<other_tuple_t &&>(std::move(other));
@@ -208,31 +189,67 @@ public:
      * \{
      */
     //!\brief Access the best score of the wrapped score matrix cell.
-    decltype(auto) best_score() & noexcept { return get_score_impl<0>(*this); }
+    decltype(auto) best_score() & noexcept
+    {
+        return get_score_impl<0>(*this);
+    }
     //!\overload
-    decltype(auto) best_score() const & noexcept { return get_score_impl<0>(*this); }
+    decltype(auto) best_score() const & noexcept
+    {
+        return get_score_impl<0>(*this);
+    }
     //!\overload
-    decltype(auto) best_score() && noexcept { return get_score_impl<0>(std::move(*this)); }
+    decltype(auto) best_score() && noexcept
+    {
+        return get_score_impl<0>(std::move(*this));
+    }
     //!\overload
-    decltype(auto) best_score() const && noexcept { return get_score_impl<0>(std::move(*this)); }
+    decltype(auto) best_score() const && noexcept
+    {
+        return get_score_impl<0>(std::move(*this));
+    }
 
     //!\brief Access the horizontal score of the wrapped score matrix cell.
-    decltype(auto) horizontal_score() & noexcept { return get_score_impl<1>(*this); }
+    decltype(auto) horizontal_score() & noexcept
+    {
+        return get_score_impl<1>(*this);
+    }
     //!\overload
-    decltype(auto) horizontal_score() const & noexcept { return get_score_impl<1>(*this); }
+    decltype(auto) horizontal_score() const & noexcept
+    {
+        return get_score_impl<1>(*this);
+    }
     //!\overload
-    decltype(auto) horizontal_score() && noexcept { return get_score_impl<1>(std::move(*this)); }
+    decltype(auto) horizontal_score() && noexcept
+    {
+        return get_score_impl<1>(std::move(*this));
+    }
     //!\overload
-    decltype(auto) horizontal_score() const && noexcept { return get_score_impl<1>(std::move(*this)); }
+    decltype(auto) horizontal_score() const && noexcept
+    {
+        return get_score_impl<1>(std::move(*this));
+    }
 
     //!\brief Access the vertical score of the wrapped score matrix cell.
-    decltype(auto) vertical_score() & noexcept { return get_score_impl<2>(*this); }
+    decltype(auto) vertical_score() & noexcept
+    {
+        return get_score_impl<2>(*this);
+    }
     //!\overload
-    decltype(auto) vertical_score() const & noexcept { return get_score_impl<2>(*this); }
+    decltype(auto) vertical_score() const & noexcept
+    {
+        return get_score_impl<2>(*this);
+    }
     //!\overload
-    decltype(auto) vertical_score() && noexcept { return get_score_impl<2>(std::move(*this)); }
+    decltype(auto) vertical_score() && noexcept
+    {
+        return get_score_impl<2>(std::move(*this));
+    }
     //!\overload
-    decltype(auto) vertical_score() const && noexcept { return get_score_impl<2>(std::move(*this)); }
+    decltype(auto) vertical_score() const && noexcept
+    {
+        return get_score_impl<2>(std::move(*this));
+    }
     //!\}
 
     /*!\name Trace value accessor
@@ -241,99 +258,75 @@ public:
      */
     //!\brief Access the optimal score of the wrapped score matrix cell.
     decltype(auto) best_trace() & noexcept
-    //!\cond
         requires affine_score_and_trace_cell<tuple_t>
-    //!\endcond
     {
         return get_trace_impl<0>(*this);
     }
     //!\overload
     decltype(auto) best_trace() const & noexcept
-    //!\cond
         requires affine_score_and_trace_cell<tuple_t>
-    //!\endcond
     {
         return get_trace_impl<0>(*this);
     }
     //!\overload
     decltype(auto) best_trace() && noexcept
-    //!\cond
         requires affine_score_and_trace_cell<tuple_t>
-    //!\endcond
     {
         return get_trace_impl<0>(std::move(*this));
     }
     //!\overload
     decltype(auto) best_trace() const && noexcept
-    //!\cond
         requires affine_score_and_trace_cell<tuple_t>
-    //!\endcond
     {
         return get_trace_impl<0>(std::move(*this));
     }
 
     //!\brief Access the horizontal score of the wrapped score matrix cell.
     decltype(auto) horizontal_trace() & noexcept
-    //!\cond
         requires affine_score_and_trace_cell<tuple_t>
-    //!\endcond
     {
         return get_trace_impl<1>(*this);
     }
     //!\overload
     decltype(auto) horizontal_trace() const & noexcept
-    //!\cond
         requires affine_score_and_trace_cell<tuple_t>
-    //!\endcond
     {
         return get_trace_impl<1>(*this);
     }
     //!\overload
     decltype(auto) horizontal_trace() && noexcept
-    //!\cond
         requires affine_score_and_trace_cell<tuple_t>
-    //!\endcond
     {
         return get_trace_impl<1>(std::move(*this));
     }
     //!\overload
     decltype(auto) horizontal_trace() const && noexcept
-    //!\cond
         requires affine_score_and_trace_cell<tuple_t>
-    //!\endcond
     {
         return get_trace_impl<1>(std::move(*this));
     }
 
     //!\brief Access the vertical score of the wrapped score matrix cell.
     decltype(auto) vertical_trace() & noexcept
-    //!\cond
         requires affine_score_and_trace_cell<tuple_t>
-    //!\endcond
     {
         return get_trace_impl<2>(*this);
     }
     //!\overload
     decltype(auto) vertical_trace() const & noexcept
-    //!\cond
         requires affine_score_and_trace_cell<tuple_t>
-    //!\endcond
     {
         return get_trace_impl<2>(*this);
     }
     //!\overload
     decltype(auto) vertical_trace() && noexcept
-    //!\cond
         requires affine_score_and_trace_cell<tuple_t>
-    //!\endcond
     {
         return get_trace_impl<2>(std::move(*this));
     }
     //!\overload
     decltype(auto) vertical_trace() const && noexcept
-    //!\cond
         requires affine_score_and_trace_cell<tuple_t>
-    //!\endcond
     {
         return get_trace_impl<2>(std::move(*this));
     }
@@ -349,9 +342,7 @@ private:
      * \returns The score value from the given tuple index.
      */
     template <size_t index, typename this_t>
-    //!\cond
         requires (index < 3)
-    //!\endcond
     static constexpr decltype(auto) get_score_impl(this_t && me) noexcept
     {
         using std::get;
@@ -371,9 +362,7 @@ private:
      * \returns The trace value from the given tuple index.
      */
     template <size_t index, typename this_t>
-    //!\cond
         requires (index < 3 && affine_score_and_trace_cell<tuple_t>)
-    //!\endcond
     static constexpr decltype(auto) get_trace_impl(this_t && me) noexcept
     {
         using std::get;

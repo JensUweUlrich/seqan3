@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------------------------------
-# Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-# Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+# Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+# Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 # This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 # shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 # -----------------------------------------------------------------------------------------------------
@@ -46,7 +46,7 @@ set (CMAKE_CXX_FLAGS_FEDORA
 # ----------------------------------------------------------------------------
 
 find_path (SEQAN3_TEST_INCLUDE_DIR
-           NAMES seqan3/test/tmp_filename.hpp
+           NAMES seqan3/test/tmp_directory.hpp
            HINTS "${CMAKE_CURRENT_LIST_DIR}/include/")
 find_path (SEQAN3_TEST_CMAKE_MODULE_DIR
            NAMES seqan3_test_component.cmake
@@ -79,7 +79,9 @@ endif ()
 # needed for performance test cases in seqan3/test/performance
 if (NOT TARGET seqan3::test::performance)
     add_library (seqan3_test_performance INTERFACE)
-    target_link_libraries (seqan3_test_performance INTERFACE "seqan3::test" "gbenchmark")
+    target_link_libraries (seqan3_test_performance INTERFACE "seqan3::test" "benchmark_main" "benchmark")
+    # std::views::join is experimental in libc++
+    target_compile_definitions (seqan3_test_performance INTERFACE _LIBCPP_ENABLE_EXPERIMENTAL)
 
     if (SEQAN3_BENCHMARK_ALIGN_LOOPS)
         target_compile_options (seqan3_test_performance INTERFACE "-falign-loops=32")
@@ -120,6 +122,8 @@ if (NOT TARGET seqan3::test::header)
     add_library (seqan3_test_header INTERFACE)
     target_link_libraries (seqan3_test_header INTERFACE "seqan3::test::unit")
     target_link_libraries (seqan3_test_header INTERFACE "seqan3::test::performance")
+    target_compile_options (seqan3_test_header INTERFACE "-Wno-unused-const-variable" "-Wno-unused-variable"
+                                                         "-Wno-unused-function")
     target_compile_definitions (seqan3_test_header INTERFACE -DSEQAN3_DISABLE_DEPRECATED_WARNINGS)
     target_compile_definitions (seqan3_test_header INTERFACE -DSEQAN3_HEADER_TEST)
     add_library (seqan3::test::header ALIAS seqan3_test_header)

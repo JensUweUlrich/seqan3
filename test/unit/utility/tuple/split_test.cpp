@@ -1,21 +1,25 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
-#include <seqan3/std/concepts>
+#include <gtest/gtest.h>
+
+#include <concepts>
 #include <tuple>
 #include <type_traits>
-
-#include <gtest/gtest.h>
 
 #include <seqan3/core/detail/strong_type.hpp>
 #include <seqan3/utility/tuple/pod_tuple.hpp>
 #include <seqan3/utility/tuple/split.hpp>
 
 #include "my_tuple.hpp"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-braces"
+
 struct bar : public seqan3::detail::strong_type<unsigned, bar>
 {
     using seqan3::detail::strong_type<unsigned, bar>::strong_type;
@@ -25,12 +29,11 @@ template <typename T>
 class tuple_split : public ::testing::Test
 {
 public:
-
     T value;
 };
 
-using tuple_utility_types = ::testing::Types<std::tuple<int, long, bar, float>,
-                                             seqan3::pod_tuple<int, long, bar, float>>;
+using tuple_utility_types =
+    ::testing::Types<std::tuple<int, long, bar, float>, seqan3::pod_tuple<int, long, bar, float>>;
 
 TYPED_TEST_SUITE(tuple_split, tuple_utility_types, );
 
@@ -261,3 +264,5 @@ TYPED_TEST(tuple_split, by_type_const_rvalue)
         EXPECT_FLOAT_EQ(std::get<3>(std::get<1>(res)), 2.1);
     }
 }
+
+#pragma GCC diagnostic pop

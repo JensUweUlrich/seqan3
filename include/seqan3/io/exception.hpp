@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -60,10 +60,10 @@ struct io_error : std::ios_base::failure
     // see https://en.cppreference.com/w/cpp/io/ios_base/failure
     using base_t = std::ios_base::failure;
     using base_t::base_t;
-#else // ^^^ workaround / no workaround vvv
+#else  // ^^^ workaround / no workaround vvv
     //!\brief Constructor that forwards the exception string.
-    explicit io_error(std::string const & s, std::error_code const & ec = std::io_errc::stream)
-        : std::ios_base::failure{s, ec}
+    explicit io_error(std::string const & s, std::error_code const & ec = std::io_errc::stream) :
+        std::ios_base::failure{s, ec}
     {}
 #endif // SEQAN3_WORKAROUND_GCC_NO_CXX11_ABI
 };

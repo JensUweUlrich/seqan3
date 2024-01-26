@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -26,14 +26,14 @@ public:
     /*!\brief The constructor.
      * \param[in] s The error message.
      */
-    gap_erase_failure(std::string const & s) : std::logic_error{s} {}
+    gap_erase_failure(std::string const & s) : std::logic_error{s}
+    {}
 };
 
 //!\brief Thrown if the configuration of the alignment algorithm is invalid.
 class invalid_alignment_configuration : public std::invalid_argument
 {
 public:
-
     /*!\brief The constructor.
      * \param[in] s The error message.
      */

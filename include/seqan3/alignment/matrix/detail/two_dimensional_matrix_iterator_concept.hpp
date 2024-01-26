@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,11 +12,11 @@
 
 #pragma once
 
+#include <concepts>
+#include <iterator>
 #include <type_traits>
 
 #include <seqan3/alignment/matrix/detail/matrix_coordinate.hpp>
-#include <seqan3/std/concepts>
-#include <seqan3/std/iterator>
 
 namespace seqan3::detail
 {
@@ -92,28 +92,71 @@ namespace seqan3::detail
 //!\cond
 template <typename iter_t>
 concept two_dimensional_matrix_iterator =
-    std::random_access_iterator<iter_t> &&
-    requires(std::remove_reference_t<iter_t> it, std::remove_reference_t<iter_t> const cit, matrix_offset offset)
-    {
-        { it += offset };
-        { it + offset };
-        { offset + it };
-        { cit + offset };
-        { offset + cit };
-        { it -= offset };
-        { it - offset };
-        { cit - offset };
-        { it.coordinate() };
-        { cit.coordinate() };
+    std::random_access_iterator<iter_t>
+    && requires (std::remove_reference_t<iter_t> it, std::remove_reference_t<iter_t> const cit, matrix_offset offset) {
+           {
+               it += offset
+           };
+           {
+               it + offset
+           };
+           {
+               offset + it
+           };
+           {
+               cit + offset
+           };
+           {
+               offset + cit
+           };
+           {
+               it -= offset
+           };
+           {
+               it - offset
+           };
+           {
+               cit - offset
+           };
+           {
+               it.coordinate()
+           };
+           {
+               cit.coordinate()
+           };
 
-        SEQAN3_RETURN_TYPE_CONSTRAINT(it += offset, std::same_as, std::remove_reference_t<iter_t> &);
-        SEQAN3_RETURN_TYPE_CONSTRAINT(it + offset, std::same_as, std::remove_reference_t<iter_t>);
-        SEQAN3_RETURN_TYPE_CONSTRAINT(offset + it, std::same_as, std::remove_reference_t<iter_t>);
-        SEQAN3_RETURN_TYPE_CONSTRAINT(it -= offset, std::same_as, std::remove_reference_t<iter_t> &);
-        SEQAN3_RETURN_TYPE_CONSTRAINT(it - offset, std::same_as, std::remove_reference_t<iter_t>);
-        SEQAN3_RETURN_TYPE_CONSTRAINT(cit - offset, std::same_as, std::remove_reference_t<iter_t>);
-        SEQAN3_RETURN_TYPE_CONSTRAINT(it.coordinate(), std::same_as, matrix_coordinate);
-        SEQAN3_RETURN_TYPE_CONSTRAINT(cit.coordinate(), std::same_as, matrix_coordinate);
-    };
+           {
+               it += offset
+               } -> std::same_as<std::remove_reference_t<iter_t> &>;
+           {
+               it + offset
+               } -> std::same_as<std::remove_reference_t<iter_t>>;
+           {
+               offset + it
+               } -> std::same_as<std::remove_reference_t<iter_t>>;
+           {
+               it -= offset
+               } -> std::same_as<std::remove_reference_t<iter_t> &>;
+           {
+               it - offset
+               } -> std::same_as<std::remove_reference_t<iter_t>>;
+           {
+               cit - offset
+               } -> std::same_as<std::remove_reference_t<iter_t>>;
+           {
+               it.coordinate()
+               } -> std::same_as<matrix_coordinate>;
+           {
+               cit.coordinate()
+               } -> std::same_as<matrix_coordinate>;
+       };
 //!\endcond
+
+// Workaround for https://github.com/doxygen/doxygen/issues/9379
+#if SEQAN3_DOXYGEN_ONLY(1) 0
+template <typename iter_t>
+class two_dimensional_matrix_iterator
+{};
+#endif
+
 } // namespace seqan3::detail

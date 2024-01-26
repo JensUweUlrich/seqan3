@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 # -----------------------------------------------------------------------------------------------------
-# Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-# Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+# Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+# Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 # This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 # shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 # -----------------------------------------------------------------------------------------------------
@@ -18,7 +18,7 @@
 # This is a script checking for blocks of include statements:
 #
 #  #include <cassert>
-#  #include <seqan3/std/concepts>
+#  #include <concepts>
 #  #include <utility>
 #
 #  It will extract the include paths to

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,12 +12,12 @@
 
 #pragma once
 
-#include <seqan3/std/concepts>
-#include <seqan3/std/iterator>
-#include <seqan3/std/ranges>
-#include <seqan3/std/span>
+#include <concepts>
+#include <iterator>
+#include <ranges>
+#include <span>
 #include <stdexcept>
-#include <seqan3/std/type_traits>
+#include <type_traits>
 
 #include <seqan3/core/range/detail/adaptor_from_functor.hpp>
 #include <seqan3/io/exception.hpp>
@@ -60,9 +60,9 @@ struct slice_fn
         if (end_pos < begin_pos)
             throw std::invalid_argument{"end_pos argument to seqan3::views::slice must be >= the begin_pos argument."};
 
-        // SEQAN3_WORKAROUND_GCC_100139 == 1 if std::views::{take, drop} does not type reduce (e.g. keep in type
-        // std::basic_string_view, std::span, std::ranges::subrange).
-        // See https://github.com/seqan/seqan3/pull/2540/files#r617575294
+            // SEQAN3_WORKAROUND_GCC_100139 == 1 if std::views::{take, drop} does not type reduce (e.g. keep in type
+            // std::basic_string_view, std::span, std::ranges::subrange).
+            // See https://github.com/seqan/seqan3/pull/2540/files#r617575294
 #if SEQAN3_WORKAROUND_GCC_100139
         // string_view
         if constexpr (is_type_specialisation_of_v<std::remove_cvref_t<urng_t>, std::basic_string_view>)
@@ -70,29 +70,25 @@ struct slice_fn
             return urange.substr(begin_pos, static_cast<size_t>(target_size));
         }
         // string const &
-        else if constexpr (is_type_specialisation_of_v<std::remove_cvref_t<urng_t>, std::basic_string> &&
-                           std::is_const_v<std::remove_reference_t<urng_t>>)
+        else if constexpr (is_type_specialisation_of_v<std::remove_cvref_t<urng_t>, std::basic_string>
+                           && std::is_const_v<std::remove_reference_t<urng_t>>)
         {
             return std::basic_string_view{std::ranges::data(urange) + begin_pos, static_cast<size_t>(target_size)};
         }
         // contiguous
-        else if constexpr (std::ranges::borrowed_range<urng_t> &&
-                           std::ranges::contiguous_range<urng_t> &&
-                           std::ranges::sized_range<urng_t>)
+        else if constexpr (std::ranges::borrowed_range<urng_t> && std::ranges::contiguous_range<urng_t>
+                           && std::ranges::sized_range<urng_t>)
         {
             return std::span{std::ranges::data(urange) + begin_pos, static_cast<size_t>(target_size)};
         }
         // random_access
-        else if constexpr (std::ranges::borrowed_range<urng_t> &&
-                           std::ranges::random_access_range<urng_t> &&
-                           std::ranges::sized_range<urng_t>)
+        else if constexpr (std::ranges::borrowed_range<urng_t> && std::ranges::random_access_range<urng_t>
+                           && std::ranges::sized_range<urng_t>)
         {
-            return std::ranges::subrange<std::ranges::iterator_t<urng_t>, std::ranges::iterator_t<urng_t>>
-            {
+            return std::ranges::subrange<std::ranges::iterator_t<urng_t>, std::ranges::iterator_t<urng_t>>{
                 std::ranges::begin(urange) + begin_pos,
                 std::ranges::begin(urange) + end_pos,
-                static_cast<size_t>(target_size)
-            };
+                static_cast<size_t>(target_size)};
         }
         // std::views::drop
         else
@@ -100,10 +96,9 @@ struct slice_fn
             // urange | drop | take
             return std::views::take(std::views::drop(std::forward<urng_t>(urange), begin_pos), target_size);
         }
-#else // ^^^ workaround / no workaround vvv
+#else  /*^^^ workaround / no workaround vvv*/
         // urange | type_reduce | drop | take
-        return std::views::take(std::views::drop(seqan3::views::type_reduce(std::forward<urng_t>(urange)),
-                                                 begin_pos),
+        return std::views::take(std::views::drop(seqan3::views::type_reduce(std::forward<urng_t>(urange)), begin_pos),
                                 target_size);
 #endif // SEQAN3_WORKAROUND_GCC_100139
     }

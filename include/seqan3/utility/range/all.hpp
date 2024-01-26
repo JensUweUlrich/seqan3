@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -72,10 +72,10 @@
  *            \link std::ranges::output_range output ranges \endlink (if they are output files), but they are neither
  *            containers, decorators nor views.
  *
- * \sa https://ericniebler.github.io/range-v3/index.html
  * \see utility
  */
 
 #pragma once
 
 #include <seqan3/utility/range/concept.hpp>
+#include <seqan3/utility/range/to.hpp>

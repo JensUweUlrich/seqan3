@@ -1,23 +1,23 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #include <gtest/gtest.h>
 
+#include <ranges>
 #include <type_traits>
 
-#include <seqan3/alignment/pairwise/detail/alignment_algorithm_state.hpp>
-#include <seqan3/alignment/matrix/detail/alignment_score_matrix_one_column_banded.hpp>
 #include <seqan3/alignment/matrix/detail/alignment_score_matrix_one_column.hpp>
-#include <seqan3/alignment/matrix/detail/alignment_trace_matrix_full_banded.hpp>
+#include <seqan3/alignment/matrix/detail/alignment_score_matrix_one_column_banded.hpp>
 #include <seqan3/alignment/matrix/detail/alignment_trace_matrix_full.hpp>
+#include <seqan3/alignment/matrix/detail/alignment_trace_matrix_full_banded.hpp>
+#include <seqan3/alignment/pairwise/detail/alignment_algorithm_state.hpp>
 #include <seqan3/alignment/pairwise/policy/affine_gap_init_policy.hpp>
 #include <seqan3/alignment/pairwise/policy/affine_gap_policy.hpp>
 #include <seqan3/alphabet/nucleotide/dna4.hpp>
-#include <seqan3/std/ranges>
 
 using seqan3::operator""_dna4;
 using seqan3::operator|;
@@ -36,8 +36,8 @@ public:
 
     using base_t::compute_cell;
     //TODO: remove me! using base_t::compute_first_band_cell;
-    using init_base_t::init_origin_cell;
     using init_base_t::init_column_cell;
+    using init_base_t::init_origin_cell;
     using init_base_t::init_row_cell;
 
     template <typename cell_t, typename state_t>
@@ -54,9 +54,8 @@ struct affine_gap_fixture : public ::testing::Test
     using score_matrix_iter_t = typename score_matrix_t::iterator;
     using trace_matrix_iter_t = typename trace_matrix_t::iterator;
 
-    static constexpr bool with_trace =
-        !seqan3::detail::decays_to_ignore_v<
-            std::remove_reference_t<decltype(std::declval<typename trace_matrix_t::value_type>().current)>>;
+    static constexpr bool with_trace = !seqan3::detail::decays_to_ignore_v<
+        std::remove_reference_t<decltype(std::declval<typename trace_matrix_t::value_type>().current)>>;
 
     void SetUp()
     {
@@ -109,8 +108,7 @@ using testing_types = ::testing::Types<
                std::true_type>,
     std::tuple<seqan3::detail::alignment_score_matrix_one_column_banded<int>,
                seqan3::detail::alignment_trace_matrix_full_banded<seqan3::detail::trace_directions, true>,
-               std::true_type>
-    >;
+               std::true_type>>;
 
 TYPED_TEST_SUITE(affine_gap_fixture, testing_types, );
 
@@ -140,7 +138,7 @@ TYPED_TEST(affine_gap_fixture, compute_cell)
     {
         EXPECT_EQ(trace_cell.current,
                   seqan3::detail::trace_directions::diagonal | seqan3::detail::trace_directions::up_open
-                                                             | seqan3::detail::trace_directions::left_open);
+                      | seqan3::detail::trace_directions::left_open);
         EXPECT_EQ(trace_cell.up, seqan3::detail::trace_directions::up_open);
         EXPECT_EQ(trace_cell.w_left, seqan3::detail::trace_directions::left_open);
     }

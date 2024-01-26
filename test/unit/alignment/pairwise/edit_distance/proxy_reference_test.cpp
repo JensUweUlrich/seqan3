@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -11,17 +11,23 @@
 
 using seqan3::detail::proxy_reference;
 
-namespace std
+template <typename T>
+struct remove_reference
 {
+    using type = std::remove_reference_t<T>;
+};
+
 template <typename T>
 struct remove_reference<proxy_reference<T>>
 {
     using type = T;
 };
-} // namespace std
+
+template <typename T>
+using remove_reference_t = typename remove_reference<T>::type;
 
 template <typename reference_t>
-constexpr bool is_const_ref_v = std::is_const_v<std::remove_reference_t<reference_t>>;
+constexpr bool is_const_ref_v = std::is_const_v<remove_reference_t<reference_t>>;
 
 template <typename T>
 using reference_test = ::testing::Test;
@@ -35,8 +41,7 @@ using reference_types = ::testing::Types<int &,
                                          proxy_reference<int> const,
                                          proxy_reference<int const>,
                                          proxy_reference<int const> const>;
-using proxy_reference_types = ::testing::Types<proxy_reference<int>,
-                                               proxy_reference<int const>>;
+using proxy_reference_types = ::testing::Types<proxy_reference<int>, proxy_reference<int const>>;
 
 TYPED_TEST_SUITE(reference_test, reference_types, );
 TYPED_TEST_SUITE(proxy_reference_test, proxy_reference_types, );
@@ -55,7 +60,7 @@ TYPED_TEST(reference_test, construct_with_lvalue)
     EXPECT_EQ(a, 15);
     EXPECT_EQ(x, 15); // tracks a
 
-    if constexpr(!is_const_ref_v<reference_t>)
+    if constexpr (!is_const_ref_v<reference_t>)
     {
         x = 115;
         EXPECT_EQ(a, 115);
@@ -76,7 +81,7 @@ TYPED_TEST(reference_test, construct_with_reference)
     EXPECT_EQ(x, 15); // tracks a
     EXPECT_EQ(y, 15); // tracks a
 
-    if constexpr(!is_const_ref_v<reference_t>)
+    if constexpr (!is_const_ref_v<reference_t>)
     {
         x = 115;
         EXPECT_EQ(a, 115);
@@ -101,7 +106,7 @@ TYPED_TEST(reference_test, assign_with_lvalue)
     EXPECT_EQ(a, 15);
     EXPECT_EQ(x, 15); // tracks a
 
-    if constexpr(!is_const_ref_v<reference_t>)
+    if constexpr (!is_const_ref_v<reference_t>)
     {
         x = 115;
         EXPECT_EQ(a, 115);
@@ -122,7 +127,7 @@ TYPED_TEST(reference_test, assign_with_reference)
     EXPECT_EQ(x, 15); // tracks a
     EXPECT_EQ(y, 15); // tracks a
 
-    if constexpr(!is_const_ref_v<reference_t>)
+    if constexpr (!is_const_ref_v<reference_t>)
     {
         x = 115;
         EXPECT_EQ(a, 115);
@@ -151,7 +156,7 @@ TYPED_TEST(reference_test, assign_value)
     EXPECT_EQ(b, 500);
     EXPECT_EQ(y, 500); // tracks b
 
-    if constexpr(!is_const_ref_v<reference_t>)
+    if constexpr (!is_const_ref_v<reference_t>)
     {
         x = y; // still tracks a
         EXPECT_EQ(a, 500);
@@ -174,9 +179,9 @@ TYPED_TEST(proxy_reference_test, default_construct_and_move_assign)
     int a = 5;
     int b = 500;
 
-    reference_t x{}; // tracks nothing, yet
+    reference_t x{};    // tracks nothing, yet
     x = reference_t{a}; // tracks a, this statement is not valid for proxy_reference<int> const
-    reference_t y = b; // tracks b
+    reference_t y = b;  // tracks b
 
     a = 15;
     EXPECT_EQ(a, 15);
@@ -190,7 +195,7 @@ TYPED_TEST(proxy_reference_test, default_construct_and_move_assign)
     EXPECT_EQ(b, 500);
     EXPECT_EQ(y, 500); // tracks b
 
-    if constexpr(!is_const_ref_v<reference_t>)
+    if constexpr (!is_const_ref_v<reference_t>)
     {
         x = 5; // has no effect
         y = 50;
@@ -214,9 +219,9 @@ TYPED_TEST(proxy_reference_test, move_construct)
     int a = 5;
     int b = 500;
 
-    reference_t x{}; // tracks nothing, yet
+    reference_t x{};    // tracks nothing, yet
     x = reference_t{a}; // tracks a, this statement is not valid for proxy_reference<int> const
-    reference_t y = b; // tracks b
+    reference_t y = b;  // tracks b
 
     a = 15;
     EXPECT_EQ(a, 15);
@@ -230,7 +235,7 @@ TYPED_TEST(proxy_reference_test, move_construct)
     EXPECT_EQ(b, 500);
     EXPECT_EQ(y, 500); // tracks b
 
-    if constexpr(!is_const_ref_v<reference_t>)
+    if constexpr (!is_const_ref_v<reference_t>)
     {
         x = 5; // has no effect
         y = 50;

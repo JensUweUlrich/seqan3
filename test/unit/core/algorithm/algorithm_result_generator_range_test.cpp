@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -21,8 +21,8 @@
 
 struct dummy_executor
 {
-    using value_type      = size_t;
-    using reference       = value_type;
+    using value_type = size_t;
+    using reference = value_type;
     using difference_type = std::ptrdiff_t;
 
     std::optional<size_t> next_result()
@@ -41,7 +41,6 @@ struct dummy_executor
     }
 
 private:
-
     seqan3::detail::single_pass_input_view<decltype(std::views::iota(0u, 10u))> generator{std::views::iota(0u, 10u)};
 };
 
@@ -62,7 +61,9 @@ struct iterator_fixture<algorithm_result_generator_range_iterator> : ::testing::
     std::vector<size_t> expected_range{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 };
 
-INSTANTIATE_TYPED_TEST_SUITE_P(algorithm_result_generator_range_iterator, iterator_fixture, algorithm_result_generator_range_iterator, );
+INSTANTIATE_TYPED_TEST_SUITE_P(algorithm_result_generator_range_iterator,
+                               iterator_fixture,
+                               algorithm_result_generator_range_iterator, );
 
 // ----------------------------------------------------------------------------
 // Testing alignment range concepts and interfaces.

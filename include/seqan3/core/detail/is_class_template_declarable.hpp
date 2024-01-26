@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <seqan3/std/type_traits>
+#include <type_traits>
 
 #include <seqan3/core/platform.hpp>
 
@@ -38,16 +38,16 @@ namespace seqan3::detail
  *
  * \include test/snippet/core/detail/is_class_template_declarable_with.cpp
  */
-template <template <typename ...> typename query_t, typename ...args_t>
+template <template <typename...> typename query_t, typename... args_t>
 struct is_class_template_declarable_with :
-//!\cond
+    //!\cond
     public std::false_type
 //!\endcond
 {};
 
 //!\cond
-template <template <typename ...> typename query_t, typename ...args_t>
-requires requires { typename std::type_identity<query_t<args_t...>>::type; }
+template <template <typename...> typename query_t, typename... args_t>
+    requires requires { typename std::type_identity<query_t<args_t...>>::type; }
 struct is_class_template_declarable_with<query_t, args_t...> : public std::true_type
 {};
 //!\endcond
@@ -57,7 +57,7 @@ struct is_class_template_declarable_with<query_t, args_t...> : public std::true_
  * \tparam args_t  The template parameter pack to instantiate the template class with.
  * \relates seqan3::detail::is_class_template_declarable_with
  */
-template <template <typename ...> typename query_t, typename ...args_t>
+template <template <typename...> typename query_t, typename... args_t>
 inline constexpr bool is_class_template_declarable_with_v =
     is_class_template_declarable_with<query_t, args_t...>::value;
 

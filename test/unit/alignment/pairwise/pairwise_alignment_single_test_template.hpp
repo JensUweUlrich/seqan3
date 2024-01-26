@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -50,9 +50,8 @@ TYPED_TEST_P(pairwise_alignment_test, end_positions)
 {
     auto const & fixture = this->fixture();
 
-    seqan3::configuration align_cfg = fixture.config | seqan3::align_cfg::output_end_position{} |
-                                                       seqan3::align_cfg::output_score{} |
-                                                       seqan3::align_cfg::score_type<double>{};
+    seqan3::configuration align_cfg = fixture.config | seqan3::align_cfg::output_end_position{}
+                                    | seqan3::align_cfg::output_score{} | seqan3::align_cfg::score_type<double>{};
 
     std::vector database = fixture.sequence1;
     std::vector query = fixture.sequence2;
@@ -69,9 +68,8 @@ TYPED_TEST_P(pairwise_alignment_test, end_positions)
 TYPED_TEST_P(pairwise_alignment_test, begin_positions)
 {
     auto const & fixture = this->fixture();
-    seqan3::configuration align_cfg = fixture.config | seqan3::align_cfg::output_begin_position{} |
-                                                       seqan3::align_cfg::output_end_position{} |
-                                                       seqan3::align_cfg::output_score{};
+    seqan3::configuration align_cfg = fixture.config | seqan3::align_cfg::output_begin_position{}
+                                    | seqan3::align_cfg::output_end_position{} | seqan3::align_cfg::output_score{};
 
     std::vector database = fixture.sequence1;
     std::vector query = fixture.sequence2;
@@ -89,11 +87,10 @@ TYPED_TEST_P(pairwise_alignment_test, begin_positions)
 TYPED_TEST_P(pairwise_alignment_test, alignment)
 {
     auto const & fixture = this->fixture();
-    seqan3::configuration align_cfg = fixture.config | seqan3::align_cfg::output_score{} |
-                                                       seqan3::align_cfg::output_end_position{} |
-                                                       seqan3::align_cfg::output_begin_position{} |
-                                                       seqan3::align_cfg::output_alignment{} |
-                                                       seqan3::align_cfg::detail::debug{};
+    seqan3::configuration align_cfg = fixture.config | seqan3::align_cfg::output_score{}
+                                    | seqan3::align_cfg::output_end_position{}
+                                    | seqan3::align_cfg::output_begin_position{} | seqan3::align_cfg::output_alignment{}
+                                    | seqan3::align_cfg::detail::debug{};
 
     std::vector database = fixture.sequence1;
     std::vector query = fixture.sequence2;

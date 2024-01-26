@@ -1,13 +1,13 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #include <gtest/gtest.h>
 
-#include <seqan3/std/ranges>
+#include <ranges>
 
 #include <seqan3/alphabet/detail/debug_stream_alphabet.hpp>
 #include <seqan3/alphabet/quality/aliases.hpp>
@@ -50,8 +50,7 @@ TEST(view_trim, qualified)
                                     {'G'_dna5, 'I'_phred42},
                                     {'G'_dna5, '?'_phred42},
                                     {'A'_dna5, '5'_phred42}};
-    std::vector<seqan3::dna5q> cmp2{{'A'_dna5, 'I'_phred42},
-                                    {'G'_dna5, 'I'_phred42}};
+    std::vector<seqan3::dna5q> cmp2{{'A'_dna5, 'I'_phred42}, {'G'_dna5, 'I'_phred42}};
 
     // trim by phred_value
     EXPECT_RANGE_EQ(cmp1, vec | seqan3::views::trim_quality(20u));

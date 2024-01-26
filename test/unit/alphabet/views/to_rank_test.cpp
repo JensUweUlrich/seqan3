@@ -1,13 +1,13 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #include <gtest/gtest.h>
 
-#include <seqan3/std/ranges>
+#include <ranges>
 
 #include <seqan3/alphabet/nucleotide/dna5.hpp>
 #include <seqan3/alphabet/views/to_rank.hpp>
@@ -19,7 +19,7 @@ using seqan3::operator""_dna5;
 TEST(view_to_rank, basic)
 {
     seqan3::dna5_vector vec{"ACTTTGATA"_dna5};
-    std::vector<uint8_t> cmp{0,1,4,4,4,2,0,4,0};
+    std::vector<uint8_t> cmp{0, 1, 4, 4, 4, 2, 0, 4, 0};
 
     // pipe notation
     EXPECT_RANGE_EQ(cmp, vec | seqan3::views::to_rank);

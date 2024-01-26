@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -29,7 +29,6 @@ namespace seqan3::detail
 class ignore_output_iterator
 {
 public:
-
     /*!\name Member types
      * \{
      * \brief Associated types are void for output iterators, see also
@@ -37,13 +36,13 @@ public:
      */
 
     //!\brief The value type (void).
-    using value_type        = void;
+    using value_type = void;
     //!\brief The reference type (void).
-    using reference         = void;
+    using reference = void;
     //!\brief The pointer type (void).
-    using pointer           = void;
+    using pointer = void;
     //!\brief A signed integer type, usually std::ptrdiff_t.
-    using difference_type   = std::ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     //!\brief The iterator category type.
     using iterator_category = std::output_iterator_tag;
     //!\}
@@ -51,12 +50,12 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    ignore_output_iterator() = default;                                            //!< Defaulted
-    ignore_output_iterator(ignore_output_iterator const &) = default;              //!< Defaulted
-    ignore_output_iterator(ignore_output_iterator &&) = default;                   //!< Defaulted
-    ignore_output_iterator & operator= (ignore_output_iterator const &) = default; //!< Defaulted
-    ignore_output_iterator & operator= (ignore_output_iterator &&) = default;      //!< Defaulted
-    ~ignore_output_iterator() = default;                                           //!< Defaulted
+    ignore_output_iterator() = default;                                           //!< Defaulted
+    ignore_output_iterator(ignore_output_iterator const &) = default;             //!< Defaulted
+    ignore_output_iterator(ignore_output_iterator &&) = default;                  //!< Defaulted
+    ignore_output_iterator & operator=(ignore_output_iterator const &) = default; //!< Defaulted
+    ignore_output_iterator & operator=(ignore_output_iterator &&) = default;      //!< Defaulted
+    ~ignore_output_iterator() = default;                                          //!< Defaulted
     //!\}
 
     /*!\name Member functions
@@ -66,25 +65,25 @@ public:
      */
     //!\brief Emulates writing the passed value to the `null`-stream.
     template <typename type>
-    constexpr ignore_output_iterator & operator= (type const /*v*/) noexcept
+    constexpr ignore_output_iterator & operator=(type const /*v*/) noexcept
     {
         return *this;
     }
 
     //!\brief This operator performs no function in output iterators.
-    constexpr ignore_output_iterator & operator* () noexcept
+    constexpr ignore_output_iterator & operator*() noexcept
     {
         return *this;
     }
 
     //!\brief This operator performs no function in output iterators.
-    constexpr ignore_output_iterator & operator++ () noexcept
+    constexpr ignore_output_iterator & operator++() noexcept
     {
         return *this;
     }
 
     //!\brief This operator performs no function in output iterators.
-    constexpr ignore_output_iterator & operator++ (int) noexcept
+    constexpr ignore_output_iterator & operator++(int) noexcept
     {
         return *this;
     }

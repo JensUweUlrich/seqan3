@@ -1,139 +1,99 @@
-name: SeqAn3 CI on Linux
+name: Unit Linux
 
 on:
   push:
     branches:
-      # Push events to branches matching refs/heads/master
       - 'master'
-      # Push events to branches matching refs/heads/release*
-      - 'release*'
   pull_request:
+    types:
+      - unlabeled
+  workflow_dispatch:
 
 concurrency:
   group: linux-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name != 'push' }}
 
 env:
-  CMAKE_VERSION: 3.10.3
   SEQAN3_NO_VERSION_CHECK: 1
   TZ: Europe/Berlin
 
 defaults:
   run:
-    shell: bash -ex {0}
+    shell: bash -Eeuxo pipefail {0}
 
 jobs:
   build:
     name: ${{ matrix.name }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 120
+    if: github.repository_owner == 'seqan' || github.event_name == 'workflow_dispatch' || github.event.label.name == 'lint'
     strategy:
       fail-fast: true
       matrix:
         include:
-          - name: "Coverage gcc11"
-            cxx: "g++-11"
-            cc: "gcc-11"
-            build: coverage
-            build_type: Debug
+          - name: "clang17 libc++"
+            compiler: "clang-17"
+            build: unit
+            build_type: Release
+            cxx_flags: "-stdlib=libc++"
 
-          - name: "Unit gcc11"
-            cxx: "g++-11"
-            cc: "gcc-11"
+          - name: "clang17"
+            compiler: "clang-17"
             build: unit
             build_type: Release
 
-          - name: "Unit gcc10"
-            cxx: "g++-10"
-            cc: "gcc-10"
+          - name: "gcc13"
+            compiler: "gcc-13"
+            build: unit
+            build_type: Release
+            cxx_flags: "-std=c++23"
+
+          - name: "gcc12"
+            compiler: "gcc-12"
             build: unit
             build_type: Release
 
-          - name: "Unit gcc9 (c++2a)"
-            cxx: "g++-9"
-            cc: "gcc-9"
+          - name: "gcc11"
+            compiler: "gcc-11"
             build: unit
             build_type: Release
-            cxx_flags: "-std=c++2a"
 
     steps:
       - name: Checkout SeqAn3
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           path: seqan3
-          fetch-depth: 2
+          fetch-depth: 1
           submodules: true
 
       - name: Checkout SeqAn2
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: seqan/seqan
-          ref: develop
           path: seqan3/submodules/seqan
-          fetch-depth: 2
+          fetch-depth: 1
 
-      - name: Configure APT
-        continue-on-error: true
-        run: bash ./seqan3/.github/workflows/scripts/configure_apt.sh
+      - name: Setup toolchain
+        uses: seqan/actions/setup-toolchain@main
+        with:
+          compiler: ${{ matrix.compiler }}
+          ccache_size: 75M
 
       - name: Install CMake
-        run: bash ./seqan3/.github/workflows/scripts/install_cmake.sh
-
-      - name: Install ccache
-        run: |
-          conda install --yes --override-channels --channel conda-forge ccache
-          sudo ln -s $CONDA/bin/ccache /usr/bin/ccache
-
-      - name: Install compiler ${{ matrix.cxx }}
-        run: sudo apt-get install --yes ${{ matrix.cxx }}
-
-      - name: Install gcovr
-        if: matrix.build == 'coverage'
-        env:
-          CC: ${{ matrix.cc }}
-        run: |
-          sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/${CC/gcc/gcov} 100
-          pip install gcovr
-
-      - name: Load ccache
-        uses: actions/cache@v2
+        uses: seqan/actions/setup-cmake@main
         with:
-          path: .ccache
-          key: ${{ runner.os }}-${{ matrix.name }}-ccache-${{ github.ref }}-${{ github.run_number }}
-          # Restoring: From current branch, otherwise from base branch, otherwise from any branch.
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.name }}-ccache-${{ github.ref }}
-            ${{ runner.os }}-${{ matrix.name }}-ccache-${{ github.base_ref }}
-            ${{ runner.os }}-${{ matrix.name }}-ccache-
-
-      - name: Tool versions
-        run: |
-          env cmake --version
-          env ${{ matrix.cxx }} --version
+          cmake: 3.16.9
 
       - name: Configure tests
-        env:
-          CXX: ${{ matrix.cxx }}
-          CC: ${{ matrix.cc }}
         run: |
           mkdir seqan3-build
           cd seqan3-build
           cmake ../seqan3/test/${{ matrix.build }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
                                                    -DCMAKE_CXX_FLAGS="${{ matrix.cxx_flags }}" \
-                                                   -DSEQAN3_VERBOSE_TESTS=OFF \
-                                                   -DSEQAN3_BENCHMARK_MIN_TIME=0.01 \
-                                                   -DSEQAN3_COVERAGE_PARALLEL_LEVEL=2
+                                                   -DSEQAN3_VERBOSE_TESTS=OFF
           make -j2 gtest_build
 
       - name: Build tests
-        env:
-          CCACHE_BASEDIR: ${{ github.workspace }}
-          CCACHE_DIR: ${{ github.workspace }}/.ccache
-          CCACHE_COMPRESS: true
-          CCACHE_COMPRESSLEVEL: 12
-          CCACHE_MAXSIZE: ${{ matrix.build == 'coverage' && '525M' || '75M' }}
-          CCACHE_IGNOREOPTIONS: "-fprofile-abs-path"
-          GCOV: ${{ github.workspace }}/seqan3/.github/workflows/scripts/gcov.sh
         run: |
           ccache -z
           cd seqan3-build
@@ -141,14 +101,7 @@ jobs:
           ccache -sv
 
       - name: Run tests
-        if: matrix.build != 'coverage'
         run: |
           cd seqan3-build
           ctest . -j2 --output-on-failure
 
-      - name: Submit coverage build
-        if: matrix.build == 'coverage'
-        uses: codecov/codecov-action@v2
-        with:
-          files: ${{ github.workspace }}/seqan3-build/seqan3_coverage.xml
-          root_dir: ${{ github.workspace }}/seqan3

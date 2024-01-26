@@ -1,13 +1,13 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2020, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2020, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
-#include <iostream>
-
 #include <gtest/gtest.h>
+
+#include <iostream>
 
 #include <seqan3/alphabet/detail/debug_stream_alphabet.hpp>
 #include <seqan3/core/debug_stream/byte.hpp>
@@ -36,12 +36,8 @@ struct sam_file_seek_test : public ::testing::TestWithParam<sam_file_seek_test_f
         EXPECT_EQ(record.sequence(), expected_record.sequence());
         EXPECT_EQ(record.id(), expected_record.id());
         EXPECT_EQ(record.base_qualities(), expected_record.base_qualities());
-        EXPECT_EQ(record.sequence_position(), expected_record.sequence_position());
         EXPECT_EQ(record.reference_id(), expected_record.reference_id());
         EXPECT_EQ(record.reference_position(), expected_record.reference_position());
-        // reference sequence is unknown to sam_file, so alignment can't be constructed
-        // EXPECT_RANGE_EQ(std::get<0>(record.alignment()), std::get<0>(expected_record.alignment()));
-        EXPECT_RANGE_EQ(std::get<1>(record.alignment()), std::get<1>(expected_record.alignment()));
         EXPECT_RANGE_EQ(record.cigar_sequence(), expected_record.cigar_sequence());
         EXPECT_EQ(record.flag(), expected_record.flag());
         EXPECT_EQ(record.mapping_quality(), expected_record.mapping_quality());

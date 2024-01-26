@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -9,7 +9,7 @@
 
 #include <fstream>
 #include <iostream>
-#include <seqan3/std/ranges>
+#include <ranges>
 
 #include <seqan3/alphabet/detail/debug_stream_alphabet.hpp>
 #include <seqan3/alphabet/nucleotide/dna5.hpp>
@@ -18,7 +18,7 @@
 #include <seqan3/io/views/detail/istreambuf_view.hpp>
 #include <seqan3/io/views/detail/take_until_view.hpp>
 #include <seqan3/test/expect_range_eq.hpp>
-#include <seqan3/test/tmp_filename.hpp>
+#include <seqan3/test/tmp_directory.hpp>
 #include <seqan3/utility/char_operations/predicate.hpp>
 
 #include "../../../range/iterator_test_template.hpp"
@@ -51,14 +51,12 @@ TEST(view_istreambuf, basic)
     std::istringstream is{data};
 
     // construct from istream:
-    EXPECT_RANGE_EQ(seqan3::detail::istreambuf(is),
-                    data)
+    EXPECT_RANGE_EQ(seqan3::detail::istreambuf(is), data)
 
     // construct from streambuf
     is.clear();
     is.seekg(0, std::ios::beg);
-    EXPECT_RANGE_EQ(seqan3::detail::istreambuf(*is.rdbuf()),
-                    data)
+    EXPECT_RANGE_EQ(seqan3::detail::istreambuf(*is.rdbuf()), data)
 
     // combinability
     is.clear();
@@ -69,8 +67,7 @@ TEST(view_istreambuf, basic)
     // combinability 2
     is.clear();
     is.seekg(0, std::ios::beg);
-    EXPECT_RANGE_EQ(seqan3::detail::istreambuf(is) | seqan3::detail::take_until(seqan3::is_space),
-                    "ACGTATATATAT"sv);
+    EXPECT_RANGE_EQ(seqan3::detail::istreambuf(is) | seqan3::detail::take_until(seqan3::is_space), "ACGTATATATAT"sv);
 }
 
 TEST(view_istreambuf, concepts)
@@ -94,20 +91,19 @@ TEST(view_istreambuf, big_file_stram)
 {
     using namespace std::literals;
 
-    seqan3::test::tmp_filename file_name{"istream_storage"};
+    seqan3::test::tmp_directory tmp_dir{};
+    auto file_name = tmp_dir.path() / "istream_storage";
 
     {
-        std::ofstream os{file_name.get_path()};
-        for (size_t idx = 0; idx < 11000 ; ++idx)
+        std::ofstream os{file_name};
+        for (size_t idx = 0; idx < 11000; ++idx)
             os << "halloballo\n";
     }
 
-    std::ifstream istream{file_name.get_path()};
+    std::ifstream istream{file_name};
     auto v = seqan3::detail::istreambuf(istream);
     while (v.begin() != v.end())
     {
-        EXPECT_RANGE_EQ(v | seqan3::detail::take_until_or_throw_and_consume(seqan3::is_char<'\n'>),
-                        "halloballo"sv);
+        EXPECT_RANGE_EQ(v | seqan3::detail::take_until_or_throw_and_consume(seqan3::is_char<'\n'>), "halloballo"sv);
     }
-
 }

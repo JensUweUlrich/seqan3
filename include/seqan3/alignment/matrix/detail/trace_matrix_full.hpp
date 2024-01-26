@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,8 +12,8 @@
 
 #pragma once
 
-#include <seqan3/std/ranges>
-#include <seqan3/std/span>
+#include <ranges>
+#include <span>
 #include <vector>
 
 #include <seqan3/alignment/matrix/detail/matrix_coordinate.hpp>
@@ -21,7 +21,7 @@
 #include <seqan3/alignment/matrix/detail/trace_iterator.hpp>
 #include <seqan3/alignment/matrix/detail/two_dimensional_matrix.hpp>
 #include <seqan3/core/detail/template_inspection.hpp>
-#include <seqan3/utility/concept/exposition_only/core_language.hpp>
+#include <seqan3/utility/concept.hpp>
 #include <seqan3/utility/container/aligned_allocator.hpp>
 #include <seqan3/utility/views/repeat_n.hpp>
 #include <seqan3/utility/views/zip.hpp>
@@ -48,16 +48,13 @@ namespace seqan3::detail
  * trace column.
  */
 template <typename trace_t>
-//!\cond
     requires std::same_as<trace_t, trace_directions>
-//!\endcond
 class trace_matrix_full
 {
 private:
     //!\brief The type to store the complete trace matrix.
-    using matrix_t = two_dimensional_matrix<trace_t,
-                                            aligned_allocator<trace_t, sizeof(trace_t)>,
-                                            matrix_major_order::column>;
+    using matrix_t =
+        two_dimensional_matrix<trace_t, aligned_allocator<trace_t, sizeof(trace_t)>, matrix_major_order::column>;
     //!\brief The type of the score column which allocates memory for the entire column.
     using physical_column_t = std::vector<trace_t>;
     //!\brief The type of the virtual score column which only stores one value.
@@ -80,12 +77,12 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    trace_matrix_full() = default; //!< Defaulted.
-    trace_matrix_full(trace_matrix_full const &) = default; //!< Defaulted.
-    trace_matrix_full(trace_matrix_full &&) = default; //!< Defaulted.
+    trace_matrix_full() = default;                                      //!< Defaulted.
+    trace_matrix_full(trace_matrix_full const &) = default;             //!< Defaulted.
+    trace_matrix_full(trace_matrix_full &&) = default;                  //!< Defaulted.
     trace_matrix_full & operator=(trace_matrix_full const &) = default; //!< Defaulted.
-    trace_matrix_full & operator=(trace_matrix_full &&) = default; //!< Defaulted.
-    ~trace_matrix_full() = default; //!< Defaulted.
+    trace_matrix_full & operator=(trace_matrix_full &&) = default;      //!< Defaulted.
+    ~trace_matrix_full() = default;                                     //!< Defaulted.
 
     //!\}
 
@@ -112,8 +109,7 @@ public:
      * Basic exception guarantee. Might throw std::bad_alloc on resizing the internal matrices.
      */
     template <std::integral column_index_t, std::integral row_index_t>
-    void resize(column_index_type<column_index_t> const column_count,
-                row_index_type<row_index_t> const row_count)
+    void resize(column_index_type<column_index_t> const column_count, row_index_type<row_index_t> const row_count)
     {
         this->column_count = column_count.get();
         this->row_count = row_count.get();
@@ -173,9 +169,7 @@ public:
  * the three columns into a single range.
  */
 template <typename trace_t>
-//!\cond
     requires std::same_as<trace_t, trace_directions>
-//!\endcond
 class trace_matrix_full<trace_t>::iterator
 {
 private:
@@ -215,12 +209,12 @@ public:
     /*!\name Constructor, assignment and destructor
      * \{
      */
-    iterator() noexcept = default; //!< Defaulted.
-    iterator(iterator const &) noexcept = default; //!< Defaulted.
-    iterator(iterator &&) noexcept = default; //!< Defaulted.
+    iterator() noexcept = default;                             //!< Defaulted.
+    iterator(iterator const &) noexcept = default;             //!< Defaulted.
+    iterator(iterator &&) noexcept = default;                  //!< Defaulted.
     iterator & operator=(iterator const &) noexcept = default; //!< Defaulted.
-    iterator & operator=(iterator &&) noexcept = default; //!< Defaulted.
-    ~iterator() = default; //!< Defaulted.
+    iterator & operator=(iterator &&) noexcept = default;      //!< Defaulted.
+    ~iterator() = default;                                     //!< Defaulted.
 
     /*!\brief Initialises the iterator from the underlying matrix.
      *
@@ -242,9 +236,8 @@ public:
         auto column_begin = host_ptr->complete_matrix.data() + current_column_id * host_ptr->row_count;
         single_trace_column_type single_trace_column{column_begin, column_begin + host_ptr->row_count};
 
-        return column_proxy{views::zip(std::move(single_trace_column),
-                                       host_ptr->horizontal_column,
-                                       host_ptr->vertical_column)};
+        return column_proxy{
+            views::zip(std::move(single_trace_column), host_ptr->horizontal_column, host_ptr->vertical_column)};
     }
     //!\}
 
@@ -291,25 +284,23 @@ public:
  * assign it to the value type of the iterator.
  */
 template <typename trace_t>
-//!\cond
     requires std::same_as<trace_t, trace_directions>
-//!\endcond
 class trace_matrix_full<trace_t>::iterator::column_proxy : public std::ranges::view_interface<column_proxy>
 {
 private:
     //!\brief The represented column.
-    matrix_column_type column{};
+    matrix_column_type column;
 
 public:
     /*!\name Constructor, assignment and destructor
      * \{
      */
-    column_proxy() = default; //!< Defaulted.
-    column_proxy(column_proxy const &) = default; //!< Defaulted.
-    column_proxy(column_proxy &&) = default; //!< Defaulted.
+    column_proxy() = default;                                 //!< Defaulted.
+    column_proxy(column_proxy const &) = default;             //!< Defaulted.
+    column_proxy(column_proxy &&) = default;                  //!< Defaulted.
     column_proxy & operator=(column_proxy const &) = default; //!< Defaulted.
-    column_proxy & operator=(column_proxy &&) = default; //!< Defaulted.
-    ~column_proxy() = default; //!< Defaulted.
+    column_proxy & operator=(column_proxy &&) = default;      //!< Defaulted.
+    ~column_proxy() = default;                                //!< Defaulted.
 
     /*!\brief Initialises the proxy with the respective column.
     *
@@ -344,7 +335,7 @@ public:
     constexpr operator matrix_column_value_t() const
     {
         matrix_column_value_t target{};
-        std::ranges::copy(column, std::cpp20::back_inserter(target));
+        std::ranges::copy(column, std::back_inserter(target));
         return target;
     }
 };

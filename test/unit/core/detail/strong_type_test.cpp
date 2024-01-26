@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -18,7 +18,7 @@ namespace seqan3::detail
 {
 // Make operator| accessible by ADL for seqan3 namespace
 using seqan3::operator|;
-} // seqan3::detail
+} // namespace seqan3::detail
 
 struct pure_type : seqan3::detail::strong_type<int, pure_type>
 {
@@ -29,31 +29,25 @@ struct additive_type : seqan3::detail::strong_type<int, additive_type, seqan3::d
     using seqan3::detail::strong_type<int, additive_type, seqan3::detail::strong_type_skill::additive>::strong_type;
 };
 
-struct multiplicative_type : seqan3::detail::strong_type<int,
-                                                         multiplicative_type,
-                                                         seqan3::detail::strong_type_skill::multiplicative>
+struct multiplicative_type :
+    seqan3::detail::strong_type<int, multiplicative_type, seqan3::detail::strong_type_skill::multiplicative>
 {
-    using seqan3::detail::strong_type<int,
-                                      multiplicative_type,
-                                      seqan3::detail::strong_type_skill::multiplicative>::strong_type;
+    using seqan3::detail::strong_type<int, multiplicative_type, seqan3::detail::strong_type_skill::multiplicative>::
+        strong_type;
 };
 
-struct bitwise_type : seqan3::detail::strong_type<unsigned,
-                                                  bitwise_type,
-                                                  seqan3::detail::strong_type_skill::bitwise_logic>
+struct bitwise_type :
+    seqan3::detail::strong_type<unsigned, bitwise_type, seqan3::detail::strong_type_skill::bitwise_logic>
 {
-    using seqan3::detail::strong_type<unsigned,
-                                      bitwise_type,
-                                      seqan3::detail::strong_type_skill::bitwise_logic>::strong_type;
+    using seqan3::detail::strong_type<unsigned, bitwise_type, seqan3::detail::strong_type_skill::bitwise_logic>::
+        strong_type;
 };
 
-struct bitwise_shift_type : seqan3::detail::strong_type<unsigned,
-                                                        bitwise_shift_type,
-                                                        seqan3::detail::strong_type_skill::bitwise_shift>
+struct bitwise_shift_type :
+    seqan3::detail::strong_type<unsigned, bitwise_shift_type, seqan3::detail::strong_type_skill::bitwise_shift>
 {
-    using seqan3::detail::strong_type<unsigned,
-                                      bitwise_shift_type,
-                                      seqan3::detail::strong_type_skill::bitwise_shift>::strong_type;
+    using seqan3::detail::strong_type<unsigned, bitwise_shift_type, seqan3::detail::strong_type_skill::bitwise_shift>::
+        strong_type;
 };
 
 struct logic_type : seqan3::detail::strong_type<bool, logic_type, seqan3::detail::strong_type_skill::logic>
@@ -86,17 +80,18 @@ struct comp_type : seqan3::detail::strong_type<int, comp_type, seqan3::detail::s
     using seqan3::detail::strong_type<int, comp_type, seqan3::detail::strong_type_skill::comparable>::strong_type;
 };
 
-struct multi_skill_type : seqan3::detail::strong_type<int,
-                                                      multi_skill_type,
-                                                      seqan3::detail::strong_type_skill::additive  |
-                                                      seqan3::detail::strong_type_skill::increment |
-                                                      seqan3::detail::strong_type_skill::decrement |
-                                                      seqan3::detail::strong_type_skill::convert>
+struct multi_skill_type :
+    seqan3::detail::strong_type<
+        int,
+        multi_skill_type,
+        seqan3::detail::strong_type_skill::additive | seqan3::detail::strong_type_skill::increment
+            | seqan3::detail::strong_type_skill::decrement | seqan3::detail::strong_type_skill::convert>
 {
-    using seqan3::detail::strong_type<int, multi_skill_type, seqan3::detail::strong_type_skill::additive  |
-                                                             seqan3::detail::strong_type_skill::increment |
-                                                             seqan3::detail::strong_type_skill::decrement |
-                                                             seqan3::detail::strong_type_skill::convert>::strong_type;
+    using seqan3::detail::strong_type<
+        int,
+        multi_skill_type,
+        seqan3::detail::strong_type_skill::additive | seqan3::detail::strong_type_skill::increment
+            | seqan3::detail::strong_type_skill::decrement | seqan3::detail::strong_type_skill::convert>::strong_type;
 };
 
 TEST(strong_type, concept)
@@ -124,7 +119,7 @@ TEST(strong_type, pure_type)
         EXPECT_EQ(p.get(), 1);
     }
 
-    {  // From r-value
+    { // From r-value
         pure_type p{10};
         EXPECT_EQ(p.get(), 10);
     }

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -21,50 +21,34 @@
  */
 #if __has_include(<seqan/version.h>)
 
-#include <seqan/version.h>
+#    include <seqan/version.h>
 
 // Require minimum version of seqan2, see https://github.com/seqan/seqan3/issues/748
-#if SEQAN_VERSION_MAJOR == 2 && SEQAN_VERSION_MINOR >= 4
-#define SEQAN3_HAS_SEQAN2 1
-#endif
+#    if SEQAN_VERSION_MAJOR == 2 && SEQAN_VERSION_MINOR >= 4
+#        define SEQAN3_HAS_SEQAN2 1
+#    endif
 
 #endif
 
 #ifdef SEQAN3_HAS_SEQAN2
 
-#include <seqan3/std/ranges>
+#    include <ranges>
 
-#include <range/v3/range_fwd.hpp>
+#    include <seqan/basic.h>
 
-#include <seqan/basic.h>
-
-namespace ranges
-{
-
-/*!\brief This makes seqan2 iterators ranges-aware, i.e. makes them fulfil ranges::indirectly_readable which is in turn
- *        needed for ranges::input_iterator and ranges::input_range.
- */
-template <typename ...args_t>
-struct indirectly_readable_traits<seqan::Iter<args_t...>>
-{
-    using value_type = typename seqan::Value<seqan::Iter<args_t...>>::Type;
-};
-
-} // namespace ranges
-
-#if __cpp_lib_ranges // C++20 ranges available
+#    if __cpp_lib_ranges // C++20 ranges available
 namespace std
 {
 
 /*!\brief This makes seqan2 iterators ranges-aware, i.e. makes them fulfil std::indirectly_readable which is in turn
  *        needed for std::input_iterator and std::ranges::input_range.
  */
-template <typename ...args_t>
-struct indirectly_readable_traits<seqan::Iter<args_t...>>
+template <typename... args_t>
+struct indirectly_readable_traits<seqan2::Iter<args_t...>>
 {
-    using value_type = typename seqan::Value<seqan::Iter<args_t...>>::Type;
+    using value_type = typename seqan2::Value<seqan2::Iter<args_t...>>::Type;
 };
 
 } // namespace std
-#endif //__cpp_lib_ranges
-#endif // SEQAN3_HAS_SEQAN2
+#    endif //__cpp_lib_ranges
+#endif     // SEQAN3_HAS_SEQAN2

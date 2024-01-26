@@ -20,8 +20,9 @@ addons:
   apt:
     sources:
       - sourceline: 'ppa:ubuntu-toolchain-r/test'
+      - sourceline: 'ppa:ubuntu-toolchain-r/ppa'
     packages:
-      - g++-11
+      - gcc-10
 
 arch:
   - arm64
@@ -30,8 +31,8 @@ arch:
 
 env:
   global:
-    - CXX=g++-11
-    - CC=gcc-11
+    - CXX=g++-10
+    - CC=gcc-10
   jobs:
     - BUILD=unit
     - BUILD=snippet

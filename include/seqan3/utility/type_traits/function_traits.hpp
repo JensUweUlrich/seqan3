@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -41,7 +41,7 @@ struct function_traits;
  *
  * \include snippet/utility/type_traits/function_traits.cpp
  */
-template <typename return_t, typename ...args_t>
+template <typename return_t, typename... args_t>
 struct function_traits<std::function<return_t(args_t...)>>
 {
     //!\brief The number of arguments passed to the std::function target.
@@ -54,16 +54,18 @@ struct function_traits<std::function<return_t(args_t...)>>
      * \tparam index The position of the argument to get the type for; must be smaller than `argument_count`.
      */
     template <size_t index>
-    //!\cond
         requires (index < argument_count)
-    //!\endcond
     using argument_type_at = pack_traits::at<index, args_t...>;
 };
 
 //!\cond
 // Overload for all function types.
 template <typename function_t>
-    requires requires (function_t fn) { {std::function{fn}}; }
+    requires requires (function_t fn) {
+                 {
+                     std::function{fn}
+                 };
+             }
 struct function_traits<function_t> : function_traits<decltype(std::function{std::declval<function_t>()})>
 {};
 //!\endcond

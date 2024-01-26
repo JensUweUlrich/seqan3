@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -55,7 +55,8 @@ private:
 
     //!\brief Befriend seqan3::nucleotide_base.
     friend base_t;
-    //!\cond \brief Befriend seqan3::alphabet_base.
+    //!\cond
+    //!\brief Befriend seqan3::alphabet_base.
     friend base_t::base_t;
     //!\endcond
     //!\brief Befriend seqan3::rna15 so it can copy #char_to_rank.
@@ -65,12 +66,12 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr dna15()                           noexcept = default; //!< Defaulted.
-    constexpr dna15(dna15 const &)              noexcept = default; //!< Defaulted.
-    constexpr dna15(dna15 &&)                   noexcept = default; //!< Defaulted.
-    constexpr dna15 & operator=(dna15 const &)  noexcept = default; //!< Defaulted.
-    constexpr dna15 & operator=(dna15 &&)       noexcept = default; //!< Defaulted.
-    ~dna15()                                    noexcept = default; //!< Defaulted.
+    constexpr dna15() noexcept = default;                          //!< Defaulted.
+    constexpr dna15(dna15 const &) noexcept = default;             //!< Defaulted.
+    constexpr dna15(dna15 &&) noexcept = default;                  //!< Defaulted.
+    constexpr dna15 & operator=(dna15 const &) noexcept = default; //!< Defaulted.
+    constexpr dna15 & operator=(dna15 &&) noexcept = default;      //!< Defaulted.
+    ~dna15() noexcept = default;                                   //!< Defaulted.
 
     using base_t::base_t;
 
@@ -81,7 +82,7 @@ public:
      *
      * \stableapi{Since version 3.1.}
      */
-    template <std::same_as<rna15> t>    // Accept incomplete type
+    template <std::same_as<rna15> t> // Accept incomplete type
     constexpr dna15(t const & r) noexcept
     {
         assign_rank(r.to_rank());
@@ -90,53 +91,11 @@ public:
 
 private:
     //!\copydoc seqan3::dna4::rank_to_char_table
-    static constexpr char_type rank_to_char_table[alphabet_size]
-    {
-        'A',
-        'B',
-        'C',
-        'D',
-        'G',
-        'H',
-        'K',
-        'M',
-        'N',
-        'R',
-        'S',
-        'T',
-        'V',
-        'W',
-        'Y'
-    };
-
-    //!\copydoc seqan3::dna4::char_to_rank
-    static constexpr std::array<rank_type, 256> char_to_rank_table
-    {
-        [] () constexpr
-        {
-            std::array<rank_type, 256> ret{};
-
-            // initialize with UNKNOWN (std::array::fill unfortunately not constexpr)
-            for (auto & c : ret)
-                c = 8; // rank of 'N'
-
-            // reverse mapping for characters and their lowercase
-            for (size_t rnk = 0u; rnk < alphabet_size; ++rnk)
-            {
-                ret[rank_to_char_table[rnk]] = rnk;
-                ret[to_lower(rank_to_char_table[rnk])] = rnk;
-            }
-
-            // set U equal to T
-            ret['U'] = ret['T']; ret['u'] = ret['t'];
-
-            return ret;
-        }()
-    };
+    static constexpr char_type
+        rank_to_char_table[alphabet_size]{'A', 'B', 'C', 'D', 'G', 'H', 'K', 'M', 'N', 'R', 'S', 'T', 'V', 'W', 'Y'};
 
     //!\copydoc seqan3::dna4::rank_complement_table
-    static constexpr rank_type rank_complement_table[alphabet_size]
-    {
+    static constexpr rank_type rank_complement_table[alphabet_size]{
         11, // T is complement of 'A'_dna15
         12, // V is complement of 'B'_dna15
         4,  // G is complement of 'C'_dna15
@@ -172,7 +131,32 @@ private:
         using index_t = std::make_unsigned_t<char_type>;
         return char_to_rank_table[static_cast<index_t>(chr)];
     }
+
+    // clang-format off
+    //!\copydoc seqan3::dna4::char_to_rank
+    static constexpr std::array<rank_type, 256> char_to_rank_table
+    {
+        []() constexpr {
+            std::array<rank_type, 256> ret{};
+
+            ret.fill(8u); // initialize with UNKNOWN ('N')
+
+            // reverse mapping for characters and their lowercase
+            for (size_t rnk = 0u; rnk < alphabet_size; ++rnk)
+            {
+                ret[rank_to_char_table[rnk]] = rnk;
+                ret[to_lower(rank_to_char_table[rnk])] = rnk;
+            }
+
+            // set U equal to T
+            ret['U'] = ret['T'];
+            ret['u'] = ret['t'];
+
+            return ret;
+        }()
+    };
 };
+// clang-format on
 
 // ------------------------------------------------------------------
 // containers
@@ -219,7 +203,7 @@ constexpr dna15 operator""_dna15(char const c) noexcept
  *
  * \stableapi{Since version 3.1.}
  */
-inline dna15_vector operator""_dna15(char const * s, std::size_t n)
+SEQAN3_WORKAROUND_LITERAL dna15_vector operator""_dna15(char const * s, std::size_t n)
 {
     dna15_vector r;
     r.resize(n);
@@ -231,6 +215,6 @@ inline dna15_vector operator""_dna15(char const * s, std::size_t n)
 }
 //!\}
 
-} // inline namespace literals
+} // namespace literals
 
 } // namespace seqan3

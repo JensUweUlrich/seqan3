@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -13,7 +13,7 @@
 #pragma once
 
 #include <tuple>
-#include <seqan3/std/type_traits>
+#include <type_traits>
 
 #include <seqan3/core/platform.hpp>
 
@@ -26,7 +26,11 @@
  * \ingroup utility_type_traits
  * \returns true or false.
  */
-#define SEQAN3_IS_CONSTEXPR(...) std::integral_constant<bool, __builtin_constant_p((__VA_ARGS__, 0))>::value
+#if defined(__clang__) // https://github.com/llvm/llvm-project/issues/58078
+#    define SEQAN3_IS_CONSTEXPR(...) true
+#else
+#    define SEQAN3_IS_CONSTEXPR(...) std::integral_constant<bool, __builtin_constant_p(((void)__VA_ARGS__, 0))>::value
+#endif
 //!\endcond
 
 namespace seqan3
@@ -100,7 +104,7 @@ namespace seqan3::detail
  * \tparam dependent_ts Any provided types are ignored.
  * \see seqan3::detail::deferred_type_t
  */
-template <typename t, typename ...dependent_ts>
+template <typename t, typename... dependent_ts>
 struct deferred_type
 {
     //!\brief The type identity.
@@ -114,7 +118,7 @@ struct deferred_type
  * \tparam dependent_ts Any provided types are ignored.
  * \see seqan3::detail::deferred_type
  */
-template <typename t, typename ...dependent_ts>
+template <typename t, typename... dependent_ts>
 using deferred_type_t = typename deferred_type<t, dependent_ts...>::type;
 
 // ----------------------------------------------------------------------------
@@ -145,10 +149,10 @@ constexpr bool decays_to_ignore_v = std::is_same_v<std::remove_cvref_t<t>, ignor
  * \ingroup utility_type_traits
  */
 #if defined(__clang__)
-#   define SEQAN3_IS_SAME(...)              __is_same(__VA_ARGS__)
+#    define SEQAN3_IS_SAME(...) __is_same(__VA_ARGS__)
 #elif defined(__GNUC__)
-#   define SEQAN3_IS_SAME(...)              __is_same_as(__VA_ARGS__)
+#    define SEQAN3_IS_SAME(...) __is_same_as(__VA_ARGS__)
 #else
-#   define SEQAN3_IS_SAME(...)              std::is_same_v<__VA_ARGS__>
+#    define SEQAN3_IS_SAME(...) std::is_same_v<__VA_ARGS__>
 #endif
 //!\endcond

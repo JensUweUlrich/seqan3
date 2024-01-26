@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -15,10 +15,10 @@
 #include <seqan3/io/stream/detail/fast_ostreambuf_iterator.hpp>
 #include <seqan3/test/performance/sequence_generator.hpp>
 #include <seqan3/test/seqan2.hpp>
-#include <seqan3/test/tmp_filename.hpp>
+#include <seqan3/test/tmp_directory.hpp>
 
 #if SEQAN3_HAS_SEQAN2
-#include <seqan/stream.h>
+#    include <seqan/stream.h>
 #endif
 
 enum class tag
@@ -35,8 +35,9 @@ template <tag id>
 void write_all(benchmark::State & state)
 {
     /* prepare file for writing */
-    seqan3::test::tmp_filename filename{"foo"};
-    std::ofstream os{filename.get_path(), std::ios::binary};
+    seqan3::test::tmp_directory tmp{};
+    auto filename = tmp.path() / "foo";
+    std::ofstream os{filename, std::ios::binary};
 
     // sequence to write:
     std::vector<char> sequence = seqan3::test::generate_sequence<char>(10'000, 0, 0);
@@ -47,7 +48,7 @@ void write_all(benchmark::State & state)
     /* start benchmark */
     for (auto _ : state)
     {
-        std::ofstream os{filename.get_path(), std::ios::binary};
+        std::ofstream os{filename, std::ios::binary};
 
         auto it = [&os]()
         {
@@ -63,24 +64,24 @@ void write_all(benchmark::State & state)
             {
                 return seqan3::detail::fast_ostreambuf_iterator<char>{*os.rdbuf()};
             }
-        #ifdef SEQAN3_HAS_SEQAN2
+#ifdef SEQAN3_HAS_SEQAN2
             else if constexpr (id == tag::seqan2_stream_it || id == tag::seqan2_stream_it_write_range)
             {
-                return seqan::Iter<std::ofstream, seqan::StreamIterator<seqan::Output>>{os};
+                return seqan2::Iter<std::ofstream, seqan2::StreamIterator<seqan2::Output>>{os};
             }
-        #endif
+#endif
         }();
 
         if constexpr (id == tag::seqan3_streambuf_it_write_range)
         {
             it.write_range(sequence);
         }
-        #ifdef SEQAN3_HAS_SEQAN2
+#ifdef SEQAN3_HAS_SEQAN2
         else if constexpr (id == tag::seqan2_stream_it_write_range)
         {
-            seqan::write(it, seqan2_sequence);
+            seqan2::write(it, seqan2_sequence);
         }
-        #endif
+#endif
         else
         {
             for (auto chr : sequence)

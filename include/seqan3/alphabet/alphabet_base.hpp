@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -13,8 +13,8 @@
 #pragma once
 
 #include <cassert>
-#include <seqan3/std/concepts>
-#include <seqan3/std/type_traits>
+#include <concepts>
+#include <type_traits>
 
 #include <seqan3/alphabet/concept.hpp>
 #include <seqan3/utility/detail/integer_traits.hpp>
@@ -84,12 +84,12 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr alphabet_base()                                   noexcept = default; //!< Defaulted.
-    constexpr alphabet_base(alphabet_base const &)              noexcept = default; //!< Defaulted.
-    constexpr alphabet_base(alphabet_base &&)                   noexcept = default; //!< Defaulted.
-    constexpr alphabet_base & operator=(alphabet_base const &)  noexcept = default; //!< Defaulted.
-    constexpr alphabet_base & operator=(alphabet_base &&)       noexcept = default; //!< Defaulted.
-    ~alphabet_base()                                            noexcept = default; //!< Defaulted.
+    constexpr alphabet_base() noexcept = default;                                  //!< Defaulted.
+    constexpr alphabet_base(alphabet_base const &) noexcept = default;             //!< Defaulted.
+    constexpr alphabet_base(alphabet_base &&) noexcept = default;                  //!< Defaulted.
+    constexpr alphabet_base & operator=(alphabet_base const &) noexcept = default; //!< Defaulted.
+    constexpr alphabet_base & operator=(alphabet_base &&) noexcept = default;      //!< Defaulted.
+    ~alphabet_base() noexcept = default;                                           //!< Defaulted.
 
     //!\}
 
@@ -113,9 +113,7 @@ public:
      * \stableapi{Since version 3.1.}
      */
     constexpr char_type to_char() const noexcept
-    //!\cond
         requires (!std::same_as<char_t, void>)
-    //!\endcond
     {
         return derived_type::rank_to_char(rank);
     }
@@ -163,9 +161,7 @@ public:
      * \stableapi{Since version 3.1.}
      */
     constexpr derived_type & assign_char(char_type const chr) noexcept
-    //!\cond
         requires (!std::same_as<char_t, void>)
-    //!\endcond
     {
         rank = derived_type::char_to_rank(chr);
         return static_cast<derived_type &>(*this);
@@ -200,7 +196,7 @@ public:
      *
      * \stableapi{Since version 3.1.}
      */
-    static detail::min_viable_uint_t<size> constexpr alphabet_size = size;
+    static constexpr detail::min_viable_uint_t<size> alphabet_size = size;
 
     //!\name Comparison operators
     //!\{
@@ -262,7 +258,7 @@ public:
 
 private:
     //!\brief The value of the alphabet letter is stored as the rank.
-    rank_type rank{};
+    rank_type rank;
 };
 
 } // namespace seqan3

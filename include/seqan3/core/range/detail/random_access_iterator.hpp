@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -13,7 +13,7 @@
 #pragma once
 
 #include <cassert>
-#include <seqan3/std/iterator>
+#include <iterator>
 #include <type_traits>
 
 #include <seqan3/core/platform.hpp>
@@ -37,7 +37,7 @@ namespace seqan3::detail
  * Since the CRTP parameter is in fact a template template, CRTP instantiation looks a little different, e.g.:
  * \include test/snippet/range/detail/random_access_iterator.cpp
  */
-template <typename range_type, template <typename ...> typename derived_t_template>
+template <typename range_type, template <typename...> typename derived_t_template, typename... args_t>
 class random_access_iterator_base
 {
 protected:
@@ -49,18 +49,11 @@ protected:
     position_type pos{static_cast<position_type>(0)};
 
     //!\brief This friend declaration is required to allow non-const to const-construction.
-    template <typename range_type2, template <typename ...> typename derived_t_template2>
-    //!\cond
-#if !SEQAN3_WORKAROUND_FURTHER_CONSTRAIN_FRIEND_DECLARATION
-        requires std::is_const_v<range_type> && (!std::is_const_v<range_type2>) &&
-                 std::is_same_v<std::remove_const_t<range_type>, range_type2> &&
-                 std::is_same_v<derived_t_template2, derived_t_template>
-#endif // !SEQAN3_WORKAROUND_FURTHER_CONSTRAIN_FRIEND_DECLARATION
-    //!\endcond
+    template <typename range_type2, template <typename...> typename derived_t_template2, typename... args2_t>
     friend class random_access_iterator_base;
 
     //!\brief Because this is CRTP, we know the full derived type:
-    using derived_t = derived_t_template <range_type>;
+    using derived_t = derived_t_template<range_type>;
 
 public:
     //!\brief Type for distances between iterators.
@@ -88,27 +81,27 @@ public:
     //!\brief Copy construction via assignment.
     constexpr random_access_iterator_base & operator=(random_access_iterator_base const &) = default;
     //!\brief Move constructor.
-    constexpr random_access_iterator_base (random_access_iterator_base &&) = default;
+    constexpr random_access_iterator_base(random_access_iterator_base &&) = default;
     //!\brief Move assignment.
     constexpr random_access_iterator_base & operator=(random_access_iterator_base &&) = default;
     //!\brief Use default deconstructor.
     ~random_access_iterator_base() = default;
 
     //!\brief Construct by host, default position pointer with 0.
-    explicit constexpr random_access_iterator_base(range_type & host) noexcept : host{&host} {}
+    explicit constexpr random_access_iterator_base(range_type & host) noexcept : host{&host}
+    {}
     //!\brief Construct by host and explicit position.
-    constexpr random_access_iterator_base(range_type & host, position_type const pos) noexcept :
-        host{&host}, pos{pos}
+    constexpr random_access_iterator_base(range_type & host, position_type const pos) noexcept : host{&host}, pos{pos}
     {}
 
     //!\brief Constructor for const version from non-const version.
     template <typename range_type2>
-    //!\cond
-        requires std::is_const_v<range_type> && (!std::is_const_v<range_type2>) &&
-                 std::is_same_v<std::remove_const_t<range_type>, range_type2>
-    //!\endcond
-    constexpr random_access_iterator_base(random_access_iterator_base<range_type2, derived_t_template> const & rhs) noexcept :
-        host{rhs.host}, pos{rhs.pos}
+        requires std::is_const_v<range_type>
+                  && (!std::is_const_v<range_type2>) && std::is_same_v<std::remove_const_t<range_type>, range_type2>
+    constexpr random_access_iterator_base(
+        random_access_iterator_base<range_type2, derived_t_template> const & rhs) noexcept :
+        host{rhs.host},
+        pos{rhs.pos}
     {}
     //!\}
 
@@ -120,9 +113,7 @@ public:
 
     //!\brief Checks whether `*this` is equal to `rhs`.
     template <typename range_type2>
-    //!\cond
         requires std::is_same_v<std::remove_const_t<range_type>, std::remove_const_t<range_type2>>
-    //!\endcond
     constexpr bool operator==(random_access_iterator_base<range_type2, derived_t_template> const & rhs) const noexcept
     {
         return pos == rhs.pos;
@@ -130,9 +121,7 @@ public:
 
     //!\brief Checks whether `*this` is not equal to `rhs`.
     template <typename range_type2>
-    //!\cond
         requires std::is_same_v<std::remove_const_t<range_type>, std::remove_const_t<range_type2>>
-    //!\endcond
     constexpr bool operator!=(random_access_iterator_base<range_type2, derived_t_template> const & rhs) const noexcept
     {
         return !(*this == rhs);
@@ -140,9 +129,7 @@ public:
 
     //!\brief Checks whether `*this` is less than `rhs`.
     template <typename range_type2>
-    //!\cond
         requires std::is_same_v<std::remove_const_t<range_type>, std::remove_const_t<range_type2>>
-    //!\endcond
     constexpr bool operator<(random_access_iterator_base<range_type2, derived_t_template> const & rhs) const noexcept
     {
         return static_cast<bool>(pos < rhs.pos);
@@ -150,9 +137,7 @@ public:
 
     //!\brief Checks whether `*this` is greater than `rhs`.
     template <typename range_type2>
-    //!\cond
         requires std::is_same_v<std::remove_const_t<range_type>, std::remove_const_t<range_type2>>
-    //!\endcond
     constexpr bool operator>(random_access_iterator_base<range_type2, derived_t_template> const & rhs) const noexcept
     {
         return pos > rhs.pos;
@@ -160,9 +145,7 @@ public:
 
     //!\brief Checks whether `*this` is less than or equal to `rhs`.
     template <typename range_type2>
-    //!\cond
         requires std::is_same_v<std::remove_const_t<range_type>, std::remove_const_t<range_type2>>
-    //!\endcond
     constexpr bool operator<=(random_access_iterator_base<range_type2, derived_t_template> const & rhs) const noexcept
     {
         return pos <= rhs.pos;
@@ -170,9 +153,7 @@ public:
 
     //!\brief Checks whether `*this` is greater than or equal to `rhs`.
     template <typename range_type2>
-    //!\cond
         requires std::is_same_v<std::remove_const_t<range_type>, std::remove_const_t<range_type2>>
-    //!\endcond
     constexpr bool operator>=(random_access_iterator_base<range_type2, derived_t_template> const & rhs) const noexcept
     {
         return pos >= rhs.pos;
@@ -277,21 +258,20 @@ public:
     }
 
     //!\brief Return underlying container value currently pointed at.
-    constexpr reference operator[](position_type const n) const noexcept(noexcept((*host)[pos+n]))
+    constexpr reference operator[](position_type const n) const noexcept(noexcept((*host)[pos + n]))
     {
         return (*host)[pos + n];
     }
     //!\}
 
 private:
-
     //!\brief Cast this to derived type.
-    constexpr derived_t* this_derived()
+    constexpr derived_t * this_derived()
     {
-        return static_cast<derived_t*>(this);
+        return static_cast<derived_t *>(this);
     }
 
-    //!\copydoc this_derived
+    //!\copydoc seqan3::detail::random_access_iterator_base::this_derived
     constexpr derived_t const * this_derived() const
     {
         return static_cast<derived_t const *>(this);
@@ -307,8 +287,7 @@ private:
  * a requirement for this.
  */
 template <typename range_type>
-class random_access_iterator :
-    public random_access_iterator_base<range_type, random_access_iterator>
+class random_access_iterator : public random_access_iterator_base<range_type, random_access_iterator>
 {
 private:
     //!\brief Shortcut for the base class.
@@ -321,12 +300,12 @@ public:
      * \brief Make the parent's member types visible.
      * \{
      */
-    using typename base::difference_type;
-    using typename base::value_type;
-    using typename base::reference;
     using typename base::const_reference;
-    using typename base::pointer;
+    using typename base::difference_type;
     using typename base::iterator_category;
+    using typename base::pointer;
+    using typename base::reference;
+    using typename base::value_type;
     //!\}
 
     //!\brief Import the parent's constructors.

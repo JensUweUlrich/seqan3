@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -13,24 +13,22 @@
 
 #pragma once
 
-#include <seqan3/std/concepts>
+#include <concepts>
 #include <exception>
 
 #include <seqan3/core/configuration/configuration.hpp>
 #include <seqan3/core/debug_stream/debug_stream_type.hpp>
 #include <seqan3/core/detail/empty_type.hpp>
 #include <seqan3/core/detail/template_inspection.hpp>
-#include <seqan3/search/fm_index/concept.hpp>
 #include <seqan3/search/fm_index/bi_fm_index_cursor.hpp>
+#include <seqan3/search/fm_index/concept.hpp>
 #include <seqan3/search/fm_index/fm_index_cursor.hpp>
 
 namespace seqan3::detail
 {
 // forward declaration
 template <typename search_configuration_t>
-#if !SEQAN3_WORKAROUND_GCC_93467
-    requires is_type_specialisation_of_v<search_configuration_t, configuration>
-#endif // !SEQAN3_WORKAROUND_GCC_93467
+    requires seqan3::detail::is_type_specialisation_of_v<search_configuration_t, configuration>
 struct policy_search_result_builder;
 } // namespace seqan3::detail
 
@@ -70,15 +68,13 @@ template <typename query_id_type,
           typename cursor_type,
           typename reference_id_type,
           typename reference_begin_position_type>
-//!\cond
-    requires (std::integral<query_id_type> || std::same_as<query_id_type, detail::empty_type>) &&
-             (detail::template_specialisation_of<cursor_type, fm_index_cursor> ||
-                     detail::template_specialisation_of<cursor_type, bi_fm_index_cursor> ||
-                     std::same_as<cursor_type, detail::empty_type>) &&
-             (std::integral<reference_id_type> || std::same_as<reference_id_type, detail::empty_type>) &&
-             (std::integral<reference_begin_position_type> || std::same_as<reference_begin_position_type,
-                                                                           detail::empty_type>)
-//!\endcond
+    requires (std::integral<query_id_type> || std::same_as<query_id_type, detail::empty_type>)
+          && (detail::template_specialisation_of<cursor_type, fm_index_cursor>
+              || detail::template_specialisation_of<cursor_type, bi_fm_index_cursor>
+              || std::same_as<cursor_type, detail::empty_type>)
+          && (std::integral<reference_id_type> || std::same_as<reference_id_type, detail::empty_type>)
+          && (std::integral<reference_begin_position_type>
+              || std::same_as<reference_begin_position_type, detail::empty_type>)
 class search_result
 {
 private:
@@ -93,23 +89,19 @@ private:
 
     // Grant the policy access to private constructors.
     template <typename search_configuration_t>
-    #if !SEQAN3_WORKAROUND_GCC_93467
-    //!\cond
-        requires detail::is_type_specialisation_of_v<search_configuration_t, configuration>
-    //!\endcond
-    #endif // !SEQAN3_WORKAROUND_GCC_93467
+        requires seqan3::detail::is_type_specialisation_of_v<search_configuration_t, configuration>
     friend struct detail::policy_search_result_builder;
 
 public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    search_result() = default; //!< Defaulted.
-    search_result(search_result const &) = default; //!< Defaulted.
-    search_result(search_result &&) = default; //!< Defaulted.
+    search_result() = default;                                  //!< Defaulted.
+    search_result(search_result const &) = default;             //!< Defaulted.
+    search_result(search_result &&) = default;                  //!< Defaulted.
     search_result & operator=(search_result const &) = default; //!< Defaulted.
-    search_result & operator=(search_result &&) = default; //!< Defaulted.
-    ~search_result() = default; //!< Defaulted.
+    search_result & operator=(search_result &&) = default;      //!< Defaulted.
+    ~search_result() = default;                                 //!< Defaulted.
 
     //!\}
 
@@ -200,9 +192,7 @@ public:
  * \relates seqan3::debug_stream_type
  */
 template <typename char_t, typename search_result_t>
-//!\cond
     requires detail::is_type_specialisation_of_v<std::remove_cvref_t<search_result_t>, search_result>
-//!\endcond
 inline debug_stream_type<char_t> & operator<<(debug_stream_type<char_t> & stream, search_result_t && result)
 {
     using result_type_list = detail::transfer_template_args_onto_t<std::remove_cvref_t<search_result_t>, type_list>;

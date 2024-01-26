@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -17,7 +17,7 @@ struct non_writeable_alphabet
     rank_t to_rank() const noexcept;
     char_t to_char() const noexcept;
 
-    constexpr static bool alphabet_size{1};
+    static constexpr bool alphabet_size{1};
 
     friend bool operator<(non_writeable_alphabet, non_writeable_alphabet);
     friend bool operator<=(non_writeable_alphabet, non_writeable_alphabet);
@@ -26,7 +26,6 @@ struct non_writeable_alphabet
     friend bool operator==(non_writeable_alphabet, non_writeable_alphabet);
     friend bool operator!=(non_writeable_alphabet, non_writeable_alphabet);
 };
-
 
 // see issue https://github.com/seqan/seqan3/issues/1518
 TEST(non_writeable_alphabet_test, issue1518)

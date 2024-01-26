@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -13,7 +13,7 @@
 #pragma once
 
 #include <seqan3/alignment/matrix/detail/alignment_optimum.hpp>
-#include <seqan3/utility/concept/exposition_only/core_language.hpp>
+#include <seqan3/utility/concept.hpp>
 #include <seqan3/utility/simd/concept.hpp>
 
 namespace seqan3::detail
@@ -30,9 +30,7 @@ namespace seqan3::detail
  * the underlying two-dimensional matrix.
  */
 template <typename score_type>
-//!\cond
     requires arithmetic<score_type> || simd_concept<score_type>
-//!\endcond
 struct alignment_algorithm_state
 {
     //!\brief The cached gap extension score.
@@ -58,4 +56,4 @@ struct alignment_algorithm_state
 template <typename score_type>
 alignment_algorithm_state(score_type, score_type) -> alignment_algorithm_state<score_type>;
 //!\}
-}  // namespace seqan3::detail
+} // namespace seqan3::detail

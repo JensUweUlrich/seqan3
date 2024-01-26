@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -423,7 +423,7 @@ constexpr bool shift_left_test()
 {
     seqan3::dynamic_bitset t1{0b1111'0001'0000'1100};
 
-    bool res = t1 << 3 == seqan3::dynamic_bitset{0b1000'1000'0110'0000};
+    bool res = (t1 << 3) == seqan3::dynamic_bitset{0b1000'1000'0110'0000};
     t1 <<= 4;
     res &= t1 == seqan3::dynamic_bitset{"0001000011000000"};
 
@@ -441,7 +441,7 @@ constexpr bool shift_right_test()
 {
     seqan3::dynamic_bitset t1{0b1111'0001'0000'1100};
 
-    bool res = t1 >> 3 == seqan3::dynamic_bitset{"0001111000100001"};
+    bool res = (t1 >> 3) == seqan3::dynamic_bitset{"0001111000100001"};
     t1 >>= 4;
     res &= t1 == seqan3::dynamic_bitset{"0000111100010000"};
 

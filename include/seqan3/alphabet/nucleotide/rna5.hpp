@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -53,7 +53,8 @@ private:
 
     //!\brief Befriend nucleotide_base.
     friend base_t;
-    //!\cond \brief Befriend seqan3::alphabet_base.
+    //!\cond
+    //!\brief Befriend seqan3::alphabet_base.
     friend base_t::base_t;
     //!\endcond
 
@@ -61,12 +62,12 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr rna5()                          noexcept = default; //!< Defaulted.
-    constexpr rna5(rna5 const &)              noexcept = default; //!< Defaulted.
-    constexpr rna5(rna5 &&)                   noexcept = default; //!< Defaulted.
-    constexpr rna5 & operator=(rna5 const &)  noexcept = default; //!< Defaulted.
-    constexpr rna5 & operator=(rna5 &&)       noexcept = default; //!< Defaulted.
-    ~rna5()                                   noexcept = default; //!< Defaulted.
+    constexpr rna5() noexcept = default;                         //!< Defaulted.
+    constexpr rna5(rna5 const &) noexcept = default;             //!< Defaulted.
+    constexpr rna5(rna5 &&) noexcept = default;                  //!< Defaulted.
+    constexpr rna5 & operator=(rna5 const &) noexcept = default; //!< Defaulted.
+    constexpr rna5 & operator=(rna5 &&) noexcept = default;      //!< Defaulted.
+    ~rna5() noexcept = default;                                  //!< Defaulted.
 
     using base_t::base_t;
 
@@ -86,14 +87,7 @@ public:
 
 private:
     //!\copydoc seqan3::dna4::rank_to_char_table
-    static constexpr char_type rank_to_char_table[alphabet_size]
-    {
-        'A',
-        'C',
-        'G',
-        'N',
-        'U'
-    };
+    static constexpr char_type rank_to_char_table[alphabet_size]{'A', 'C', 'G', 'N', 'U'};
 
     //!\copydoc seqan3::dna4::rank_complement
     static constexpr rank_type rank_complement(rank_type const rank)
@@ -124,7 +118,6 @@ private:
  * \stableapi{Since version 3.1.}
  */
 using rna5_vector = std::vector<rna5>;
-
 
 // ------------------------------------------------------------------
 // literals
@@ -160,7 +153,7 @@ constexpr rna5 operator""_rna5(char const c) noexcept
  *
  * \stableapi{Since version 3.1.}
  */
-inline rna5_vector operator""_rna5(char const * s, std::size_t n)
+SEQAN3_WORKAROUND_LITERAL rna5_vector operator""_rna5(char const * s, std::size_t n)
 {
     rna5_vector r;
     r.resize(n);
@@ -172,6 +165,6 @@ inline rna5_vector operator""_rna5(char const * s, std::size_t n)
 }
 //!\}
 
-} // inline namespace literals
+} // namespace literals
 
 } // namespace seqan3

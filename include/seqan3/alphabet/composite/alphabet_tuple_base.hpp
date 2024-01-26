@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -13,19 +13,18 @@
 #pragma once
 
 #include <cassert>
-#include <seqan3/std/concepts>
+#include <concepts>
 #include <utility>
 
 #include <seqan3/alphabet/alphabet_base.hpp>
 #include <seqan3/alphabet/composite/detail.hpp>
 #include <seqan3/alphabet/concept.hpp>
 #include <seqan3/alphabet/detail/alphabet_proxy.hpp>
-#include <seqan3/utility/concept/exposition_only/core_language.hpp>
 #include <seqan3/utility/detail/integer_traits.hpp>
 #include <seqan3/utility/tuple/concept.hpp>
 #include <seqan3/utility/type_list/detail/type_list_algorithm.hpp>
-#include <seqan3/utility/type_list/type_list.hpp>
 #include <seqan3/utility/type_list/traits.hpp>
+#include <seqan3/utility/type_list/type_list.hpp>
 #include <seqan3/utility/type_pack/traits.hpp>
 #include <seqan3/utility/type_traits/detail/transformation_trait_or.hpp>
 
@@ -33,30 +32,27 @@ namespace seqan3::detail
 {
 
 //!\brief Prevents wrong instantiations of seqan3::alphabet_tuple_base's equality comparison operators.
-template <typename tuple_derived_t, typename rhs_t, typename ... component_types>
+template <typename tuple_derived_t, typename rhs_t, typename... component_types>
 inline constexpr bool tuple_general_guard =
-                      (!std::same_as<rhs_t, tuple_derived_t>) &&
-                      (!std::same_as<rhs_t, alphabet_tuple_base<component_types...>>) &&
-                      (!std::is_base_of_v<tuple_derived_t, rhs_t>) &&
-                      (!(std::same_as<rhs_t, component_types> || ...)) &&
-                      (!list_traits::contains<tuple_derived_t, recursive_required_types_t<rhs_t>>);
-
+    (!std::same_as<rhs_t, tuple_derived_t>)&&(!std::same_as<rhs_t, alphabet_tuple_base<component_types...>>)&&(
+        !std::is_base_of_v<tuple_derived_t, rhs_t>)&&(!(std::same_as<rhs_t, component_types> || ...))
+    && (!list_traits::contains<tuple_derived_t, recursive_required_types_t<rhs_t>>);
 
 //!\brief Prevents wrong instantiations of seqan3::alphabet_tuple_base's equality comparison operators.
-template <typename lhs_t, typename tuple_derived_t, typename rhs_t, typename ... component_types>
+template <typename lhs_t, typename tuple_derived_t, typename rhs_t, typename... component_types>
 inline constexpr bool tuple_eq_guard =
     (instantiate_if_v<lazy<weakly_equality_comparable_with_trait, rhs_t, component_types>,
-                      std::same_as<lhs_t, tuple_derived_t> &&
-                      tuple_general_guard<tuple_derived_t, rhs_t, component_types...>
-                      > || ...);
+                      std::same_as<lhs_t, tuple_derived_t>
+                          && tuple_general_guard<tuple_derived_t, rhs_t, component_types...>>
+     || ...);
 
 //!\brief Prevents wrong instantiations of seqan3::alphabet_tuple_base's ordered comparison operators.
-template <typename lhs_t, typename tuple_derived_t, typename rhs_t, typename ... component_types>
+template <typename lhs_t, typename tuple_derived_t, typename rhs_t, typename... component_types>
 inline constexpr bool tuple_order_guard =
     (instantiate_if_v<lazy<weakly_ordered_with_trait, rhs_t, component_types>,
-                      std::same_as<lhs_t, tuple_derived_t> &&
-                      tuple_general_guard<lhs_t, tuple_derived_t, rhs_t, component_types...>
-                      > || ...);
+                      std::same_as<lhs_t, tuple_derived_t>
+                          && tuple_general_guard<lhs_t, tuple_derived_t, rhs_t, component_types...>>
+     || ...);
 
 } // namespace seqan3::detail
 
@@ -111,12 +107,8 @@ decltype(auto) get();
  *
  * \stableapi{Since version 3.1.}
  */
-template <typename derived_type,
-          typename ...component_types>
-//!\cond
-    requires (detail::writable_constexpr_semialphabet<component_types> && ...) &&
-             (std::regular<component_types> && ...)
-//!\endcond
+template <typename derived_type, typename... component_types>
+    requires (detail::writable_constexpr_semialphabet<component_types> && ...) && (std::regular<component_types> && ...)
 class alphabet_tuple_base :
     public alphabet_base<derived_type,
                          (1 * ... * alphabet_size<component_types>),
@@ -125,8 +117,8 @@ class alphabet_tuple_base :
 private:
     //!\brief The base type of this class.
     using base_t = alphabet_base<derived_type,
-                                (1 * ... * alphabet_size<component_types>),
-                                void>; // no char type, because this is only semi_alphabet
+                                 (1 * ... * alphabet_size<component_types>),
+                                 void>; // no char type, because this is only semi_alphabet
 
     //!\brief A seqan3::type_list The types of each component in the composite
     using component_list = seqan3::type_list<component_types...>;
@@ -146,7 +138,8 @@ private:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr alphabet_tuple_base() noexcept : base_t{} {}                            //!< Defaulted.
+    constexpr alphabet_tuple_base() noexcept : base_t{}
+    {}                                                                                //!< Defaulted.
     constexpr alphabet_tuple_base(alphabet_tuple_base const &) = default;             //!< Defaulted.
     constexpr alphabet_tuple_base(alphabet_tuple_base &&) = default;                  //!< Defaulted.
     constexpr alphabet_tuple_base & operator=(alphabet_tuple_base const &) = default; //!< Defaulted.
@@ -166,18 +159,17 @@ private:
 public:
     // Import from base:
     using base_t::alphabet_size;
-    using base_t::to_rank;
     using base_t::assign_rank;
+    using base_t::to_rank;
 
     //!\brief Export this type's components in a visible manner.
     //!\private
     using seqan3_required_types = component_list;
     //!\brief Export this type's components and possibly the components' components in a visible manner.
     //!\private
-    using seqan3_recursive_required_types =
-        list_traits::concat<component_list,
-                            detail::transformation_trait_or_t<detail::recursive_required_types<component_types>,
-                                                              seqan3::type_list<>>...>;
+    using seqan3_recursive_required_types = list_traits::concat<
+        component_list,
+        detail::transformation_trait_or_t<detail::recursive_required_types<component_types>, seqan3::type_list<>>...>;
     //!\brief Make specialisations of this template identifiable in metapgrogramming contexts.
     //!\private
     static constexpr bool seqan3_alphabet_tuple_like = true;
@@ -190,7 +182,7 @@ public:
      *            seqan3::structure_aa).
      */
     //!\brief Construction from initialiser-list.
-    constexpr alphabet_tuple_base(component_types ... components) noexcept
+    constexpr alphabet_tuple_base(component_types... components) noexcept
     {
         assign_rank(rank_sum_helper(components..., std::make_index_sequence<sizeof...(component_types)>{}));
     }
@@ -206,10 +198,7 @@ public:
      * \stableapi{Since version 3.1.}
      */
     template <typename component_type>
-    //!\cond
-        requires (!std::is_base_of_v<alphabet_tuple_base, component_type>) &&
-                 is_unique_component<component_type>
-    //!\endcond
+        requires (!std::is_base_of_v<alphabet_tuple_base, component_type>) && is_unique_component<component_type>
     constexpr explicit alphabet_tuple_base(component_type const alph) noexcept : alphabet_tuple_base{}
     {
         get<component_type>(*this) = alph;
@@ -231,16 +220,15 @@ public:
      * \experimentalapi{Experimental since version 3.1.}
      */
     template <typename indirect_component_type>
-    //!\cond
         requires ((detail::instantiate_if_v<
-                    detail::lazy<std::is_convertible, indirect_component_type, component_types>,
-                    detail::tuple_general_guard<derived_type, indirect_component_type, component_types...>> || ...))
-    //!\endcond
+                       detail::lazy<std::is_convertible, indirect_component_type, component_types>,
+                       detail::tuple_general_guard<derived_type, indirect_component_type, component_types...>>
+                   || ...))
     constexpr explicit alphabet_tuple_base(indirect_component_type const alph) noexcept : alphabet_tuple_base{}
     {
         using component_predicate = detail::implicitly_convertible_from<indirect_component_type>;
-        constexpr auto component_position = seqan3::list_traits::find_if<component_predicate::template invoke,
-                                                                         component_list>;
+        constexpr auto component_position =
+            seqan3::list_traits::find_if<component_predicate::template invoke, component_list>;
         using component_type = seqan3::list_traits::at<component_position, component_list>;
         component_type tmp(alph); // delegate construction
         get<component_type>(*this) = tmp;
@@ -249,16 +237,18 @@ public:
     //!\cond
     template <typename indirect_component_type>
         requires ((!(detail::instantiate_if_v<
-                     detail::lazy<std::is_convertible, indirect_component_type, component_types>,
-                     detail::tuple_general_guard<derived_type, indirect_component_type, component_types...>> || ...)) &&
-                   (detail::instantiate_if_v<
-                     detail::lazy<std::is_constructible, component_types, indirect_component_type>,
-                     detail::tuple_general_guard<derived_type, indirect_component_type, component_types...>> || ...))
+                         detail::lazy<std::is_convertible, indirect_component_type, component_types>,
+                         detail::tuple_general_guard<derived_type, indirect_component_type, component_types...>>
+                     || ...))
+                  && (detail::instantiate_if_v<
+                          detail::lazy<std::is_constructible, component_types, indirect_component_type>,
+                          detail::tuple_general_guard<derived_type, indirect_component_type, component_types...>>
+                      || ...))
     constexpr explicit alphabet_tuple_base(indirect_component_type const alph) noexcept : alphabet_tuple_base{}
     {
         using component_predicate = detail::constructible_from<indirect_component_type>;
-        constexpr auto component_position = seqan3::list_traits::find_if<component_predicate::template invoke,
-                                                                         component_list>;
+        constexpr auto component_position =
+            seqan3::list_traits::find_if<component_predicate::template invoke, component_list>;
         using component_type = seqan3::list_traits::at<component_position, component_list>;
         component_type tmp(alph); // delegate construction
         get<component_type>(*this) = tmp;
@@ -276,10 +266,7 @@ public:
      * \stableapi{Since version 3.1.}
      */
     template <typename component_type>
-    //!\cond
-        requires (!std::derived_from<component_type, alphabet_tuple_base>) &&
-                 is_unique_component<component_type>
-    //!\endcond
+        requires (!std::derived_from<component_type, alphabet_tuple_base>) && is_unique_component<component_type>
     constexpr derived_type & operator=(component_type const alph) noexcept
     {
         get<component_type>(*this) = alph;
@@ -298,16 +285,14 @@ public:
      * \experimentalapi{Experimental since version 3.1.}
      */
     template <typename indirect_component_type>
-    //!\cond
-        requires ((!std::derived_from<indirect_component_type, alphabet_tuple_base>) &&
-                  (!is_unique_component<indirect_component_type>) &&
-                  (std::assignable_from<component_types, indirect_component_type> || ...))
-    //!\endcond
+        requires ((!std::derived_from<indirect_component_type, alphabet_tuple_base>)
+                  && (!is_unique_component<indirect_component_type>)
+                  && (std::assignable_from<component_types, indirect_component_type> || ...))
     constexpr derived_type & operator=(indirect_component_type const alph) noexcept
     {
         using component_predicate = detail::assignable_from<indirect_component_type>;
-        constexpr auto component_position = seqan3::list_traits::find_if<component_predicate::template invoke,
-                                                                         component_list>;
+        constexpr auto component_position =
+            seqan3::list_traits::find_if<component_predicate::template invoke, component_list>;
         using component_type = seqan3::list_traits::at<component_position, component_list>;
         get<component_type>(*this) = alph; // delegate assignment
         return static_cast<derived_type &>(*this);
@@ -315,15 +300,15 @@ public:
     //!\cond
     // If not assignable but implicit convertible, convert first and assign afterwards
     template <typename indirect_component_type>
-        requires ((!std::derived_from<indirect_component_type, alphabet_tuple_base>) &&
-                  (!is_unique_component<indirect_component_type>) &&
-                  (!(std::assignable_from<component_types, indirect_component_type> || ...)) &&
-                  (std::convertible_to<indirect_component_type, component_types> || ...))
+        requires ((!std::derived_from<indirect_component_type, alphabet_tuple_base>)
+                  && (!is_unique_component<indirect_component_type>)
+                  && (!(std::assignable_from<component_types, indirect_component_type> || ...))
+                  && (std::convertible_to<indirect_component_type, component_types> || ...))
     constexpr derived_type & operator=(indirect_component_type const alph) noexcept
     {
         using component_predicate = detail::implicitly_convertible_from<indirect_component_type>;
-        constexpr auto component_position = seqan3::list_traits::find_if<component_predicate::template invoke,
-                                                                         component_list>;
+        constexpr auto component_position =
+            seqan3::list_traits::find_if<component_predicate::template invoke, component_list>;
         using component_type = seqan3::list_traits::at<component_position, component_list>;
         component_type tmp(alph);
         get<component_type>(*this) = tmp;
@@ -331,16 +316,16 @@ public:
     }
 
     template <typename indirect_component_type>
-        requires ((!std::derived_from<indirect_component_type, alphabet_tuple_base>) &&
-                  (!is_unique_component<indirect_component_type>) &&
-                  (!(std::assignable_from<component_types, indirect_component_type> || ...)) &&
-                  (!(std::convertible_to<indirect_component_type, component_types> || ...)) &&
-                  (std::constructible_from<component_types, indirect_component_type> || ...))
+        requires ((!std::derived_from<indirect_component_type, alphabet_tuple_base>)
+                  && (!is_unique_component<indirect_component_type>)
+                  && (!(std::assignable_from<component_types, indirect_component_type> || ...))
+                  && (!(std::convertible_to<indirect_component_type, component_types> || ...))
+                  && (std::constructible_from<component_types, indirect_component_type> || ...))
     constexpr derived_type & operator=(indirect_component_type const alph) noexcept
     {
         using component_predicate = detail::constructible_from<indirect_component_type>;
-        constexpr auto component_position = seqan3::list_traits::find_if<component_predicate::template invoke,
-                                                                         component_list>;
+        constexpr auto component_position =
+            seqan3::list_traits::find_if<component_predicate::template invoke, component_list>;
         using component_type = seqan3::list_traits::at<component_position, component_list>;
         component_type tmp(alph); // delegate construction
         get<component_type>(*this) = tmp;
@@ -372,7 +357,7 @@ public:
         return component_proxy<t, index>{val, l};
     }
 
-    /*!\copybrief get
+    /*!\copybrief seqan3::alphabet_tuple_base::get
      * \tparam type Return the element of specified type; only available if the type is unique in the set of components.
      * \returns A proxy to the contained element that models the same alphabets concepts and supports assignment.
      *
@@ -380,14 +365,12 @@ public:
      */
     template <typename type>
     friend constexpr auto get(alphabet_tuple_base & l) noexcept
-    //!\cond
         requires is_unique_component<type>
-    //!\endcond
     {
         return get<seqan3::list_traits::find<type, component_list>>(l);
     }
 
-    /*!\copybrief get
+    /*!\copybrief seqan3::alphabet_tuple_base::get
      * \tparam index Return the i-th element.
      * \returns A copy of the contained element.
      *
@@ -403,7 +386,7 @@ public:
         return seqan3::assign_rank_to(l.to_component_rank<index>(), t{});
     }
 
-    /*!\copybrief get
+    /*!\copybrief seqan3::alphabet_tuple_base::get
      * \tparam type Return the element of specified type; only available if the type is unique in the set of components.
      * \returns A copy of the contained element.
      *
@@ -411,9 +394,7 @@ public:
      */
     template <typename type>
     friend constexpr type get(alphabet_tuple_base const & l) noexcept
-    //!\cond
         requires is_unique_component<type>
-    //!\endcond
     {
         return get<seqan3::list_traits::find<type, component_list>>(l);
     }
@@ -424,9 +405,7 @@ public:
      */
     template <typename type>
     constexpr operator type() const noexcept
-    //!\cond
         requires is_unique_component<type>
-    //!\endcond
     {
         return get<type>(*this);
     }
@@ -451,131 +430,143 @@ public:
      */
     template <typename derived_type_t, typename indirect_component_type>
     friend constexpr auto operator==(derived_type_t const lhs, indirect_component_type const rhs) noexcept
-        -> std::enable_if_t<detail::tuple_eq_guard<derived_type_t, derived_type, indirect_component_type, component_types...>,
-                            bool>
+        -> std::enable_if_t<
+            detail::tuple_eq_guard<derived_type_t, derived_type, indirect_component_type, component_types...>,
+            bool>
     {
         using component_predicate = detail::weakly_equality_comparable_with_<indirect_component_type>;
-        constexpr auto component_position = seqan3::list_traits::find_if<component_predicate::template invoke,
-                                                                         component_list>;
+        constexpr auto component_position =
+            seqan3::list_traits::find_if<component_predicate::template invoke, component_list>;
         using component_type = seqan3::list_traits::at<component_position, component_list>;
         return get<component_type>(lhs) == rhs;
     }
 
-    //!\copydoc operator==(derived_type_t const lhs, indirect_component_type const rhs)
+    //!\copydoc seqan3::alphabet_tuple_base::operator==(derived_type_t const lhs, indirect_component_type const rhs)
     template <typename derived_type_t, typename indirect_component_type>
     friend constexpr auto operator==(indirect_component_type const lhs, derived_type_t const rhs) noexcept
-        -> std::enable_if_t<detail::tuple_eq_guard<derived_type_t, derived_type, indirect_component_type, component_types...>,
-                            bool>
+        -> std::enable_if_t<
+            detail::tuple_eq_guard<derived_type_t, derived_type, indirect_component_type, component_types...>,
+            bool>
     {
         return rhs == lhs;
     }
 
-    //!\copydoc operator==(derived_type_t const lhs, indirect_component_type const rhs)
+    //!\copydoc seqan3::alphabet_tuple_base::operator==(derived_type_t const lhs, indirect_component_type const rhs)
     template <typename derived_type_t, typename indirect_component_type>
     friend constexpr auto operator!=(derived_type_t const lhs, indirect_component_type const rhs) noexcept
-        -> std::enable_if_t<detail::tuple_eq_guard<derived_type_t, derived_type, indirect_component_type, component_types...>,
-                            bool>
+        -> std::enable_if_t<
+            detail::tuple_eq_guard<derived_type_t, derived_type, indirect_component_type, component_types...>,
+            bool>
     {
         using component_predicate = detail::weakly_equality_comparable_with_<indirect_component_type>;
-        constexpr auto component_position = seqan3::list_traits::find_if<component_predicate::template invoke,
-                                                                         component_list>;
+        constexpr auto component_position =
+            seqan3::list_traits::find_if<component_predicate::template invoke, component_list>;
         using component_type = seqan3::list_traits::at<component_position, component_list>;
         return get<component_type>(lhs) != rhs;
     }
 
-    //!\copydoc operator==(derived_type_t const lhs, indirect_component_type const rhs)
+    //!\copydoc seqan3::alphabet_tuple_base::operator==(derived_type_t const lhs, indirect_component_type const rhs)
     template <typename derived_type_t, typename indirect_component_type>
     friend constexpr auto operator!=(indirect_component_type const lhs, derived_type_t const rhs) noexcept
-        -> std::enable_if_t<detail::tuple_eq_guard<derived_type_t, derived_type, indirect_component_type, component_types...>,
-                            bool>
+        -> std::enable_if_t<
+            detail::tuple_eq_guard<derived_type_t, derived_type, indirect_component_type, component_types...>,
+            bool>
     {
         return rhs != lhs;
     }
 
-    //!\copydoc operator==(derived_type_t const lhs, indirect_component_type const rhs)
+    //!\copydoc seqan3::alphabet_tuple_base::operator==(derived_type_t const lhs, indirect_component_type const rhs)
     template <typename derived_type_t, typename indirect_component_type>
     friend constexpr auto operator<(derived_type_t const lhs, indirect_component_type const rhs) noexcept
-        -> std::enable_if_t<detail::tuple_order_guard<derived_type_t, derived_type, indirect_component_type, component_types...>,
-                            bool>
+        -> std::enable_if_t<
+            detail::tuple_order_guard<derived_type_t, derived_type, indirect_component_type, component_types...>,
+            bool>
     {
         using component_predicate = detail::weakly_ordered_with_<indirect_component_type>;
-        constexpr auto component_position = seqan3::list_traits::find_if<component_predicate::template invoke,
-                                                                         component_list>;
+        constexpr auto component_position =
+            seqan3::list_traits::find_if<component_predicate::template invoke, component_list>;
         using component_type = seqan3::list_traits::at<component_position, component_list>;
         return get<component_type>(lhs) < rhs;
     }
 
-    //!\copydoc operator==(derived_type_t const lhs, indirect_component_type const rhs)
+    //!\copydoc seqan3::alphabet_tuple_base::operator==(derived_type_t const lhs, indirect_component_type const rhs)
     template <typename derived_type_t, typename indirect_component_type>
     friend constexpr auto operator<(indirect_component_type const lhs, derived_type_t const rhs) noexcept
-        -> std::enable_if_t<detail::tuple_order_guard<derived_type_t, derived_type, indirect_component_type, component_types...>,
-                            bool>
+        -> std::enable_if_t<
+            detail::tuple_order_guard<derived_type_t, derived_type, indirect_component_type, component_types...>,
+            bool>
     {
         return rhs > lhs;
     }
 
-    //!\copydoc operator==(derived_type_t const lhs, indirect_component_type const rhs)
+    //!\copydoc seqan3::alphabet_tuple_base::operator==(derived_type_t const lhs, indirect_component_type const rhs)
     template <typename derived_type_t, typename indirect_component_type>
     friend constexpr auto operator<=(derived_type_t const lhs, indirect_component_type const rhs) noexcept
-        -> std::enable_if_t<detail::tuple_order_guard<derived_type_t, derived_type, indirect_component_type, component_types...>,
-                            bool>
+        -> std::enable_if_t<
+            detail::tuple_order_guard<derived_type_t, derived_type, indirect_component_type, component_types...>,
+            bool>
     {
         using component_predicate = detail::weakly_ordered_with_<indirect_component_type>;
-        constexpr auto component_position = seqan3::list_traits::find_if<component_predicate::template invoke,
-                                                                         component_list>;
+        constexpr auto component_position =
+            seqan3::list_traits::find_if<component_predicate::template invoke, component_list>;
         using component_type = seqan3::list_traits::at<component_position, component_list>;
         return get<component_type>(lhs) <= rhs;
     }
 
-    //!\copydoc operator==(derived_type_t const lhs, indirect_component_type const rhs)
+    //!\copydoc seqan3::alphabet_tuple_base::operator==(derived_type_t const lhs, indirect_component_type const rhs)
     template <typename derived_type_t, typename indirect_component_type>
     friend constexpr auto operator<=(indirect_component_type const lhs, derived_type_t const rhs) noexcept
-        -> std::enable_if_t<detail::tuple_order_guard<derived_type_t, derived_type, indirect_component_type, component_types...>,
-                            bool>
+        -> std::enable_if_t<
+            detail::tuple_order_guard<derived_type_t, derived_type, indirect_component_type, component_types...>,
+            bool>
     {
         return rhs >= lhs;
     }
 
-    //!\copydoc operator==(derived_type_t const lhs, indirect_component_type const rhs)
+    //!\copydoc seqan3::alphabet_tuple_base::operator==(derived_type_t const lhs, indirect_component_type const rhs)
     template <typename derived_type_t, typename indirect_component_type>
     friend constexpr auto operator>(derived_type_t const lhs, indirect_component_type const rhs) noexcept
-          -> std::enable_if_t<detail::tuple_order_guard<derived_type_t, derived_type, indirect_component_type, component_types...>,
-                            bool>
+        -> std::enable_if_t<
+            detail::tuple_order_guard<derived_type_t, derived_type, indirect_component_type, component_types...>,
+            bool>
     {
         using component_predicate = detail::weakly_ordered_with_<indirect_component_type>;
-        constexpr auto component_position = seqan3::list_traits::find_if<component_predicate::template invoke,
-                                                                         component_list>;
+        constexpr auto component_position =
+            seqan3::list_traits::find_if<component_predicate::template invoke, component_list>;
         using component_type = seqan3::list_traits::at<component_position, component_list>;
         return get<component_type>(lhs) > rhs;
     }
 
-    //!\copydoc operator==(derived_type_t const lhs, indirect_component_type const rhs)
+    //!\copydoc seqan3::alphabet_tuple_base::operator==(derived_type_t const lhs, indirect_component_type const rhs)
     template <typename derived_type_t, typename indirect_component_type>
     friend constexpr auto operator>(indirect_component_type const lhs, derived_type_t const rhs) noexcept
-        -> std::enable_if_t<detail::tuple_order_guard<derived_type_t, derived_type, indirect_component_type, component_types...>,
-                            bool>
+        -> std::enable_if_t<
+            detail::tuple_order_guard<derived_type_t, derived_type, indirect_component_type, component_types...>,
+            bool>
     {
         return rhs < lhs;
     }
 
-    //!\copydoc operator==(derived_type_t const lhs, indirect_component_type const rhs)
+    //!\copydoc seqan3::alphabet_tuple_base::operator==(derived_type_t const lhs, indirect_component_type const rhs)
     template <typename derived_type_t, typename indirect_component_type>
     friend constexpr auto operator>=(derived_type_t const lhs, indirect_component_type const rhs) noexcept
-        -> std::enable_if_t<detail::tuple_order_guard<derived_type_t, derived_type, indirect_component_type, component_types...>,
-                            bool>
+        -> std::enable_if_t<
+            detail::tuple_order_guard<derived_type_t, derived_type, indirect_component_type, component_types...>,
+            bool>
     {
         using component_predicate = detail::weakly_ordered_with_<indirect_component_type>;
-        constexpr auto component_position = seqan3::list_traits::find_if<component_predicate::template invoke,
-                                                                         component_list>;
+        constexpr auto component_position =
+            seqan3::list_traits::find_if<component_predicate::template invoke, component_list>;
         using component_type = seqan3::list_traits::at<component_position, component_list>;
         return get<component_type>(lhs) >= rhs;
     }
 
-    //!\copydoc operator==(derived_type_t const lhs, indirect_component_type const rhs)
+    //!\copydoc seqan3::alphabet_tuple_base::operator==(derived_type_t const lhs, indirect_component_type const rhs)
     template <typename derived_type_t, typename indirect_component_type>
     friend constexpr auto operator>=(indirect_component_type const lhs, derived_type_t const rhs) noexcept
-        -> std::enable_if_t<detail::tuple_order_guard<derived_type_t, derived_type, indirect_component_type, component_types...>,
-                            bool>
+        -> std::enable_if_t<
+            detail::tuple_order_guard<derived_type_t, derived_type, indirect_component_type, component_types...>,
+            bool>
     {
         return rhs <= lhs;
     }
@@ -592,8 +583,8 @@ private:
         }
         else
         {
-            return (to_rank() / cummulative_alph_sizes[index]) %
-                seqan3::alphabet_size<pack_traits::at<index, component_types...>>;
+            return (to_rank() / cummulative_alph_sizes[index])
+                 % seqan3::alphabet_size<pack_traits::at<index, component_types...>>;
         }
     }
 
@@ -601,32 +592,44 @@ private:
     template <size_t index>
     constexpr void assign_component_rank(ptrdiff_t const r) noexcept
     {
-        assign_rank(static_cast<ptrdiff_t>(to_rank()) +
-                    ((r - static_cast<ptrdiff_t>(to_component_rank<index>())) *
-                     static_cast<ptrdiff_t>(cummulative_alph_sizes[index])));
+        assign_rank(static_cast<ptrdiff_t>(to_rank())
+                    + ((r - static_cast<ptrdiff_t>(to_component_rank<index>()))
+                       * static_cast<ptrdiff_t>(cummulative_alph_sizes[index])));
     }
 
+    //!\brief For the given components, compute the combined rank.
+    template <std::size_t... idx>
+    static constexpr rank_type rank_sum_helper(component_types... components,
+                                               std::index_sequence<idx...> const &) noexcept
+    {
+        return ((seqan3::to_rank(components) * cummulative_alph_sizes[idx]) + ...);
+    }
+
+    // clang-format off
     //!\brief The cumulative alphabet size products are cached.
     static constexpr std::array<rank_type, component_list::size()> cummulative_alph_sizes
     {
-        [] () constexpr
-        {
+        []() constexpr {
             // create array (1, |sigma1|, |sigma1|*|sigma2|,  ... ,  |sigma1|*...*|sigmaN|)
             std::array<rank_type, component_list::size() + 1> ret{};
             ret[0] = 1;
+
             size_t count = 1;
             using reverse_list_t = decltype(seqan3::list_traits::detail::reverse(component_list{}));
-            seqan3::detail::for_each<reverse_list_t>([&] (auto alphabet_type_identity) constexpr
-            {
-                using alphabet_t = typename decltype(alphabet_type_identity)::type;
-                ret[count] = static_cast<rank_type>(seqan3::alphabet_size<alphabet_t> * ret[count - 1]);
-                ++count;
-            });
+
+            seqan3::detail::for_each<reverse_list_t>(
+                [&](auto alphabet_type_identity) constexpr {
+                    using alphabet_t = typename decltype(alphabet_type_identity)::type;
+                    ret[count] = static_cast<rank_type>(seqan3::alphabet_size<alphabet_t> * ret[count - 1]);
+                    ++count;
+                }
+            );
 
             // reverse and strip one: (|sigma1|*...*|sigmaN-1|, ... |sigma1|*|sigma2|, |sigma1|, 1)
             // reverse order guarantees that the first alphabet is the most significant rank contributer
             // resulting in element-wise alphabetical ordering on comparison
             std::array<rank_type, component_list::size()> ret2{};
+
             for (size_t i = 0; i < component_list::size(); ++i)
                 ret2[i] = ret[component_list::size() - i - 1];
 
@@ -634,25 +637,17 @@ private:
         }()
     };
 
-    //!\brief For the given components, compute the combined rank.
-    template <std::size_t ...idx>
-    static constexpr rank_type rank_sum_helper(component_types ... components, std::index_sequence<idx...> const &) noexcept
-    {
-        return ((seqan3::to_rank(components) * cummulative_alph_sizes[idx]) + ...);
-    }
-
     //!\brief Conversion table from rank to the i-th component's rank.
-    static constexpr std::array<std::array<rank_type, alphabet_size < 1024 ? alphabet_size : 0>, // not for big alphs
+    static constexpr std::array<std::array<rank_type, alphabet_size < 1024u ? alphabet_size : 0u>, // not for big alphs
                                 list_traits::size<component_list>> rank_to_component_rank
     {
-        [] () constexpr
-        {
-            std::array<std::array<rank_type, alphabet_size < 1024 ? alphabet_size : 0>, // not for big alphs
-                       list_traits::size<component_list>> ret{};
+        []() constexpr {
+            std::array<std::array<rank_type, alphabet_size < 1024u ? alphabet_size : 0u>, // not for big alphs
+                                  list_traits::size<component_list>> ret{};
 
-            if constexpr (alphabet_size < 1024)
+            if constexpr (alphabet_size < 1024u)
             {
-                std::array<size_t, alphabet_size> alph_sizes{ seqan3::alphabet_size<component_types>... };
+                std::array<size_t, alphabet_size> alph_sizes{seqan3::alphabet_size<component_types>...};
 
                 for (size_t i = 0; i < list_traits::size<component_list>; ++i)
                     for (size_t j = 0; j < static_cast<size_t>(alphabet_size); ++j)
@@ -663,6 +658,7 @@ private:
         }()
     };
 };
+// clang-format on
 
 /*!\brief Specialisation of seqan3::alphabet_proxy that updates the rank of the alphabet_tuple_base.
  * \tparam alphabet_type The type of the emulated component.
@@ -670,13 +666,11 @@ private:
  *
  * \noapi
  */
-template <typename derived_type, typename ...component_types>
-//!\cond
-    requires (detail::writable_constexpr_semialphabet<component_types> && ...) &&
-             (std::regular<component_types> && ...)
-//!\endcond
+template <typename derived_type, typename... component_types>
+    requires (detail::writable_constexpr_semialphabet<component_types> && ...) && (std::regular<component_types> && ...)
 template <typename alphabet_type, size_t index>
-class alphabet_tuple_base<derived_type, component_types...>::component_proxy : public alphabet_proxy<component_proxy<alphabet_type, index>, alphabet_type>
+class alphabet_tuple_base<derived_type, component_types...>::component_proxy :
+    public alphabet_proxy<component_proxy<alphabet_type, index>, alphabet_type>
 {
 private:
     //!\brief The base type.
@@ -685,7 +679,7 @@ private:
     friend base_t;
 
     //!\brief Store a pointer to the parent object so we can update it.
-    alphabet_tuple_base *parent;
+    alphabet_tuple_base * parent;
 
     //!\brief The implementation updates the rank in the parent object.
     constexpr void on_update() noexcept
@@ -702,15 +696,14 @@ public:
         */
     //!\brief Deleted, because using this proxy without parent would be undefined behaviour.
     component_proxy() = delete;
-    constexpr component_proxy(component_proxy const &) = default;              //!< Defaulted.
-    constexpr component_proxy(component_proxy &&) = default;                   //!< Defaulted.
-    constexpr component_proxy & operator=(component_proxy const &) = default;  //!< Defaulted.
-    constexpr component_proxy & operator=(component_proxy &&) = default;       //!< Defaulted.
-    ~component_proxy() = default;                                              //!< Defaulted.
+    constexpr component_proxy(component_proxy const &) = default;             //!< Defaulted.
+    constexpr component_proxy(component_proxy &&) = default;                  //!< Defaulted.
+    constexpr component_proxy & operator=(component_proxy const &) = default; //!< Defaulted.
+    constexpr component_proxy & operator=(component_proxy &&) = default;      //!< Defaulted.
+    ~component_proxy() = default;                                             //!< Defaulted.
 
     //!\brief Construct from an alphabet letter and reference to the parent object.
-    constexpr component_proxy(alphabet_type const l, alphabet_tuple_base & p) :
-        base_t{l}, parent{&p}
+    constexpr component_proxy(alphabet_type const l, alphabet_tuple_base & p) : base_t{l}, parent{&p}
     {}
 
     // Does not inherit the base's constructor for alphabet_type so as not to cause ambiguity

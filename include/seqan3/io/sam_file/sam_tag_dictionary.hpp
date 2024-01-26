@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,33 +12,38 @@
 
 #pragma once
 
-#include <seqan3/std/concepts>
+#include <concepts>
 #include <map>
 #include <variant>
 
 #include <seqan3/core/detail/template_inspection.hpp>
 #include <seqan3/utility/char_operations/predicate.hpp>
-#include <seqan3/utility/concept/exposition_only/core_language.hpp>
 #include <seqan3/utility/container/small_string.hpp>
 
 namespace seqan3::detail
 {
 //!\brief std::variant of allowed types for optional tag fields of the SAM format.
 //!\ingroup io_sam_file
-using sam_tag_variant = std::variant<char, int32_t, float, std::string,
+using sam_tag_variant = std::variant<char,
+                                     int32_t,
+                                     float,
+                                     std::string,
                                      std::vector<std::byte>,
-                                     std::vector<int8_t>, std::vector<uint8_t>,
-                                     std::vector<int16_t>, std::vector<uint16_t>,
-                                     std::vector<int32_t>, std::vector<uint32_t>,
+                                     std::vector<int8_t>,
+                                     std::vector<uint8_t>,
+                                     std::vector<int16_t>,
+                                     std::vector<uint16_t>,
+                                     std::vector<int32_t>,
+                                     std::vector<uint32_t>,
                                      std::vector<float>>;
 
 //!\brief Each SAM tag type char identifier. Index corresponds to the seqan3::detail::sam_tag_variant types.
 //!\ingroup io_sam_file
-char constexpr sam_tag_type_char[12]       = {'A',  'i',  'f',  'Z', 'H', 'B', 'B', 'B', 'B', 'B', 'B', 'B'};
+constexpr char sam_tag_type_char[12] = {'A', 'i', 'f', 'Z', 'H', 'B', 'B', 'B', 'B', 'B', 'B', 'B'};
 //!\brief Each types SAM tag type extra char id. Index corresponds to the seqan3::detail::sam_tag_variant types.
 //!\ingroup io_sam_file
-char constexpr sam_tag_type_char_extra[12] = {'\0', '\0', '\0', '\0', '\0', 'c', 'C', 's', 'S', 'i', 'I', 'f'};
-}
+constexpr char sam_tag_type_char_extra[12] = {'\0', '\0', '\0', '\0', '\0', 'c', 'C', 's', 'S', 'i', 'I', 'f'};
+} // namespace seqan3::detail
 
 namespace seqan3
 {
@@ -65,35 +70,21 @@ inline namespace literals
  * The purpose of those tags is to fill or query the seqan3::sam_tag_dictionary for a specific key (tag_id) and
  * retrieve the corresponding value.
  */
-
-#ifdef __cpp_nontype_template_parameter_class
 template <small_string<2> str> // TODO: better handling if too large string is provided?
 constexpr uint16_t operator""_tag()
 {
-#else // GCC/Clang extension
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-template <typename char_t, char_t ...s>
-constexpr uint16_t operator""_tag()
-{
-    static_assert(std::same_as<char_t, char>, "Illegal SAM tag: Type must be char.");
-    constexpr small_string<sizeof...(s)> str{std::array<char, sizeof...(s)>{s...}};
-#pragma GCC diagnostic pop
-#endif
-
     static_assert(str.size() == 2, "Illegal SAM tag: Exactly two characters must be given.");
 
-    char constexpr char0 = str[0];
-    char constexpr char1 = str[1];
+    constexpr char char0 = str[0];
+    constexpr char char1 = str[1];
 
-    static_assert((is_alpha(char0) && is_alnum(char1)),
-                  "Illegal SAM tag: a SAM tag must match /[A-Za-z][A-Za-z0-9]/.");
+    static_assert((is_alpha(char0) && is_alnum(char1)), "Illegal SAM tag: a SAM tag must match /[A-Za-z][A-Za-z0-9]/.");
 
     return static_cast<uint16_t>(char0) * 256 + static_cast<uint16_t>(char1);
 }
 //!\}
 
-} // inline namespace literals
+} // namespace literals
 
 /*!\brief The generic base class.
  * \ingroup io_sam_file
@@ -184,6 +175,7 @@ struct sam_tag_type
 template <uint16_t tag_value>
 using sam_tag_type_t = typename sam_tag_type<tag_value>::type;
 
+// clang-format off
 //!\cond
 template <> struct sam_tag_type<"AM"_tag> { using type = int32_t; };
 template <> struct sam_tag_type<"AS"_tag> { using type = int32_t; };
@@ -252,6 +244,7 @@ template <> struct sam_tag_type<"TC"_tag> { using type = int32_t; };
 template <> struct sam_tag_type<"U2"_tag> { using type = std::string; };
 template <> struct sam_tag_type<"UQ"_tag> { using type = int32_t; };
 //!\endcond
+// clang-format on
 
 /*!\brief The SAM tag dictionary class that stores all optional SAM fields.
  * \ingroup io_sam_file
@@ -360,9 +353,7 @@ public:
 
     //!\brief Uses std::map::operator[] for access and default initializes new keys.
     template <uint16_t tag>
-    //!\cond
         requires (!std::same_as<sam_tag_type_t<tag>, variant_type>)
-    //!\endcond
     auto & get() &
     {
         if ((*this).count(tag) == 0)
@@ -373,9 +364,7 @@ public:
 
     //!\brief Uses std::map::operator[] for access and default initializes new keys.
     template <uint16_t tag>
-    //!\cond
         requires (!std::same_as<sam_tag_type_t<tag>, variant_type>)
-    //!\endcond
     auto && get() &&
     {
         if ((*this).count(tag) == 0)
@@ -387,9 +376,7 @@ public:
     //!\brief Uses std::map::at() for access and throws when the key is unknown.
     //!\throws std::out_of_range if map has no key `tag`.
     template <uint16_t tag>
-    //!\cond
         requires (!std::same_as<sam_tag_type_t<tag>, variant_type>)
-    //!\endcond
     auto const & get() const &
     {
         return std::get<sam_tag_type_t<tag>>((*this).at(tag));
@@ -398,9 +385,7 @@ public:
     //!\brief Uses std::map::at() for access and throws when the key is unknown.
     //!\throws std::out_of_range if map has no key `tag`.
     template <uint16_t tag>
-    //!\cond
         requires (!std::same_as<sam_tag_type_t<tag>, variant_type>)
-    //!\endcond
     auto const && get() const &&
     {
         return std::get<sam_tag_type_t<tag>>(std::move((*this).at(tag)));

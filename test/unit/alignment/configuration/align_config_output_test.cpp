@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -51,13 +51,9 @@ TEST(align_config_output, sequence2_id)
 
 TEST(align_config_output, combine_outputs)
 {
-    seqan3::configuration cfg = seqan3::align_cfg::output_score{} |
-                                seqan3::align_cfg::output_end_position{} |
-                                seqan3::align_cfg::output_begin_position{} |
-                                seqan3::align_cfg::output_alignment{} |
-                                seqan3::align_cfg::output_sequence1_id{} |
-                                seqan3::align_cfg::output_sequence2_id{};
-
+    seqan3::configuration cfg = seqan3::align_cfg::output_score{} | seqan3::align_cfg::output_end_position{}
+                              | seqan3::align_cfg::output_begin_position{} | seqan3::align_cfg::output_alignment{}
+                              | seqan3::align_cfg::output_sequence1_id{} | seqan3::align_cfg::output_sequence2_id{};
 
     EXPECT_TRUE(cfg.exists<seqan3::align_cfg::output_score>());
     EXPECT_TRUE(cfg.exists<seqan3::align_cfg::output_end_position>());

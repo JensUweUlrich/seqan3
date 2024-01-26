@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -11,6 +11,8 @@
  */
 
 #pragma once
+
+#include <algorithm>
 
 #include <seqan3/alphabet/alphabet_base.hpp>
 #include <seqan3/alphabet/detail/convert.hpp>
@@ -44,18 +46,20 @@ private:
     //!\brief The base type.
     using base_t = alphabet_base<derived_type, size, char>;
 
-    //!\brief Befriend the base type so it can access #char_to_rank and #rank_to_char.
+    /*!\brief Befriend the base type so it can access seqan3::alphabet_base::char_to_rank
+     *        and seqan3::alphabet_base::rank_to_char.
+     */
     friend base_t;
 
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr phred_base()                                  noexcept = default; //!< Defaulted.
-    constexpr phred_base(phred_base const &)                noexcept = default; //!< Defaulted.
-    constexpr phred_base(phred_base &&)                     noexcept = default; //!< Defaulted.
-    constexpr phred_base & operator=(phred_base const &)    noexcept = default; //!< Defaulted.
-    constexpr phred_base & operator=(phred_base &&)         noexcept = default; //!< Defaulted.
-    ~phred_base()                                           noexcept = default; //!< Defaulted.
+    constexpr phred_base() noexcept = default;                               //!< Defaulted.
+    constexpr phred_base(phred_base const &) noexcept = default;             //!< Defaulted.
+    constexpr phred_base(phred_base &&) noexcept = default;                  //!< Defaulted.
+    constexpr phred_base & operator=(phred_base const &) noexcept = default; //!< Defaulted.
+    constexpr phred_base & operator=(phred_base &&) noexcept = default;      //!< Defaulted.
+    ~phred_base() noexcept = default;                                        //!< Defaulted.
 
     //!\brief Befriend the derived_type so it can instantiate.
     friend derived_type;
@@ -63,8 +67,8 @@ private:
 public:
     // Import from base type:
     using base_t::alphabet_size;
-    using base_t::to_rank;
     using base_t::assign_rank;
+    using base_t::to_rank;
     using typename base_t::char_type;
     using typename base_t::rank_type;
 
@@ -77,11 +81,8 @@ public:
      * \experimentalapi{Experimental since version 3.1.}
      */
     template <typename other_qual_type>
-    //!\cond
-        requires (!std::same_as<phred_base, other_qual_type>) &&
-                 (!std::same_as<derived_type, other_qual_type>) &&
-                 quality_alphabet<other_qual_type>
-    //!\endcond
+        requires (!std::same_as<phred_base, other_qual_type>)
+              && (!std::same_as<derived_type, other_qual_type>) && quality_alphabet<other_qual_type>
     explicit constexpr phred_base(other_qual_type const & other) noexcept
     {
         assign_phred_to(seqan3::to_phred(other), static_cast<derived_type &>(*this));
@@ -129,40 +130,6 @@ public:
     //!\}
 
 private:
-    //!\brief Phred to rank conversion table.
-    static std::array<rank_type, 256> constexpr phred_to_rank
-    {
-        [] () constexpr
-        {
-            std::array<rank_type, 256> ret{};
-
-            for (int64_t i = std::numeric_limits<phred_type>::lowest(); i <= std::numeric_limits<phred_type>::max(); ++i)
-            {
-                if (i < derived_type::offset_phred)                     // map too-small to smallest possible
-                    ret[static_cast<rank_type>(i)] = 0;
-                else if (i >= derived_type::offset_phred + alphabet_size)  // map too-large to highest possible
-                    ret[static_cast<rank_type>(i)] = alphabet_size - 1;
-                else                                                    // map valid range to identity
-                    ret[static_cast<rank_type>(i)] = i - derived_type::offset_phred;
-            }
-            return ret;
-        }()
-    };
-
-    //!\brief Rank to phred conversion table.
-    static std::array<phred_type, alphabet_size> constexpr rank_to_phred
-    {
-        [] () constexpr
-        {
-            std::array<phred_type, alphabet_size> ret{};
-
-            for (size_t i = 0; i < alphabet_size; ++i)
-                ret[i] = i + derived_type::offset_phred;
-
-            return ret;
-        }()
-    };
-
     //!\copydoc seqan3::dna4::char_to_rank
     static constexpr rank_type char_to_rank(char_type const chr)
     {
@@ -175,6 +142,43 @@ private:
     {
         return rank + derived_type::offset_char;
     }
+
+    // clang-format off
+    //!\brief Phred to rank conversion table.
+    static constexpr std::array<rank_type, 256> phred_to_rank
+    {
+        []() constexpr {
+            std::array<rank_type, 256> ret{};
+
+            for (int64_t i = std::numeric_limits<phred_type>::lowest();
+                 i <= std::numeric_limits<phred_type>::max();
+                 ++i)
+            {
+                if (i < derived_type::offset_phred) // map too-small to smallest possible
+                    ret[static_cast<rank_type>(i)] = 0;
+                else if (i >= derived_type::offset_phred + alphabet_size) // map too-large to highest possible
+                    ret[static_cast<rank_type>(i)] = alphabet_size - 1;
+                else // map valid range to identity
+                    ret[static_cast<rank_type>(i)] = i - derived_type::offset_phred;
+            }
+
+            return ret;
+        }()
+    };
+
+    //!\brief Rank to phred conversion table.
+    static constexpr std::array<phred_type, alphabet_size> rank_to_phred
+    {
+        []() constexpr {
+            std::array<phred_type, alphabet_size> ret{};
+
+            for (size_t i = 0; i < alphabet_size; ++i)
+                ret[i] = i + derived_type::offset_phred;
+
+            return ret;
+        }()
+    };
 };
+// clang-format on
 
 } // namespace seqan3

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -9,11 +9,10 @@
 
 #include <vector>
 
+#include <seqan3/test/simd_utility.hpp>
 #include <seqan3/utility/container/aligned_allocator.hpp>
 #include <seqan3/utility/simd/simd.hpp>
 #include <seqan3/utility/simd/views/iota_simd.hpp>
-
-#include <seqan3/test/simd_utility.hpp>
 
 #include "../../../range/iterator_test_template.hpp"
 
@@ -78,12 +77,12 @@ TEST(iota_simd_test, combinability)
 {
     using simd_t = seqan3::simd::simd_type_t<uint32_t>;
 
-    auto simd_iota_take_transform_view = seqan3::views::iota_simd<simd_t>(0, 10)
-                                       | std::views::take(3)
-                                       | std::views::transform([] (auto const simd_value)
-                                       {
-                                           return simd_value + seqan3::simd::fill<simd_t>(3);
-                                       });
+    auto simd_iota_take_transform_view = seqan3::views::iota_simd<simd_t>(0, 10) | std::views::take(3)
+                                       | std::views::transform(
+                                             [](auto const simd_value)
+                                             {
+                                                 return simd_value + seqan3::simd::fill<simd_t>(3);
+                                             });
 
     auto expected_it = simd_iota_take_transform_view.begin();
     SIMD_EQ(*expected_it, seqan3::simd::fill<simd_t>(3));

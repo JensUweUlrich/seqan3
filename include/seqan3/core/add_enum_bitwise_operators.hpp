@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ namespace seqan3
  * \include test/snippet/core/add_enum_bitwise_operators.cpp
  */
 template <typename t>
-constexpr bool add_enum_bitwise_operators = false;
+inline constexpr bool add_enum_bitwise_operators = false;
 
 /*!\name Binary operators for scoped enums
  * \brief Perform binary operations like on ints or weak enums. These overloads are available if
@@ -102,35 +102,35 @@ constexpr bool add_enum_bitwise_operators = false;
  * \{
  */
 template <typename t>
-constexpr t operator& (t lhs, t rhs) noexcept
+constexpr t operator&(t lhs, t rhs) noexcept
     requires std::is_enum_v<t> && add_enum_bitwise_operators<t>
 {
     return static_cast<t>(static_cast<std::underlying_type_t<t>>(lhs) & static_cast<std::underlying_type_t<t>>(rhs));
 }
 
 template <typename t>
-constexpr t operator| (t lhs, t rhs) noexcept
+constexpr t operator|(t lhs, t rhs) noexcept
     requires std::is_enum_v<t> && add_enum_bitwise_operators<t>
 {
     return static_cast<t>(static_cast<std::underlying_type_t<t>>(lhs) | static_cast<std::underlying_type_t<t>>(rhs));
 }
 
 template <typename t>
-constexpr t operator^ (t lhs, t rhs) noexcept
+constexpr t operator^(t lhs, t rhs) noexcept
     requires std::is_enum_v<t> && add_enum_bitwise_operators<t>
 {
     return static_cast<t>(static_cast<std::underlying_type_t<t>>(lhs) ^ static_cast<std::underlying_type_t<t>>(rhs));
 }
 
 template <typename t>
-constexpr t operator~ (t lhs) noexcept
+constexpr t operator~(t lhs) noexcept
     requires std::is_enum_v<t> && add_enum_bitwise_operators<t>
 {
     return static_cast<t>(~static_cast<std::underlying_type_t<t>>(lhs));
 }
 
 template <typename t>
-constexpr t & operator&= (t & lhs, t rhs) noexcept
+constexpr t & operator&=(t & lhs, t rhs) noexcept
     requires std::is_enum_v<t> && add_enum_bitwise_operators<t>
 {
     lhs = lhs & rhs;
@@ -138,7 +138,7 @@ constexpr t & operator&= (t & lhs, t rhs) noexcept
 }
 
 template <typename t>
-constexpr t & operator|= (t & lhs, t rhs) noexcept
+constexpr t & operator|=(t & lhs, t rhs) noexcept
     requires std::is_enum_v<t> && add_enum_bitwise_operators<t>
 {
     lhs = lhs | rhs;
@@ -146,7 +146,7 @@ constexpr t & operator|= (t & lhs, t rhs) noexcept
 }
 
 template <typename t>
-constexpr t & operator^= (t & lhs, t rhs) noexcept
+constexpr t & operator^=(t & lhs, t rhs) noexcept
     requires std::is_enum_v<t> && add_enum_bitwise_operators<t>
 {
     lhs = lhs ^ rhs;

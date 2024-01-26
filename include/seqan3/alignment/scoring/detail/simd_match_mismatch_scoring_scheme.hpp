@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <seqan3/std/concepts>
+#include <concepts>
 
 #include <seqan3/alignment/configuration/align_config_method.hpp>
 #include <seqan3/alignment/scoring/scoring_scheme_concept.hpp>
@@ -63,11 +63,8 @@ namespace seqan3::detail
  * during the computation of the vectorised alignment.
  */
 template <simd_concept simd_score_t, semialphabet alphabet_t, typename alignment_t>
-//!\cond
-    requires (seqan3::alphabet_size<alphabet_t> > 1) &&
-             (std::same_as<alignment_t, align_cfg::method_local> ||
-              std::same_as<alignment_t, align_cfg::method_global>)
-//!\endcond
+    requires (seqan3::alphabet_size<alphabet_t> > 1)
+          && (std::same_as<alignment_t, align_cfg::method_local> || std::same_as<alignment_t, align_cfg::method_global>)
 class simd_match_mismatch_scoring_scheme
 {
 private:
@@ -98,9 +95,7 @@ public:
 
     //!\copydoc seqan3::detail::simd_match_mismatch_scoring_scheme::initialise_from_scalar_scoring_scheme
     template <typename scoring_scheme_t>
-    //!\cond
         requires scoring_scheme_for<scoring_scheme_t, alphabet_t>
-    //!\endcond
     constexpr explicit simd_match_mismatch_scoring_scheme(scoring_scheme_t const & scoring_scheme)
     {
         initialise_from_scalar_scoring_scheme(scoring_scheme);
@@ -108,9 +103,7 @@ public:
 
     //!\copydoc seqan3::detail::simd_match_mismatch_scoring_scheme::initialise_from_scalar_scoring_scheme
     template <typename scoring_scheme_t>
-    //!\cond
         requires scoring_scheme_for<scoring_scheme_t, alphabet_t>
-    //!\endcond
     constexpr simd_match_mismatch_scoring_scheme & operator=(scoring_scheme_t const & scoring_scheme)
     {
         initialise_from_scalar_scoring_scheme(scoring_scheme);
@@ -147,8 +140,7 @@ public:
      *
      * Thread-safe.
      */
-    constexpr simd_score_t score(alphabet_ranks_type const & ranks1, alphabet_ranks_type const & ranks2)
-        const noexcept
+    constexpr simd_score_t score(alphabet_ranks_type const & ranks1, alphabet_ranks_type const & ranks2) const noexcept
     {
         typename simd_traits<simd_score_t>::mask_type mask;
         // For global and local alignment there are slightly different formulas because
@@ -170,9 +162,7 @@ public:
 
     //!\brief Returns the given simd vector without changing it (no-op).
     template <typename alphabet_ranks_t>
-    //!\cond
         requires std::same_as<std::remove_cvref_t<alphabet_ranks_t>, alphabet_ranks_type>
-    //!\endcond
     constexpr alphabet_ranks_t make_score_profile(alphabet_ranks_t && ranks) const noexcept
     {
         return std::forward<alphabet_ranks_t>(ranks);
@@ -200,16 +190,16 @@ private:
         using score_t = decltype(std::declval<scoring_scheme_t const &>().score(alphabet_t{}, alphabet_t{}));
         using simd_scalar_t = typename simd_traits<simd_score_t>::scalar_type;
 
-        score_t scalar_match_score = scoring_scheme.score(seqan3::assign_rank_to(0, alphabet_t{}),
-                                                          seqan3::assign_rank_to(0, alphabet_t{}));
-        score_t scalar_mismatch_score = scoring_scheme.score(seqan3::assign_rank_to(0, alphabet_t{}),
-                                                             seqan3::assign_rank_to(1, alphabet_t{}));
+        score_t scalar_match_score =
+            scoring_scheme.score(seqan3::assign_rank_to(0, alphabet_t{}), seqan3::assign_rank_to(0, alphabet_t{}));
+        score_t scalar_mismatch_score =
+            scoring_scheme.score(seqan3::assign_rank_to(0, alphabet_t{}), seqan3::assign_rank_to(1, alphabet_t{}));
 
         // Check if the scoring scheme match and mismatch scores do not overflow with the respective scalar type.
         if constexpr (sizeof(simd_scalar_t) < sizeof(score_t))
         {
-            if (scalar_match_score > static_cast<score_t>(std::numeric_limits<simd_scalar_t>::max()) ||
-                scalar_mismatch_score < static_cast<score_t>(std::numeric_limits<simd_scalar_t>::lowest()))
+            if (scalar_match_score > static_cast<score_t>(std::numeric_limits<simd_scalar_t>::max())
+                || scalar_mismatch_score < static_cast<score_t>(std::numeric_limits<simd_scalar_t>::lowest()))
             {
                 throw std::invalid_argument{"The selected scoring scheme score overflows "
                                             "for the selected scalar type of the simd type."};
@@ -220,7 +210,7 @@ private:
         mismatch_score = simd::fill<simd_score_t>(static_cast<simd_scalar_t>(scalar_mismatch_score));
     }
 
-    simd_score_t match_score; //!< The simd vector for a match score.
+    simd_score_t match_score;    //!< The simd vector for a match score.
     simd_score_t mismatch_score; //!< The simd vector for a mismatch score.
 };
 

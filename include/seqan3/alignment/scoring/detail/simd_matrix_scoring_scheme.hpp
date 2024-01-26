@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <seqan3/std/concepts>
+#include <concepts>
 
 #include <seqan3/alignment/configuration/align_config_method.hpp>
 #include <seqan3/alignment/scoring/scoring_scheme_concept.hpp>
@@ -54,9 +54,7 @@ namespace seqan3::detail
  * only the ranks of the alphabet are used.
  */
 template <simd_concept simd_score_t, semialphabet alphabet_t, typename alignment_t>
-//!\cond
     requires (std::same_as<alignment_t, align_cfg::method_local> || std::same_as<alignment_t, align_cfg::method_global>)
-//!\endcond
 class simd_matrix_scoring_scheme
 {
 private:
@@ -92,12 +90,12 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr simd_matrix_scoring_scheme() = default; //!< Defaulted.
-    constexpr simd_matrix_scoring_scheme(simd_matrix_scoring_scheme const &) = default; //!< Defaulted.
-    constexpr simd_matrix_scoring_scheme(simd_matrix_scoring_scheme &&) = default; //!< Defaulted.
+    constexpr simd_matrix_scoring_scheme() = default;                                               //!< Defaulted.
+    constexpr simd_matrix_scoring_scheme(simd_matrix_scoring_scheme const &) = default;             //!< Defaulted.
+    constexpr simd_matrix_scoring_scheme(simd_matrix_scoring_scheme &&) = default;                  //!< Defaulted.
     constexpr simd_matrix_scoring_scheme & operator=(simd_matrix_scoring_scheme const &) = default; //!< Defaulted.
-    constexpr simd_matrix_scoring_scheme & operator=(simd_matrix_scoring_scheme &&) = default; //!< Defaulted.
-    ~simd_matrix_scoring_scheme() = default; //!< Defaulted.
+    constexpr simd_matrix_scoring_scheme & operator=(simd_matrix_scoring_scheme &&) = default;      //!< Defaulted.
+    ~simd_matrix_scoring_scheme() = default;                                                        //!< Defaulted.
 
     //!\copydoc seqan3::detail::simd_matrix_scoring_scheme::initialise_from_scalar_scoring_scheme
     template <typename scoring_scheme_t>
@@ -183,15 +181,13 @@ private:
      *         selected simd vector type.
      */
     template <typename scoring_scheme_t>
-    //!\cond
         requires scoring_scheme_for<scoring_scheme_t, alphabet_t>
-    //!\endcond
     constexpr void initialise_from_scalar_scoring_scheme(scoring_scheme_t const & scoring_scheme)
     {
         using score_t = decltype(std::declval<scoring_scheme_t const &>().score(alphabet_t{}, alphabet_t{}));
 
         // Helper function to check if the matrix score is in the value range representable by the selected simd vector.
-        [[maybe_unused]] auto check_score_range = [&] ([[maybe_unused]] score_t score)
+        [[maybe_unused]] auto check_score_range = [&]([[maybe_unused]] score_t score)
         {
             // Note only if the size of the scalar type of the simd vector is smaller than the size of the score type
             // of the original scoring scheme, the score might exceed the valid value range of the scalar type. In this

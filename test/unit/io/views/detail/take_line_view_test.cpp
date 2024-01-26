@@ -1,13 +1,13 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #include <gtest/gtest.h>
 
-#include <seqan3/std/ranges>
+#include <ranges>
 
 #include <seqan3/io/views/detail/take_line_view.hpp>
 #include <seqan3/test/expect_range_eq.hpp>
@@ -107,7 +107,7 @@ TEST(view_take_line, eol_at_first_position)
     using sbt = std::istreambuf_iterator<char>;
 
     std::istringstream vec{"\n\nfoo"};
-    auto stream_view = std::ranges::subrange<decltype(sbt{vec}), decltype(sbt{})> {sbt{vec}, sbt{}};
+    auto stream_view = std::ranges::subrange<decltype(sbt{vec}), decltype(sbt{})>{sbt{vec}, sbt{}};
 
     EXPECT_RANGE_EQ(""sv, stream_view | seqan3::detail::take_line);
     EXPECT_RANGE_EQ("foo"sv, stream_view | seqan3::detail::take_line);
@@ -135,7 +135,7 @@ TEST(view_take_line_or_throw, windows_eol)
 TEST(view_take_line_or_throw, no_eol)
 {
     std::string vec{"foo"};
-    EXPECT_THROW(std::ranges::for_each(vec | seqan3::detail::take_line_or_throw, [](auto &&){}),
+    EXPECT_THROW(std::ranges::for_each(vec | seqan3::detail::take_line_or_throw, [](auto &&) {}),
                  seqan3::unexpected_end_of_input);
 }
 
@@ -167,6 +167,6 @@ TEST(view_take_line, reverse_bug)
     EXPECT_TRUE((std::ranges::output_range<decltype(v1), char>));
 
     // No build failure, but wrong results:
-//     auto v2 = v1 | std::views::reverse;
-//     EXPECT_EQ("oof", std::string(v2));
+    //     auto v2 = v1 | std::views::reverse;
+    //     EXPECT_EQ("oof", std::string(v2));
 }

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -10,8 +10,8 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
-#include <seqan3/std/iterator>
-#include <seqan3/std/ranges>
+#include <iterator>
+#include <ranges>
 
 #include <seqan3/test/expect_same_type.hpp>
 #include <seqan3/utility/range/concept.hpp>
@@ -136,16 +136,18 @@ struct iterator_fixture<range_test_fixture_t> : public ::testing::Test
 TYPED_TEST_SUITE_P(range_test);
 
 template <typename range_t>
-concept has_size_member = requires(range_t range)
-{
-    { range.size() };
-};
+concept has_size_member = requires (range_t range) {
+                              {
+                                  range.size()
+                              };
+                          };
 
 template <typename range_t>
-concept has_subscript_member = requires(range_t range)
-{
-    { range[0] };
-};
+concept has_subscript_member = requires (range_t range) {
+                                   {
+                                       range[0]
+                                   };
+                               };
 
 TYPED_TEST_P(range_test, concept_check)
 {
@@ -207,7 +209,7 @@ TYPED_TEST_P(range_test, concept_check)
     EXPECT_SAME_TYPE(std::ranges::range_value_t<range_t>, typename TestFixture::range_value_t);
     EXPECT_SAME_TYPE(std::ranges::range_reference_t<range_t>, typename TestFixture::range_reference_t);
 
-    if constexpr(TestFixture::const_iterable_range)
+    if constexpr (TestFixture::const_iterable_range)
     {
         EXPECT_SAME_TYPE(std::ranges::range_value_t<range_t const>, typename TestFixture::range_const_value_t);
         EXPECT_SAME_TYPE(std::ranges::range_reference_t<range_t const>, typename TestFixture::range_const_reference_t);
@@ -282,8 +284,4 @@ TYPED_TEST_P(range_test, subscript_member)
     }
 }
 
-REGISTER_TYPED_TEST_SUITE_P(range_test,
-                            concept_check,
-                            sized_range,
-                            size_member,
-                            subscript_member);
+REGISTER_TYPED_TEST_SUITE_P(range_test, concept_check, sized_range, size_member, subscript_member);

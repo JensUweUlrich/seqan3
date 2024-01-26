@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -24,23 +24,15 @@ INSTANTIATE_TYPED_TEST_SUITE_P(dssp9, semi_alphabet_constexpr, seqan3::dssp9, );
 // assign_char functions
 TEST(dssp9, assign_char)
 {
-    std::vector<char> input
-    {
-        '.', '(', ')',
-        ':', ',', '-', '_', '~', ';',
-        '<', '>', '[', ']', '{', '}',
-        'H', 'B', 'E', 'G', 'I', 'T', 'S'
-    };
+    std::vector<char> input{'.', '(', ')', ':', ',', '-', '_', '~', ';', '<', '>',
+                            '[', ']', '{', '}', 'H', 'B', 'E', 'G', 'I', 'T', 'S'};
 
-    std::vector<seqan3::dssp9> cmp
-    {
-        'X'_dssp9, 'X'_dssp9, 'X'_dssp9,
-        'X'_dssp9, 'X'_dssp9, 'X'_dssp9, 'X'_dssp9, 'X'_dssp9, 'X'_dssp9,
-        'X'_dssp9, 'X'_dssp9, 'X'_dssp9, 'X'_dssp9, 'X'_dssp9, 'X'_dssp9,
-        'H'_dssp9, 'B'_dssp9, 'E'_dssp9, 'G'_dssp9, 'I'_dssp9, 'T'_dssp9, 'S'_dssp9
-    };
+    std::vector<seqan3::dssp9> cmp{'X'_dssp9, 'X'_dssp9, 'X'_dssp9, 'X'_dssp9, 'X'_dssp9, 'X'_dssp9,
+                                   'X'_dssp9, 'X'_dssp9, 'X'_dssp9, 'X'_dssp9, 'X'_dssp9, 'X'_dssp9,
+                                   'X'_dssp9, 'X'_dssp9, 'X'_dssp9, 'H'_dssp9, 'B'_dssp9, 'E'_dssp9,
+                                   'G'_dssp9, 'I'_dssp9, 'T'_dssp9, 'S'_dssp9};
 
-    for (auto [ ch, cm ] : seqan3::views::zip(input, cmp))
+    for (auto [ch, cm] : seqan3::views::zip(input, cmp))
         EXPECT_EQ((seqan3::assign_char_to(ch, seqan3::dssp9{})), cm);
 }
 

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -18,11 +18,17 @@
 
 struct is_integral_fn
 {
-    bool operator()(...) { return false; }
+    bool operator()(...)
+    {
+        return false;
+    }
 
     template <typename identity_t>
-        requires std::integral<typename identity_t::type>
-    bool operator()(identity_t) { return true; }
+        requires std::integral<typename identity_t::type> bool
+    operator()(identity_t)
+    {
+        return true;
+    }
 };
 
 TEST(pack_algorithm, all_of_in_type_list)

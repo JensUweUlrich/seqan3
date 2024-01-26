@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,10 +12,10 @@
 
 #pragma once
 
-#include <seqan3/std/iterator>
+#include <iterator>
 #include <memory>
 #include <optional>
-#include <seqan3/std/ranges>
+#include <ranges>
 #include <type_traits>
 
 #include <seqan3/alignment/configuration/align_config_band.hpp>
@@ -62,8 +62,8 @@ namespace seqan3::detail
  * using SIMD operations or scalar operations, computing the traceback or only the score etc.. These configurations
  * are inherited using so-called `alignment policies`. An alignment policy is a type that implements a specific
  * functionality through a common interface that is used by the alignment algorithm. These policies are also
- * the customisation points of the algorithm which will be used to implement a specific behaviour. You can read more
- * about the policies in \ref alignment_pairwise_policy.
+ * the customisation points of the algorithm which will be used to implement a specific behaviour. \if DEV You can read
+ * more about the policies in \ref alignment_pairwise_policy. \endif
  *
  * Since some of the policies are augmented with traits to further refine the policy execution during the configuration,
  * it is necessary to defer the template instantiation of the policies, which are modelled as CRTP-base classes.
@@ -72,12 +72,11 @@ namespace seqan3::detail
  * template function seqan3::detail::invoke_deferred_crtp_base, which instantiates the CRTP policy types with the
  * correct alignment algorithm type.
  */
-template <typename config_t, typename ...algorithm_policies_t>
+template <typename config_t, typename... algorithm_policies_t>
 class alignment_algorithm :
     public invoke_deferred_crtp_base<algorithm_policies_t, alignment_algorithm<config_t, algorithm_policies_t...>>...
 {
 private:
-
     //!\brief The alignment configuration traits type with auxiliary information extracted from the configuration type.
     using traits_t = alignment_configuration_traits<config_t>;
 
@@ -122,12 +121,12 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr alignment_algorithm()                                        = default; //!< Defaulted
-    constexpr alignment_algorithm(alignment_algorithm const &)             = default; //!< Defaulted
-    constexpr alignment_algorithm(alignment_algorithm &&)                  = default; //!< Defaulted
+    constexpr alignment_algorithm() = default;                                        //!< Defaulted
+    constexpr alignment_algorithm(alignment_algorithm const &) = default;             //!< Defaulted
+    constexpr alignment_algorithm(alignment_algorithm &&) = default;                  //!< Defaulted
     constexpr alignment_algorithm & operator=(alignment_algorithm const &) = default; //!< Defaulted
-    constexpr alignment_algorithm & operator=(alignment_algorithm &&)      = default; //!< Defaulted
-    ~alignment_algorithm()                                                 = default; //!< Defaulted
+    constexpr alignment_algorithm & operator=(alignment_algorithm &&) = default;      //!< Defaulted
+    ~alignment_algorithm() = default;                                                 //!< Defaulted
 
     /*!\brief Constructs the algorithm with the passed configuration.
      * \param cfg The configuration to be passed to the algorithm.
@@ -192,9 +191,7 @@ public:
      * |space (alignment)       |\f$ O(n*m) \f$    |\f$ O(n*k) \f$     |
      */
     template <indexed_sequence_pair_range indexed_sequence_pairs_t, typename callback_t>
-    //!\cond
         requires (!traits_t::is_vectorised) && std::invocable<callback_t, alignment_result_t>
-    //!\endcond
     void operator()(indexed_sequence_pairs_t && indexed_sequence_pairs, callback_t && callback)
     {
         using std::get;
@@ -205,9 +202,7 @@ public:
 
     //!\overload
     template <indexed_sequence_pair_range indexed_sequence_pairs_t, typename callback_t>
-    //!\cond
         requires traits_t::is_vectorised && std::invocable<callback_t, alignment_result_t>
-    //!\endcond
     void operator()(indexed_sequence_pairs_t && indexed_sequence_pairs, callback_t && callback)
     {
         assert(cfg_ptr != nullptr);
@@ -285,13 +280,9 @@ private:
      *
      * Uses the standard dynamic programming algorithm to compute the pairwise sequence alignment.
      */
-    template <std::ranges::forward_range sequence1_t,
-              std::ranges::forward_range sequence2_t,
-              typename callback_t>
-    constexpr void compute_single_pair(size_t const idx,
-                                       sequence1_t && sequence1,
-                                       sequence2_t && sequence2,
-                                       callback_t & callback)
+    template <std::ranges::forward_range sequence1_t, std::ranges::forward_range sequence2_t, typename callback_t>
+    constexpr void
+    compute_single_pair(size_t const idx, sequence1_t && sequence1, sequence2_t && sequence2, callback_t & callback)
     {
         assert(cfg_ptr != nullptr);
 
@@ -344,22 +335,18 @@ private:
                       "The band configuration is required for the banded alignment algorithm.");
 
         using diff_type = std::iter_difference_t<std::ranges::iterator_t<sequence1_t>>;
-        static_assert(std::is_signed_v<diff_type>,  "Only signed types can be used to test the band parameters.");
+        static_assert(std::is_signed_v<diff_type>, "Only signed types can be used to test the band parameters.");
 
         if (static_cast<diff_type>(band.lower_diagonal) > std::ranges::distance(sequence1))
         {
-            throw invalid_alignment_configuration
-            {
-                "Invalid band error: The lower diagonal excludes the whole alignment matrix."
-            };
+            throw invalid_alignment_configuration{
+                "Invalid band error: The lower diagonal excludes the whole alignment matrix."};
         }
 
         if (static_cast<diff_type>(band.upper_diagonal) < -std::ranges::distance(sequence2))
         {
-            throw invalid_alignment_configuration
-            {
-                "Invalid band error: The upper diagonal excludes the whole alignment matrix."
-            };
+            throw invalid_alignment_configuration{
+                "Invalid band error: The upper diagonal excludes the whole alignment matrix."};
         }
     }
 
@@ -394,9 +381,7 @@ private:
      */
     template <typename sequence1_t, typename sequence2_t>
     void compute_matrix(sequence1_t & sequence1, sequence2_t & sequence2)
-    //!\cond
         requires (!traits_t::is_banded)
-    //!\endcond
     {
         // ----------------------------------------------------------------------------
         // Initialisation phase: allocate memory and initialise first column.
@@ -425,9 +410,7 @@ private:
     //!\overload
     template <typename sequence1_t, typename sequence2_t>
     void compute_matrix(sequence1_t & sequence1, sequence2_t & sequence2, align_cfg::band_fixed_size const & band)
-    //!\cond
-        requires traits_t::is_banded
-    //!\endcond
+        requires (traits_t::is_banded)
     {
         // ----------------------------------------------------------------------------
         // Initialisation phase: allocate memory and initialise first column.
@@ -524,7 +507,7 @@ private:
     template <bool initialise_first_cell, typename sequence1_value_t, typename sequence2_t>
     void compute_alignment_column(sequence1_value_t const & seq1_value, sequence2_t && sequence2)
     {
-        this->next_alignment_column();  // move to next column and set alignment column iterator accordingly.
+        this->next_alignment_column(); // move to next column and set alignment column iterator accordingly.
         alignment_column = this->current_alignment_column();
         alignment_column_it = alignment_column.begin();
 
@@ -605,9 +588,7 @@ private:
      * Finally, the callback is invoked with the computed alignment result.
      */
     template <typename index_t, typename sequence1_t, typename sequence2_t, typename callback_t>
-    //!\cond
         requires (!traits_t::is_vectorised)
-    //!\endcond
     constexpr void make_alignment_result([[maybe_unused]] index_t const idx,
                                          [[maybe_unused]] sequence1_t & sequence1,
                                          [[maybe_unused]] sequence2_t & sequence2,
@@ -649,11 +630,9 @@ private:
             // Get a aligned sequence builder for banded or un-banded case.
             aligned_sequence_builder builder{sequence1, sequence2};
 
-            detail::matrix_coordinate const optimum_coordinate
-            {
+            detail::matrix_coordinate const optimum_coordinate{
                 detail::row_index_type{this->alignment_state.optimum.row_index},
-                detail::column_index_type{this->alignment_state.optimum.column_index}
-            };
+                detail::column_index_type{this->alignment_state.optimum.column_index}};
             auto trace_res = builder(this->trace_matrix.trace_path(optimum_coordinate));
             res.begin_positions.first = trace_res.first_sequence_slice_positions.first;
             res.begin_positions.second = trace_res.second_sequence_slice_positions.first;
@@ -699,18 +678,15 @@ private:
      * Finally, the callback is invoked with each computed alignment result iteratively.
      */
     template <typename indexed_sequence_pair_range_t, typename callback_t>
-    //!\cond
         requires traits_t::is_vectorised
-    //!\endcond
-    constexpr auto make_alignment_result(indexed_sequence_pair_range_t && index_sequence_pairs,
-                                         callback_t & callback)
+    constexpr auto make_alignment_result(indexed_sequence_pair_range_t && index_sequence_pairs, callback_t & callback)
     {
         using result_value_t = typename alignment_result_value_type_accessor<alignment_result_t>::type;
 
         size_t simd_index = 0;
         for (auto && [sequence_pairs, alignment_index] : index_sequence_pairs)
         {
-            (void) sequence_pairs;
+            (void)sequence_pairs;
             result_value_t res{};
 
             if constexpr (traits_t::output_sequence1_id)
@@ -720,7 +696,7 @@ private:
                 res.sequence2_id = alignment_index;
 
             if constexpr (traits_t::compute_score)
-                res.score = this->alignment_state.optimum.score[simd_index];  // Just take this
+                res.score = this->alignment_state.optimum.score[simd_index]; // Just take this
 
             if constexpr (traits_t::compute_end_positions)
             {
@@ -754,21 +730,40 @@ private:
         matrix_offset offset{row_index_type{static_cast<std::ptrdiff_t>(coord.second)},
                              column_index_type{static_cast<std::ptrdiff_t>(coord.first)}};
 
-        std::ranges::copy(column | std::views::transform([] (auto const & tpl)
-        {
-            using std::get;
-            return get<0>(tpl).current;
-        }), score_debug_matrix.begin() + offset);
+        std::ranges::copy(column
+                              | std::views::transform(
+                                  [](auto const & tpl)
+                                  {
+                                      using std::get;
+                                      return get<0>(tpl).current;
+                                  }),
+                          score_debug_matrix.begin() + offset);
 
         // if traceback is enabled.
         if constexpr (traits_t::compute_sequence_alignment)
         {
-            auto trace_matrix_it = trace_debug_matrix.begin() + offset;
-            std::ranges::copy(column | std::views::transform([] (auto const & tpl)
-            {
-                using std::get;
-                return get<1>(tpl).current;
-            }), trace_debug_matrix.begin() + offset);
+            std::ranges::copy(
+                column
+                    | std::views::transform(
+                        [](auto const & tpl)
+                        {
+                            using std::get;
+                            auto trace = get<1>(tpl).current;
+
+                            if (auto _up = (trace & trace_directions::up_open); _up == trace_directions::carry_up_open)
+                                trace = trace ^ trace_directions::carry_up_open; // remove silent up open signal
+                            else if (_up == trace_directions::up_open)
+                                trace = trace ^ trace_directions::up; // display up open only with single bit.
+
+                            if (auto _left = (trace & trace_directions::left_open);
+                                _left == trace_directions::carry_left_open)
+                                trace = trace ^ trace_directions::carry_left_open; // remove silent left open signal
+                            else if (_left == trace_directions::left_open)
+                                trace = trace ^ trace_directions::left; // display left open only with single bit.
+
+                            return trace;
+                        }),
+                trace_debug_matrix.begin() + offset);
         }
     }
 

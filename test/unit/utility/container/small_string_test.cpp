@@ -1,13 +1,13 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #include <gtest/gtest.h>
 
-#include <seqan3/std/ranges>
+#include <ranges>
 #include <string>
 #include <utility>
 
@@ -57,8 +57,8 @@ TEST(small_string, construct_from_char)
 // construction from array.
 TEST(small_string, construct_from_array)
 {
-    EXPECT_TRUE((std::is_same_v<seqan3::small_string<5>,
-                                decltype(seqan3::small_string{std::array{'h','e','l','l','o'}})>));
+    EXPECT_TRUE(
+        (std::is_same_v<seqan3::small_string<5>, decltype(seqan3::small_string{std::array{'h', 'e', 'l', 'l', 'o'}})>));
 }
 
 // assignment from literal.
@@ -101,14 +101,21 @@ TEST(small_string, c_str)
 TEST(small_string, string)
 {
     seqan3::small_string em{"hello"};
-    EXPECT_EQ(em.str(), "hello"s);  // explicit
+    EXPECT_EQ(em.str(), "hello"s); // explicit
 }
 
-TEST(small_string, implicit_conversion)
+TEST(small_string, implicit_conversion_string)
 {
     seqan3::small_string em{"hello"};
     std::string str = em;
-    EXPECT_EQ(str, "hello"s);  // explicit
+    EXPECT_EQ(str, "hello"s); // explicit
+}
+
+TEST(small_string, implicit_conversion_string_view)
+{
+    seqan3::small_string em{"hello"};
+    std::string_view str_view{em};
+    EXPECT_EQ(str_view, "hello"s); // explicit
 }
 
 constexpr bool erase_test()
@@ -137,9 +144,8 @@ TEST(small_string, erase)
 TEST(small_string, concat)
 {
     {
-        constexpr seqan3::small_string em = seqan3::small_string{"hello"} +
-                                            seqan3::small_string{' '} +
-                                            seqan3::small_string{"world"};
+        constexpr seqan3::small_string em =
+            seqan3::small_string{"hello"} + seqan3::small_string{' '} + seqan3::small_string{"world"};
         constexpr auto size = em.size();
 
         EXPECT_EQ(size, 11u);
@@ -199,7 +205,7 @@ TEST(small_string, swap)
 {
     seqan3::small_string s1{"hello"};
     seqan3::small_string s2{"olleh"};
-    {  // global function.
+    { // global function.
         std::swap(s1, s2);
         EXPECT_EQ(s1, seqan3::small_string{"olleh"});
         EXPECT_EQ(s2, seqan3::small_string{"hello"});
@@ -246,7 +252,7 @@ TEST(small_string, equality)
 {
     constexpr bool cmp1 = seqan3::small_string{"hello"} == seqan3::small_string{"hello"};
     constexpr bool cmp2 = seqan3::small_string{"hello"} == seqan3::small_string{"hell"};
-    constexpr bool cmp3 = seqan3::small_string{"hell"}  == seqan3::small_string{"hello"};
+    constexpr bool cmp3 = seqan3::small_string{"hell"} == seqan3::small_string{"hello"};
     constexpr bool cmp4 = seqan3::small_string{"hella"} == seqan3::small_string{"hello"};
 
     EXPECT_TRUE(cmp1);
@@ -259,7 +265,7 @@ TEST(small_string, inequality)
 {
     constexpr bool cmp1 = seqan3::small_string{"hello"} != seqan3::small_string{"hello"};
     constexpr bool cmp2 = seqan3::small_string{"hello"} != seqan3::small_string{"hell"};
-    constexpr bool cmp3 = seqan3::small_string{"hell"}  != seqan3::small_string{"hello"};
+    constexpr bool cmp3 = seqan3::small_string{"hell"} != seqan3::small_string{"hello"};
     constexpr bool cmp4 = seqan3::small_string{"hella"} != seqan3::small_string{"hello"};
 
     EXPECT_FALSE(cmp1);
@@ -272,7 +278,7 @@ TEST(small_string, less)
 {
     constexpr bool cmp1 = seqan3::small_string{"hello"} < seqan3::small_string{"hello"};
     constexpr bool cmp2 = seqan3::small_string{"hello"} < seqan3::small_string{"hell"};
-    constexpr bool cmp3 = seqan3::small_string{"hell"}  < seqan3::small_string{"hello"};
+    constexpr bool cmp3 = seqan3::small_string{"hell"} < seqan3::small_string{"hello"};
     constexpr bool cmp4 = seqan3::small_string{"hella"} < seqan3::small_string{"hello"};
 
     EXPECT_FALSE(cmp1);
@@ -285,7 +291,7 @@ TEST(small_string, less_equal)
 {
     constexpr bool cmp1 = seqan3::small_string{"hello"} <= seqan3::small_string{"hello"};
     constexpr bool cmp2 = seqan3::small_string{"hello"} <= seqan3::small_string{"hell"};
-    constexpr bool cmp3 = seqan3::small_string{"hell"}  <= seqan3::small_string{"hello"};
+    constexpr bool cmp3 = seqan3::small_string{"hell"} <= seqan3::small_string{"hello"};
     constexpr bool cmp4 = seqan3::small_string{"hella"} <= seqan3::small_string{"hello"};
 
     EXPECT_TRUE(cmp1);
@@ -298,7 +304,7 @@ TEST(small_string, greater)
 {
     constexpr bool cmp1 = seqan3::small_string{"hello"} > seqan3::small_string{"hello"};
     constexpr bool cmp2 = seqan3::small_string{"hello"} > seqan3::small_string{"hell"};
-    constexpr bool cmp3 = seqan3::small_string{"hell"}  > seqan3::small_string{"hello"};
+    constexpr bool cmp3 = seqan3::small_string{"hell"} > seqan3::small_string{"hello"};
     constexpr bool cmp4 = seqan3::small_string{"hella"} > seqan3::small_string{"hello"};
 
     EXPECT_FALSE(cmp1);
@@ -311,7 +317,7 @@ TEST(small_string, greater_equal)
 {
     constexpr bool cmp1 = seqan3::small_string{"hello"} >= seqan3::small_string{"hello"};
     constexpr bool cmp2 = seqan3::small_string{"hello"} >= seqan3::small_string{"hell"};
-    constexpr bool cmp3 = seqan3::small_string{"hell"}  >= seqan3::small_string{"hello"};
+    constexpr bool cmp3 = seqan3::small_string{"hell"} >= seqan3::small_string{"hello"};
     constexpr bool cmp4 = seqan3::small_string{"hella"} >= seqan3::small_string{"hello"};
 
     EXPECT_TRUE(cmp1);

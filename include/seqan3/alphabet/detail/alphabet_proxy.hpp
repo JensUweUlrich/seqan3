@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,13 +12,14 @@
 
 #pragma once
 
-#include <seqan3/std/concepts>
+#include <concepts>
 
 #include <seqan3/alphabet/alphabet_base.hpp>
+#include <seqan3/alphabet/detail/concept.hpp>
 #include <seqan3/alphabet/nucleotide/concept.hpp>
 #include <seqan3/alphabet/quality/concept.hpp>
 #include <seqan3/core/detail/template_inspection.hpp>
-#include <seqan3/utility/concept/exposition_only/core_language.hpp>
+#include <seqan3/utility/concept.hpp>
 #include <seqan3/utility/type_traits/basic.hpp>
 
 namespace seqan3
@@ -54,22 +55,20 @@ namespace seqan3
  * \noapi{Exposition only}
  */
 template <typename derived_type, writable_semialphabet alphabet_type>
-//!\cond
     requires std::regular<alphabet_type>
-//!\endcond
-class alphabet_proxy : public
-    std::conditional_t<std::is_class_v<alphabet_type>,
-                       alphabet_type,
-                       alphabet_base<derived_type,
-                                     alphabet_size<alphabet_type>,
-                                     detail::valid_template_spec_or_t<void, alphabet_char_t, alphabet_type>>>
+class alphabet_proxy :
+    public std::conditional_t<std::is_class_v<alphabet_type>,
+                              alphabet_type,
+                              alphabet_base<derived_type,
+                                            alphabet_size<alphabet_type>,
+                                            detail::valid_template_spec_or_t<void, alphabet_char_t, alphabet_type>>>
 {
 private:
     //!\brief Type of the base class.
     using base_t =
         std::conditional_t<std::is_class_v<alphabet_type>,
-                           alphabet_type,                                   // inherit from emulated type if possible
-                           alphabet_base<derived_type,                      // else: alphabet_base
+                           alphabet_type,              // inherit from emulated type if possible
+                           alphabet_base<derived_type, // else: alphabet_base
                                          alphabet_size<alphabet_type>,
                                          detail::valid_template_spec_or_t<void, alphabet_char_t, alphabet_type>>>;
 
@@ -77,7 +76,7 @@ private:
     friend base_t;
 
     //!\brief The type of the alphabet character.
-    using char_type  = detail::valid_template_spec_or_t<char, alphabet_char_t, alphabet_type>;
+    using char_type = detail::valid_template_spec_or_t<char, alphabet_char_t, alphabet_type>;
 
     //!\brief The type of the Phred score.
     using phred_type = detail::valid_template_spec_or_t<int8_t, alphabet_phred_t, alphabet_type>;
@@ -95,17 +94,13 @@ private:
 
     //!\brief Construction from the emulated type.
     constexpr alphabet_proxy(alphabet_type const a) noexcept
-    //!\cond
         requires std::is_class_v<alphabet_type>
-    //!\endcond
         : base_t{a}
     {}
 
     //!\brief Construction from the emulated type.
     constexpr alphabet_proxy(alphabet_type const a) noexcept
-    //!\cond
         requires (!std::is_class_v<alphabet_type>)
-    //!\endcond
         : base_t{}
     {
         base_t::assign_rank(seqan3::to_rank(a));
@@ -126,9 +121,7 @@ private:
     //!\brief Assignment from any type that the emulated type is assignable from.
     template <typename indirect_assignable_type>
     constexpr derived_type & operator=(indirect_assignable_type const & c) noexcept
-    //!\cond
         requires weakly_assignable_from<alphabet_type, indirect_assignable_type>
-    //!\endcond
     {
         alphabet_type a{};
         a = c;
@@ -158,9 +151,7 @@ public:
 
     //!\brief Assigns a character.
     constexpr derived_type & assign_char(char_type const c) noexcept
-    //!\cond
         requires writable_alphabet<alphabet_type>
-    //!\endcond
     {
         alphabet_type tmp{};
         assign_char_to(c, tmp);
@@ -169,9 +160,7 @@ public:
 
     //!\brief Assigns a Phred score.
     constexpr derived_type & assign_phred(phred_type const c) noexcept
-    //!\cond
         requires writable_quality_alphabet<alphabet_type>
-    //!\endcond
     {
         alphabet_type tmp{};
         assign_phred_to(c, tmp);
@@ -208,9 +197,7 @@ public:
 
     //!\brief Implicit conversion to types that the emulated type is convertible to.
     template <typename other_t>
-    //!\cond
         requires (!std::is_class_v<alphabet_type>) && std::convertible_to<alphabet_type, other_t>
-    //!\endcond
     constexpr operator other_t() const noexcept
     {
         return operator alphabet_type();
@@ -224,36 +211,28 @@ public:
 
     //!\brief Returns the character.
     constexpr auto to_char() const noexcept
-    //!\cond
         requires alphabet<alphabet_type>
-    //!\endcond
     {
         return seqan3::to_char(operator alphabet_type());
     }
 
     //!\brief Returns the Phred score.
     constexpr auto to_phred() const noexcept
-    //!\cond
         requires quality_alphabet<alphabet_type>
-    //!\endcond
     {
         return seqan3::to_phred(operator alphabet_type());
     }
 
     //!\brief Returns the complement.
     constexpr alphabet_type complement() const noexcept
-    //!\cond
         requires nucleotide_alphabet<alphabet_type>
-    //!\endcond
     {
         return seqan3::complement(operator alphabet_type());
     }
 
     //!\brief Delegate to the emulated type's validator.
     static constexpr bool char_is_valid(char_type const c) noexcept
-    //!\cond
         requires writable_alphabet<alphabet_type>
-    //!\endcond
     {
         return char_is_valid_for<alphabet_type>(c);
     }
@@ -264,11 +243,12 @@ public:
      *        e.g. seqan3::alphabet_variant.
      * \{
      */
+
 private:
     //!\brief work around a gcc bug that disables short-circuiting of operator&& in an enable_if_t of a friend function
     template <typename t>
-    static constexpr bool is_alphabet_comparable_with = !std::is_same_v<derived_type, t> &&
-                                                        detail::weakly_equality_comparable_with<alphabet_type, t>;
+    static constexpr bool is_alphabet_comparable_with =
+        !std::is_same_v<derived_type, t> && detail::weakly_equality_comparable_with<alphabet_type, t>;
 
 public:
     //!\brief Allow (in-)equality comparison with types that the emulated type is comparable with.

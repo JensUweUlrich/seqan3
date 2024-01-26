@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------------------------------
-# Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-# Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+# Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+# Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 # This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 # shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 # -----------------------------------------------------------------------------------------------------
@@ -24,6 +24,8 @@ message (STATUS "Found: ${SEQAN3_INCLUDE_DIR} (${SEQAN3_VERSION})")
 set (SEQAN3_DOXYGEN_INPUT_DIR "${CMAKE_SOURCE_DIR}")
 
 include (seqan3-doxygen.cmake)
+
+include (seqan3-doxygen-layout.cmake)
 
 enable_testing ()
 

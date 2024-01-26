@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -63,12 +63,12 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr dot_bracket3()                                 noexcept = default; //!< Defaulted.
-    constexpr dot_bracket3(dot_bracket3 const &)             noexcept = default; //!< Defaulted.
-    constexpr dot_bracket3(dot_bracket3 &&)                  noexcept = default; //!< Defaulted.
+    constexpr dot_bracket3() noexcept = default;                                 //!< Defaulted.
+    constexpr dot_bracket3(dot_bracket3 const &) noexcept = default;             //!< Defaulted.
+    constexpr dot_bracket3(dot_bracket3 &&) noexcept = default;                  //!< Defaulted.
     constexpr dot_bracket3 & operator=(dot_bracket3 const &) noexcept = default; //!< Defaulted.
-    constexpr dot_bracket3 & operator=(dot_bracket3 &&)      noexcept = default; //!< Defaulted.
-    ~dot_bracket3()                                          noexcept = default; //!< Defaulted.
+    constexpr dot_bracket3 & operator=(dot_bracket3 &&) noexcept = default;      //!< Defaulted.
+    ~dot_bracket3() noexcept = default;                                          //!< Defaulted.
 
     //!\}
 
@@ -130,32 +130,7 @@ public:
 
 private:
     //!\copydoc seqan3::dna4::rank_to_char_table
-    static constexpr char_type rank_to_char_table[alphabet_size]
-    {
-        '.',
-        '(',
-        ')'
-    };
-
-    //!\copydoc seqan3::dna4::char_to_rank_table
-    static constexpr std::array<rank_type, 256> char_to_rank_table
-    {
-        [] () constexpr
-        {
-            std::array<rank_type, 256> rank_table{};
-
-            // initialize with unpaired (std::array::fill unfortunately not constexpr)
-            for (rank_type & rnk : rank_table)
-                rnk = 0u;
-
-            // canonical
-            rank_table['.'] = 0u;
-            rank_table['('] = 1u;
-            rank_table[')'] = 2u;
-
-            return rank_table;
-        } ()
-    };
+    static constexpr char_type rank_to_char_table[alphabet_size]{'.', '(', ')'};
 
     //!\copydoc seqan3::dna4::rank_to_char
     static constexpr char_type rank_to_char(rank_type const rank)
@@ -169,7 +144,27 @@ private:
         using index_t = std::make_unsigned_t<char_type>;
         return char_to_rank_table[static_cast<index_t>(chr)];
     }
+
+    // clang-format off
+    //!\copydoc seqan3::dna4::char_to_rank_table
+    static constexpr std::array<rank_type, 256> char_to_rank_table
+    {
+        []() constexpr {
+            std::array<rank_type, 256> rank_table{};
+
+            // Value-initialisation of std::array does usually initialise. `fill` is explicit.
+            rank_table.fill(0u);
+
+            // canonical
+            rank_table['.'] = 0u;
+            rank_table['('] = 1u;
+            rank_table[')'] = 2u;
+
+            return rank_table;
+        }()
+    };
 };
+// clang-format on
 
 inline namespace literals
 {
@@ -203,7 +198,7 @@ constexpr dot_bracket3 operator""_db3(char const ch) noexcept
  *
  * \experimentalapi{Experimental since version 3.1.}
  */
-inline std::vector<dot_bracket3> operator""_db3(const char * str, std::size_t len)
+SEQAN3_WORKAROUND_LITERAL std::vector<dot_bracket3> operator""_db3(char const * str, std::size_t len)
 {
     std::vector<dot_bracket3> vec;
     vec.resize(len);
@@ -215,6 +210,6 @@ inline std::vector<dot_bracket3> operator""_db3(const char * str, std::size_t le
 }
 //!\}
 
-} // inline namespace literals
+} // namespace literals
 
 } // namespace seqan3

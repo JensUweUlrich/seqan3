@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -13,9 +13,8 @@
 #pragma once
 
 #include <iosfwd>
-
-#include <seqan3/std/iterator>
-#include <seqan3/std/ranges>
+#include <iterator>
+#include <ranges>
 
 #include <seqan3/io/stream/concept.hpp>
 #include <seqan3/io/stream/detail/fast_istreambuf_iterator.hpp>
@@ -41,11 +40,9 @@ struct istreambuf_fn
     constexpr auto operator()(std::basic_streambuf<stream_char_t, stream_traits_t> & s) const
     {
         return std::ranges::subrange<detail::fast_istreambuf_iterator<stream_char_t, stream_traits_t>,
-                                     std::default_sentinel_t>
-        {
+                                     std::default_sentinel_t>{
             detail::fast_istreambuf_iterator<stream_char_t, stream_traits_t>{s},
-            std::default_sentinel_t{}
-        };
+            std::default_sentinel_t{}};
     }
 
     /*!\brief Return the view object.

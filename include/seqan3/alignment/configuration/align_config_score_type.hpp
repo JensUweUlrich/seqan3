@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -14,7 +14,7 @@
 
 #include <seqan3/alignment/configuration/detail.hpp>
 #include <seqan3/core/configuration/pipeable_config_element.hpp>
-#include <seqan3/utility/concept/exposition_only/core_language.hpp>
+#include <seqan3/utility/concept.hpp>
 
 namespace seqan3::align_cfg
 {
@@ -35,7 +35,6 @@ template <arithmetic score_t>
 class score_type : private pipeable_config_element
 {
 public:
-
     static_assert(std::floating_point<score_t> || std::signed_integral<score_t>,
                   "The selected score type must be a signed integral type or floating point type.");
 
@@ -45,12 +44,12 @@ public:
     /*!\name Constructor, destructor and assignment
      * \{
      */
-    constexpr score_type() = default; //!< Defaulted.
-    constexpr score_type(score_type const &) = default; //!< Defaulted.
-    constexpr score_type(score_type &&) = default; //!< Defaulted.
+    constexpr score_type() = default;                               //!< Defaulted.
+    constexpr score_type(score_type const &) = default;             //!< Defaulted.
+    constexpr score_type(score_type &&) = default;                  //!< Defaulted.
     constexpr score_type & operator=(score_type const &) = default; //!< Defaulted.
-    constexpr score_type & operator=(score_type &&) = default; //!< Defaulted.
-    ~score_type() = default; //!< Defaulted.
+    constexpr score_type & operator=(score_type &&) = default;      //!< Defaulted.
+    ~score_type() = default;                                        //!< Defaulted.
 
     //!\}
 

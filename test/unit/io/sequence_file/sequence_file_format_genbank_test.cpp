@@ -1,14 +1,14 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
+#include <gtest/gtest.h>
+
 #include <sstream>
 #include <string>
-
-#include <gtest/gtest.h>
 
 #include <seqan3/alphabet/nucleotide/dna15.hpp>
 #include <seqan3/test/pretty_printing.hpp>
@@ -18,9 +18,8 @@
 template <>
 struct sequence_file_read<seqan3::format_genbank> : public sequence_file_data
 {
-    std::string standard_input
-    {
-R"(LOCUS ID1
+    std::string standard_input{
+        R"(LOCUS ID1
 DEFINITION  Homo sapiens mRNA for prepro cortistatin like peptide, complete
             cds.
 ACCESSION   ID1
@@ -51,25 +50,20 @@ DEFINITION  Homo sapiens mRNA for prepro cortistatin like peptide, complete
 ACCESSION   ID3
 ORIGIN
         1 ACGTTTA
-//
-)"
-    };
+//)"};
 
-    std::string illegal_alphabet_character_input
-    {
-R"(LOCUS ID1
+    std::string illegal_alphabet_character_input{
+        R"(LOCUS ID1
 DEFINITION  Homo sapiens mRNA for prepro cortistatin like peptide, complete
             cds.
 ACCESSION   ID1
 ORIGIN
         1 ACGTTTT?TT TTTTTTTT
 //
-)"
-    };
+)"};
 
-    std::string standard_output
-    {
-R"(LOCUS       ID1                 18 bp
+    std::string standard_output{
+        R"(LOCUS       ID1                 18 bp
 ORIGIN
         1 ACGTTTTTTT TTTTTTTT
 //
@@ -82,17 +76,14 @@ LOCUS       ID3 lala                 7 bp
 ORIGIN
         1 ACGTTTA
 //
-)"
-    };
+)"};
 
-    std::string no_or_ill_formatted_id_input
-    {
-R"(LOCOS ID1    stuff
+    std::string no_or_ill_formatted_id_input{
+        R"(LOCOS ID1    stuff
 ORIGIN
         1 ACGTTTTTTT TTTTTTTT
 //
-)"
-    };
+)"};
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -170,8 +161,9 @@ struct write : public sequence_file_data
 
     void do_write_test()
     {
-        seqan3::sequence_file_output fout{ostream, seqan3::format_genbank{}, seqan3::fields<seqan3::field::seq,
-                                                                                            seqan3::field::id>{}};
+        seqan3::sequence_file_output fout{ostream,
+                                          seqan3::format_genbank{},
+                                          seqan3::fields<seqan3::field::seq, seqan3::field::id>{}};
         fout.options = options;
 
         for (unsigned i = 0; i < 3; ++i)
@@ -183,9 +175,8 @@ struct write : public sequence_file_data
 
 TEST_F(write, complete_header)
 {
-    std::string comp
-    {
-R"(LOCUS       ID1                 18 bp
+    std::string comp{
+        R"(LOCUS       ID1                 18 bp
 DEFINITION  Homo sapiens mRNA for prepro cortistatin like peptide, complete
             cds.
 ACCESSION   ID1
@@ -217,8 +208,7 @@ SOURCE      .
 ORIGIN
         1 ACGTTTA
 //
-)"
-    };
+)"};
 
     options.embl_genbank_complete_header = true;
     ids[0] = R"(LOCUS       ID1                 18 bp

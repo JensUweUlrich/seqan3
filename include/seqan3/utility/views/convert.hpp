@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,10 +12,10 @@
 
 #pragma once
 
-#include <seqan3/std/concepts>
-#include <seqan3/std/ranges>
+#include <concepts>
+#include <ranges>
 
-#include <seqan3/utility/concept/exposition_only/core_language.hpp>
+#include <seqan3/utility/concept.hpp>
 
 namespace seqan3::views
 {
@@ -66,15 +66,16 @@ namespace seqan3::views
  * \noapi
  */
 template <typename out_t>
-inline auto constexpr convert = std::views::transform([] (auto && in) -> out_t
-{
-    static_assert(std::convertible_to<decltype(in) &&, out_t> || explicitly_convertible_to<decltype(in) &&, out_t>,
-                  "The reference type of the input to views::convert is not convertible to out_t.");
+inline constexpr auto convert = std::views::transform(
+    [](auto && in) -> out_t
+    {
+        static_assert(std::convertible_to<decltype(in) &&, out_t> || explicitly_convertible_to<decltype(in) &&, out_t>,
+                      "The reference type of the input to views::convert is not convertible to out_t.");
 
-    if constexpr (std::convertible_to<decltype(in) &&, out_t>)
-        return std::forward<decltype(in)>(in);
-    else
-        return static_cast<out_t>(std::forward<decltype(in)>(in));
-});
+        if constexpr (std::convertible_to<decltype(in) &&, out_t>)
+            return std::forward<decltype(in)>(in);
+        else
+            return static_cast<out_t>(std::forward<decltype(in)>(in));
+    });
 
 } // namespace seqan3::views

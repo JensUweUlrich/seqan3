@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -53,8 +53,7 @@ public:
     ~format_html() = default;                                  //!< Defaulted.
 
     //!\copydoc format_help_base(std::vector<std::string> const &, bool const)
-    format_html(std::vector<std::string> const & names, bool const advanced = false) : base_type{names, advanced}
-    {};
+    format_html(std::vector<std::string> const & names, bool const advanced = false) : base_type{names, advanced} {};
     //!\}
 
 private:
@@ -159,7 +158,7 @@ private:
             is_dl = true;
         }
         std::cout << "<dt>" << to_html(term) << "</dt>\n"
-                << "<dd>" << to_html(desc) << "</dd>\n";
+                  << "<dd>" << to_html(desc) << "</dd>\n";
     }
 
     //!\brief Prints a help page footer in HTML format to std::cout.
@@ -250,4 +249,4 @@ private:
     bool is_p{false};
 };
 
-} // namespace seqan3
+} // namespace seqan3::detail

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -8,7 +8,7 @@
 #include <gtest/gtest.h>
 
 #include <iostream>
-#include <seqan3/std/type_traits>
+#include <type_traits>
 
 #include <seqan3/utility/simd/concept.hpp>
 #include <seqan3/utility/simd/detail/builtin_simd.hpp>
@@ -71,27 +71,27 @@ struct template_type;
 // Types that have a subscript operator
 template <typename type>
 using subscript_types = seqan3::type_list<type[15],
-                                          type const [15],
+                                          type const[15],
                                           type[15][15],
-                                          type const [15][15],
+                                          type const[15][15],
                                           type *,
                                           type const *,
                                           type * [15][15],
-                                          type * *,
-                                          type const * *,
+                                          type **,
+                                          type const **,
                                           type const * const *,
-                                          type * * [15][15],
-                                          type const * * [15][15],
+                                          type ** [15][15],
+                                          type const ** [15][15],
                                           type const * const * [15][15],
-                                          type * * *,
-                                          type const * * *,
-                                          type const * const * *,
+                                          type ***,
+                                          type const ***,
+                                          type const * const **,
                                           type const * const * const *,
-                                          type * * * [15][15],
-                                          type const * * * [15][15],
-                                          type const * const * * [15][15],
+                                          type *** [15][15],
+                                          type const *** [15][15],
+                                          type const * const ** [15][15],
                                           type const * const * const * [15][15],
-                                          type const * const * const * const [15][15]>;
+                                          type const * const * const * const[15][15]>;
 
 TEST(builtin_simd, builtin_simd)
 {
@@ -176,11 +176,11 @@ TEST(builtin_simd, simd_traits)
     EXPECT_EQ(seqan3::simd::simd_traits<uint64x4_t>::max_length, 32u);
 
     EXPECT_TRUE((std::is_same_v<seqan3::simd::simd_traits<uint16x16_t>::mask_type,
-                 decltype(std::declval<int16x16_t>() == std::declval<int16x16_t>())>));
+                                decltype(std::declval<int16x16_t>() == std::declval<int16x16_t>())>));
     EXPECT_TRUE((std::is_same_v<seqan3::simd::simd_traits<uint32x8_t>::mask_type,
-                 decltype(std::declval<uint32x8_t>() == std::declval<uint32x8_t>())>));
+                                decltype(std::declval<uint32x8_t>() == std::declval<uint32x8_t>())>));
     EXPECT_TRUE((std::is_same_v<seqan3::simd::simd_traits<uint64x4_t>::mask_type,
-                 decltype(std::declval<uint64x4_t>() == std::declval<uint64x4_t>())>));
+                                decltype(std::declval<uint64x4_t>() == std::declval<uint64x4_t>())>));
 
     EXPECT_TRUE((std::is_same_v<seqan3::simd::simd_traits<uint16x16_t>::swizzle_type, uint8x32_t>));
     EXPECT_TRUE((std::is_same_v<seqan3::simd::simd_traits<uint32x8_t>::swizzle_type, uint8x32_t>));

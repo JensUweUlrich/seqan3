@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,13 +12,15 @@
 
 #pragma once
 
+#include <cassert>
+#include <iterator>
+#include <ranges>
+#include <span>
+
 #include <seqan3/alignment/configuration/align_config_band.hpp>
 #include <seqan3/alignment/matrix/detail/alignment_matrix_column_major_range_base.hpp>
 #include <seqan3/alignment/matrix/detail/alignment_score_matrix_one_column_base.hpp>
 #include <seqan3/alignment/matrix/detail/alignment_score_matrix_proxy.hpp>
-#include <seqan3/std/iterator>
-#include <seqan3/std/ranges>
-#include <seqan3/std/span>
 
 namespace seqan3::detail
 {
@@ -107,8 +109,7 @@ public:
      * Does only obtain the sizes of the passed ranges in order to allocate the score matrix. Only allocates
      * one column of the size of the band.
      */
-    template <std::ranges::forward_range first_sequence_t,
-              std::ranges::forward_range second_sequence_t>
+    template <std::ranges::forward_range first_sequence_t, std::ranges::forward_range second_sequence_t>
     constexpr alignment_score_matrix_one_column_banded(first_sequence_t && first,
                                                        second_sequence_t && second,
                                                        align_cfg::band_fixed_size const & band,
@@ -118,8 +119,8 @@ public:
         matrix_base_t::num_rows = static_cast<size_type>(std::ranges::distance(second) + 1);
 
         band_col_index = std::min<int32_t>(std::max<int32_t>(band.upper_diagonal, 0), matrix_base_t::num_cols - 1);
-        band_row_index = std::min<int32_t>(std::abs(std::min<int32_t>(band.lower_diagonal, 0)),
-                                           matrix_base_t::num_rows - 1);
+        band_row_index =
+            std::min<int32_t>(std::abs(std::min<int32_t>(band.lower_diagonal, 0)), matrix_base_t::num_rows - 1);
 
         band_size = band_col_index + band_row_index + 1;
         // Reserve one more cell to deal with last cell in the banded column which needs only the diagonal and up cell.
@@ -156,11 +157,11 @@ private:
     template <std::random_access_iterator iter_t>
     constexpr value_type make_proxy(iter_t host_iter) noexcept
     {
-        return {std::get<0>(*host_iter),             // current
-                std::get<0>(matrix_base_t::cache),   // last diagonal
-                std::get<1>(*(host_iter + 1)),       // last left (read)
-                std::get<1>(*(host_iter)),           // next left (write)
-                std::get<1>(matrix_base_t::cache)};  // last up
+        return {std::get<0>(*host_iter),            // current
+                std::get<0>(matrix_base_t::cache),  // last diagonal
+                std::get<1>(*(host_iter + 1)),      // last left (read)
+                std::get<1>(*(host_iter)),          // next left (write)
+                std::get<1>(matrix_base_t::cache)}; // last up
     }
 
     //!\copydoc seqan3::detail::alignment_matrix_column_major_range_base::on_column_iterator_creation

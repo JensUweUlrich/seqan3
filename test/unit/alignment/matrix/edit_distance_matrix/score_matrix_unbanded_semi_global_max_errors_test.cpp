@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -73,18 +73,15 @@ TEST(semi_global_max_errors, single_word)
 
     // row-wise matrix
     std::vector<std::vector<int>> result = as_row_wise_vector(matrix);
-    std::vector<std::vector<int>> expect
-    {
-        { -0, -0, -0, -0, -0, -0, -0, -0, -0, -0},
-        { -1, -0, -0, -1, -1, -1, -1, -1, -1, -0},
-        { -2, -1, -1, -0, -1, -2, -2, -2, -2, -1},
-        { -3, -2, -2, -1, -1, -1, -2, -3, -3, -2},
-        { -4, -3, -3, -2, -2, -2, -2, -2, -3, -3},
-        { -5, -4, -3, -3, -3, -3, -3, -3, -3, -3},
-        {INF, -5, -4, -3, -3, -4, -4, -4, -4, -4},
-        {INF,INF, -5, -4, -4, -3, -4, -5, -5, -5},
-        {INF,INF,INF, -5, -5, -4, -4, -4, -5,INF}
-    };
+    std::vector<std::vector<int>> expect{{-0, -0, -0, -0, -0, -0, -0, -0, -0, -0},
+                                         {-1, -0, -0, -1, -1, -1, -1, -1, -1, -0},
+                                         {-2, -1, -1, -0, -1, -2, -2, -2, -2, -1},
+                                         {-3, -2, -2, -1, -1, -1, -2, -3, -3, -2},
+                                         {-4, -3, -3, -2, -2, -2, -2, -2, -3, -3},
+                                         {-5, -4, -3, -3, -3, -3, -3, -3, -3, -3},
+                                         {INF, -5, -4, -3, -3, -4, -4, -4, -4, -4},
+                                         {INF, INF, -5, -4, -4, -3, -4, -5, -5, -5},
+                                         {INF, INF, INF, -5, -5, -4, -4, -4, -5, INF}};
 
     EXPECT_EQ(result, expect);
 }
@@ -107,27 +104,24 @@ TEST(semi_global_max_errors, multiple_words)
 
     // row-wise matrix
     std::vector<std::vector<int>> result = as_row_wise_vector(matrix);
-    std::vector<std::vector<int>> expect
-    {
-        { -0, -0, -0, -0, -0, -0, -0, -0, -0, -0},
-        { -1, -0, -1, -1, -1, -0, -1, -1, -1, -0},
-        { -2, -1, -1, -2, -2, -1, -0, -1, -2, -1},
-        { -3, -2, -1, -2, -3, -2, -1, -1, -2, -2},
-        { -4, -3, -2, -2, -3, -3, -2, -1, -2, -3},
-        { -5, -4, -3, -2, -3, -4, -3, -2, -2, -2},
-        { -6, -5, -4, -3, -3, -4, -4, -3, -2, -2},
-        { -7, -6, -5, -4, -3, -4, -5, -4, -3, -3},
-        { -8, -7, -6, -5, -4, -4, -5, -5, -4, -3},
-        {INF, -8, -7, -6, -5, -4, -5, -6, -5, -4},
-        {INF,INF, -8, -7, -6, -5, -5, -6, -6, -5},
-        {INF,INF,INF, -8, -7, -6, -5, -6, -7, -6},
-        {INF,INF,INF,INF, -8, -7, -6, -6, -7, -7},
-        {INF,INF,INF,INF,INF, -8, -7, -6, -7, -8},
-        {INF,INF,INF,INF,INF,INF, -8, -7, -7, -8},
-        {INF,INF,INF,INF,INF,INF,INF, -8, -7, -8},
-        {INF,INF,INF,INF,INF,INF,INF,INF, -8, -8},
-        {INF,INF,INF,INF,INF,INF,INF,INF,INF, -8}
-    };
+    std::vector<std::vector<int>> expect{{-0, -0, -0, -0, -0, -0, -0, -0, -0, -0},
+                                         {-1, -0, -1, -1, -1, -0, -1, -1, -1, -0},
+                                         {-2, -1, -1, -2, -2, -1, -0, -1, -2, -1},
+                                         {-3, -2, -1, -2, -3, -2, -1, -1, -2, -2},
+                                         {-4, -3, -2, -2, -3, -3, -2, -1, -2, -3},
+                                         {-5, -4, -3, -2, -3, -4, -3, -2, -2, -2},
+                                         {-6, -5, -4, -3, -3, -4, -4, -3, -2, -2},
+                                         {-7, -6, -5, -4, -3, -4, -5, -4, -3, -3},
+                                         {-8, -7, -6, -5, -4, -4, -5, -5, -4, -3},
+                                         {INF, -8, -7, -6, -5, -4, -5, -6, -5, -4},
+                                         {INF, INF, -8, -7, -6, -5, -5, -6, -6, -5},
+                                         {INF, INF, INF, -8, -7, -6, -5, -6, -7, -6},
+                                         {INF, INF, INF, INF, -8, -7, -6, -6, -7, -7},
+                                         {INF, INF, INF, INF, INF, -8, -7, -6, -7, -8},
+                                         {INF, INF, INF, INF, INF, INF, -8, -7, -7, -8},
+                                         {INF, INF, INF, INF, INF, INF, INF, -8, -7, -8},
+                                         {INF, INF, INF, INF, INF, INF, INF, INF, -8, -8},
+                                         {INF, INF, INF, INF, INF, INF, INF, INF, INF, -8}};
 
     EXPECT_EQ(result, expect);
 }

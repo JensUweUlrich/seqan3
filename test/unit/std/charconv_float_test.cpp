@@ -1,29 +1,28 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #include <gtest/gtest.h>
 
-#if __has_include(<charconv>)
 // make sure that including the std header does not produce any errors
 // see https://github.com/seqan/seqan3/issues/2352
 #include <charconv>
-#endif // __has_include(<charconv>)
-#include <seqan3/std/charconv>
 #include <cmath>
-#include <seqan3/std/concepts>
+#include <concepts>
 #include <iostream>
 #include <limits>
+#include <seqan3/std/charconv>
 
 // =============================================================================
 // std::from_chars for float, double and long double
 // =============================================================================
 
 template <typename T>
-class from_char_real_test: public ::testing::Test { };
+class from_char_real_test : public ::testing::Test
+{};
 
 using real_types = ::testing::Types<float, double, long double>;
 
@@ -207,7 +206,6 @@ TYPED_TEST(from_char_real_test, infinity_value)
         EXPECT_EQ(res.ec, std::errc{});
         EXPECT_EQ(res.ptr, &str[0] + str.size());
     }
-
 }
 
 TYPED_TEST(from_char_real_test, nan_value)

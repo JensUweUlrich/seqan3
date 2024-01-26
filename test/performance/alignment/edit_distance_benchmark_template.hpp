@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -50,8 +50,8 @@ void seqan3_align_pairwise_edit_distance_benchmark(benchmark::State & state,
     }
 
     std::conditional_t<collection_benchmark, decltype(std::views::all), decltype(std::views::single)> view_adaptor{};
-    state.counters["cells"] = seqan3::test::pairwise_cell_updates(view_adaptor(sequence_pair_or_pairs),
-                                                                  edit_distance_cfg);
+    state.counters["cells"] =
+        seqan3::test::pairwise_cell_updates(view_adaptor(sequence_pair_or_pairs), edit_distance_cfg);
     state.counters["CUPS"] = seqan3::test::cell_updates_per_second(state.counters["cells"]);
     state.counters["total"] = total;
 }
@@ -80,7 +80,7 @@ void seqan2_align_pairwise_edit_distance_benchmark(benchmark::State & state,
     if constexpr (collection_benchmark)
     {
         for (auto _ : state)
-            for (size_t i = 0u; i < seqan::length(sequences1); ++i)
+            for (size_t i = 0u; i < seqan2::length(sequences1); ++i)
                 total += algorithm_seqan2(sequences1[i], sequences2[i]);
     }
     else

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,14 +12,14 @@
 
 #pragma once
 
-#include <seqan3/std/bit>
-#include <seqan3/std/concepts>
+#include <bit>
+#include <concepts>
 
 // Find correct header for byte-order conversion functions.
 #if __has_include(<endian.h>) // unix GLIBC
-    #include <endian.h>
-#elif __has_include(<sys/endian.h>)  // *BSD
-    #include <sys/endian.h>
+#    include <endian.h>
+#elif __has_include(<sys/endian.h>) // *BSD
+#    include <sys/endian.h>
 #endif // __has_include(endian.h)
 
 #include <seqan3/core/platform.hpp>
@@ -59,7 +59,7 @@ constexpr type to_little_endian(type const in) noexcept
         else if constexpr (sizeof(type) == 8)
             return htole64(in);
         else
-            return in;  // single byte.
+            return in; // single byte.
     }
     else
     {

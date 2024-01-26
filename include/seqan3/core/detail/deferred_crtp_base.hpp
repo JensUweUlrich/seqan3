@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -38,7 +38,7 @@ namespace seqan3::detail
  * \see seqan3::detail::invoke_deferred_crtp_base
  * \see seqan3::detail::deferred_crtp_base_vargs
  */
-template <template <typename ...> typename crtp_base, typename ...args_t>
+template <template <typename...> typename crtp_base, typename... args_t>
 struct deferred_crtp_base
 {
     /*!\brief Invokes the deferred crtp_base with the corresponding derived type.
@@ -71,7 +71,7 @@ struct deferred_crtp_base
  * \see seqan3::detail::invoke_deferred_crtp_base
  * \see seqan3::detail::deferred_crtp_base
  */
-template <template <typename, auto ...> typename crtp_base, auto ...args>
+template <template <typename, auto...> typename crtp_base, auto... args>
 struct deferred_crtp_base_vargs
 {
     /*!\brief Invokes the deferred crtp_base with the corresponding derived type.
@@ -93,9 +93,7 @@ struct deferred_crtp_base_vargs
  * \see seqan3::detail::deferred_crtp_base
  */
 template <typename deferred_crtp_base_t, typename derived_t>
-//!\cond
     requires requires { typename deferred_crtp_base_t::template invoke<derived_t>; }
-//!\endcond
 using invoke_deferred_crtp_base = typename deferred_crtp_base_t::template invoke<derived_t>;
 
 } // namespace seqan3::detail

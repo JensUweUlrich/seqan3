@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -19,14 +19,15 @@
 #include <tuple>
 
 #if defined(SEQAN3_HAS_BZIP2)
-    #include <seqan3/contrib/stream/bz2_ostream.hpp>
+#    include <seqan3/contrib/stream/bz2_ostream.hpp>
 #endif
 #if defined(SEQAN3_HAS_ZLIB)
-    #include <seqan3/contrib/stream/bgzf_ostream.hpp>
-    #include <seqan3/contrib/stream/gz_ostream.hpp>
+#    include <seqan3/contrib/stream/bgzf_ostream.hpp>
+#    include <seqan3/contrib/stream/gz_ostream.hpp>
 #endif
+#include <seqan3/contrib/stream/bgzf.hpp>
 #include <seqan3/io/exception.hpp>
-#include <seqan3/utility/concept/exposition_only/core_language.hpp>
+#include <seqan3/utility/concept.hpp>
 
 namespace seqan3::detail
 {
@@ -40,12 +41,15 @@ namespace seqan3::detail
  */
 template <builtin_character char_t>
 inline auto make_secondary_ostream(std::basic_ostream<char_t> & primary_stream, std::filesystem::path & filename)
-    -> std::unique_ptr<std::basic_ostream<char_t>, std::function<void(std::basic_ostream<char_t>*)>>
+    -> std::unique_ptr<std::basic_ostream<char_t>, std::function<void(std::basic_ostream<char_t> *)>>
 {
     // don't assume ownership
-    constexpr auto stream_deleter_noop     = [] (std::basic_ostream<char_t> *) {};
+    constexpr auto stream_deleter_noop = [](std::basic_ostream<char_t> *) {};
     // assume ownership
-    [[maybe_unused]] constexpr auto stream_deleter_default  = [] (std::basic_ostream<char_t> * ptr) { delete ptr; };
+    [[maybe_unused]] constexpr auto stream_deleter_default = [](std::basic_ostream<char_t> * ptr)
+    {
+        delete ptr;
+    };
 
     std::string extension = filename.extension().string();
 

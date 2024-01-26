@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,13 +12,13 @@
 
 #pragma once
 
-#include <seqan3/std/algorithm>
-#include <seqan3/std/ranges>
+#include <algorithm>
+#include <ranges>
 
 #include <seqan3/core/algorithm/algorithm_result_generator_range.hpp>
 #include <seqan3/core/algorithm/detail/algorithm_executor_blocking.hpp>
 #include <seqan3/core/configuration/configuration.hpp>
-#include <seqan3/core/detail/persist_view.hpp>
+#include <seqan3/core/detail/all_view.hpp>
 #include <seqan3/search/configuration/default_configuration.hpp>
 #include <seqan3/search/configuration/on_result.hpp>
 #include <seqan3/search/configuration/parallel.hpp>
@@ -43,7 +43,7 @@ struct search_configuration_validator
     static void validate_query_type()
     {
         using pure_query_t = std::remove_cvref_t<query_t>;
-        if constexpr(range_dimension_v<pure_query_t> == 1u)
+        if constexpr (range_dimension_v<pure_query_t> == 1u)
         {
             static_assert(std::ranges::random_access_range<pure_query_t>,
                           "The query sequence must model random_access_range.");
@@ -66,7 +66,7 @@ namespace seqan3
 {
 /*!\brief Search a query or a range of queries in an index.
  * \ingroup search
- * \tparam index_t    Type of the index.
+ * \tparam index_t    Type of the index. See \ref search_available_indices for an overview of our indices.
  * \tparam queries_t  Must model std::ranges::random_access_range over the index's alphabet and std::ranges::sized_range.
  *                    A range of queries must additionally model std::ranges::forward_range and std::ranges::sized_range.
  * \param[in] queries A single query or a range of queries.
@@ -80,6 +80,11 @@ namespace seqan3
  * \details
  *
  * \header_file{seqan3/search/search.hpp}
+ *
+ * The search algorithm strongly depends on the **index** that is used.
+ * Please see \ref search_available_indices for an overview of our indices.
+ *
+ * For more details on how to configure the search, please see the respective documentation: \ref search_configuration.
  *
  * ### Complexity
  *
@@ -97,20 +102,17 @@ namespace seqan3
 template <typename index_t,
           std::ranges::forward_range queries_t,
           typename configuration_t = decltype(search_cfg::default_configuration)>
-//!\cond
-    requires std::ranges::forward_range<std::ranges::range_reference_t<queries_t>> &&
-             std::same_as<range_innermost_value_t<queries_t>, typename index_t::alphabet_type>
-//!\endcond
-inline auto search(queries_t && queries,
-                   index_t const & index,
-                   configuration_t const & cfg = search_cfg::default_configuration)
+    requires std::ranges::forward_range<std::ranges::range_reference_t<queries_t>>
+          && std::same_as<range_innermost_value_t<queries_t>, typename index_t::alphabet_type>
+inline auto
+search(queries_t && queries, index_t const & index, configuration_t const & cfg = search_cfg::default_configuration)
 {
     auto updated_cfg = detail::search_configurator::add_defaults(cfg);
 
     detail::search_configuration_validator::validate_query_type<queries_t>();
 
     size_t queries_size = std::ranges::distance(queries);
-    auto indexed_queries = views::zip(std::views::iota(size_t{0}, queries_size), queries);
+    auto indexed_queries = views::zip(std::views::iota(size_t{0}, queries_size), std::forward<queries_t>(queries));
 
     using indexed_queries_t = decltype(indexed_queries);
 
@@ -120,13 +122,12 @@ inline auto search(queries_t && queries,
     using complete_configuration_t = decltype(complete_config);
     using traits_t = detail::search_traits<complete_configuration_t>;
     using algorithm_result_t = typename traits_t::search_result_type;
-    using execution_handler_t = std::conditional_t<
-                                    complete_configuration_t::template exists<search_cfg::parallel>(),
-                                    detail::execution_handler_parallel,
-                                    detail::execution_handler_sequential>;
+    using execution_handler_t = std::conditional_t<complete_configuration_t::template exists<search_cfg::parallel>(),
+                                                   detail::execution_handler_parallel,
+                                                   detail::execution_handler_sequential>;
 
     // Select the execution handler for the search configuration.
-    auto select_execution_handler = [parallel = complete_config.get_or(search_cfg::parallel{})] ()
+    auto select_execution_handler = [parallel = complete_config.get_or(search_cfg::parallel{})]()
     {
         if constexpr (std::same_as<execution_handler_t, detail::execution_handler_parallel>)
         {
@@ -169,8 +170,8 @@ inline auto search(queries_t && queries,
 template <typename index_t,
           std::ranges::forward_range queries_t,
           typename configuration_t = decltype(search_cfg::default_configuration)>
-    requires std::ranges::forward_range<std::ranges::range_reference_t<queries_t>> &&
-             (!std::same_as<range_innermost_value_t<queries_t>, typename index_t::alphabet_type>)
+    requires std::ranges::forward_range<std::ranges::range_reference_t<queries_t>>
+          && (!std::same_as<range_innermost_value_t<queries_t>, typename index_t::alphabet_type>)
 inline auto search(queries_t && queries,
                    index_t const & index,
                    configuration_t const & cfg = search_cfg::default_configuration)
@@ -189,9 +190,8 @@ inline auto search(queries_t && queries,
 template <typename index_t,
           std::ranges::forward_range query_t,
           typename configuration_t = decltype(search_cfg::default_configuration)>
-inline auto search(query_t && query,
-                   index_t const & index,
-                   configuration_t const & cfg = search_cfg::default_configuration)
+inline auto
+search(query_t && query, index_t const & index, configuration_t const & cfg = search_cfg::default_configuration)
 {
     return search(std::views::single(std::forward<query_t>(query)), index, cfg);
 }
@@ -213,8 +213,12 @@ inline auto search(std::initializer_list<char const * const> const & queries,
 {
     std::vector<std::string_view> query;
     query.reserve(std::ranges::size(queries));
-    std::ranges::for_each(queries, [&query] (char const * const q) { query.push_back(std::string_view{q}); });
-    return search(std::move(query) | detail::persist, index, cfg);
+    std::ranges::for_each(queries,
+                          [&query](char const * const q)
+                          {
+                              query.push_back(std::string_view{q});
+                          });
+    return search(std::move(query) | seqan3::detail::all, index, cfg);
 }
 //!\endcond
 

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -29,18 +29,18 @@ namespace seqan3
 //!\sa seqan3::enum_bitwise_operators enables combining enum values.
 enum fmtflags2
 {
-    none                = 0,        //!< No flag is set.
-    utf8                = 1,        //!< Enables use of non-ASCII UTF8 characters in formatted output.
-    small_int_as_number = 1 << 1,   //!< `int8_t` and `uint8_t` are often aliases for `signed char` and `unsigned char`
-                                    //!< resp. resulting in chars being printed; this options prints them as numbers.
-    default_            = small_int_as_number
+    none = 0,                     //!< No flag is set.
+    utf8 = 1,                     //!< Enables use of non-ASCII UTF8 characters in formatted output.
+    small_int_as_number = 1 << 1, //!< `int8_t` and `uint8_t` are often aliases for `signed char` and `unsigned char`
+                                  //!< resp. resulting in chars being printed; this options prints them as numbers.
+    default_ = small_int_as_number
 };
 
 //!\cond DEV
 //!\brief Overload bitwise operators for seqan3::fmtflags2.
 //!\sa seqan3::enum_bitwise_operators enables combining enum values.
 template <>
-constexpr bool add_enum_bitwise_operators<fmtflags2> = true;
+inline constexpr bool add_enum_bitwise_operators<fmtflags2> = true;
 //!\endcond
 
 // ------------------------------------------------------------------
@@ -81,12 +81,12 @@ public:
      * \brief The standard functions are explicitly set to default.
      * \{
      */
-    debug_stream_type() = default;                                       //!< Defaulted
-    debug_stream_type(debug_stream_type const &) = default;              //!< Defaulted
-    debug_stream_type(debug_stream_type &&) = default;                   //!< Defaulted
-    debug_stream_type & operator= (debug_stream_type const &) = default; //!< Defaulted
-    debug_stream_type & operator= (debug_stream_type &&) = default;      //!< Defaulted
-    ~debug_stream_type() = default;                                      //!< Defaulted
+    debug_stream_type() = default;                                      //!< Defaulted
+    debug_stream_type(debug_stream_type const &) = default;             //!< Defaulted
+    debug_stream_type(debug_stream_type &&) = default;                  //!< Defaulted
+    debug_stream_type & operator=(debug_stream_type const &) = default; //!< Defaulted
+    debug_stream_type & operator=(debug_stream_type &&) = default;      //!< Defaulted
+    ~debug_stream_type() = default;                                     //!< Defaulted
 
     //!\brief Construction from an output stream.
     constexpr explicit debug_stream_type(std::basic_ostream<char_t> & out) : stream{&out}
@@ -127,7 +127,7 @@ public:
     friend debug_stream_type<other_char_t> & operator<<(debug_stream_type<other_char_t> & s, t && v);
 
     //!\brief This overloads enables forwarding std::endl and other manipulators.
-    debug_stream_type & operator<<(std::ostream&(*fp)(std::ostream&))
+    debug_stream_type & operator<<(std::ostream & (*fp)(std::ostream &))
     {
         *stream << fp;
         return *this;
@@ -155,7 +155,7 @@ public:
     //!\}
 
     //!\brief This type is std::ios_base::fmtflags
-    using fmtflags = decltype(std::declval<std::basic_ostream<char_t>>().flags());
+    using fmtflags = typename std::basic_ostream<char_t>::fmtflags;
 
     /*!\name Format flags (std::ios_base::fmtflags)
      * \brief std::ios_base::fmtflags that modify the stream's behaviour.
@@ -185,12 +185,17 @@ public:
         stream->unsetf(flag);
     }
 
+// fmtflags is an enum in libstdc++ and an unsigned in libc++
+#ifdef _LIBCPP_VERSION
+    static_assert(std::same_as<fmtflags, unsigned>);
+#else
     //!\copybrief setf()
     debug_stream_type & operator<<(fmtflags const flag)
     {
         setf(flag);
         return *this;
     }
+#endif
     //!\}
 
     /*!\name Format flags (seqan3::fmtflags2)
@@ -232,7 +237,7 @@ public:
 
 private:
     //!\brief Pointer to the output stream.
-    std::basic_ostream<char_t> *stream/* = &std::cerr*/;
+    std::basic_ostream<char_t> * stream /* = &std::cerr*/;
 
     //!\brief The SeqAn specific flags to the stream.
     fmtflags2 flgs2{fmtflags2::default_};

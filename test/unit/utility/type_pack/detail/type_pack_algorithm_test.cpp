@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -15,7 +15,7 @@
 // all_of
 //-----------------------------------------------------------------------------
 
-auto is_value_type_integral = [] (auto value)
+auto is_value_type_integral = [](auto value)
 {
     return std::is_integral_v<decltype(value)>;
 };
@@ -61,7 +61,7 @@ TEST(type_pack_algorithm, for_each2)
 
     auto fn = [&stream](auto const & arg)
     {
-        if constexpr(std::is_same_v<decltype(arg), alphabet const &>)
+        if constexpr (std::is_same_v<decltype(arg), alphabet const &>)
             stream << arg.chr << ";";
         else
             stream << arg << ";";

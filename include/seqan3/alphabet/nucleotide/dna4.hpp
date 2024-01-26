@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -57,7 +57,8 @@ private:
 
     //!\brief Befriend seqan3::nucleotide_base.
     friend base_t;
-    //!\cond \brief Befriend seqan3::alphabet_base.
+    //!\cond
+    //!\brief Befriend seqan3::alphabet_base.
     friend base_t::base_t;
     //!\endcond
     //!\brief Befriend seqan3::rna4 so it can copy #char_to_rank.
@@ -67,12 +68,12 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr dna4()                          noexcept = default; //!< Defaulted.
-    constexpr dna4(dna4 const &)              noexcept = default; //!< Defaulted.
-    constexpr dna4(dna4 &&)                   noexcept = default; //!< Defaulted.
-    constexpr dna4 & operator=(dna4 const &)  noexcept = default; //!< Defaulted.
-    constexpr dna4 & operator=(dna4 &&)       noexcept = default; //!< Defaulted.
-    ~dna4()                                   noexcept = default; //!< Defaulted.
+    constexpr dna4() noexcept = default;                         //!< Defaulted.
+    constexpr dna4(dna4 const &) noexcept = default;             //!< Defaulted.
+    constexpr dna4(dna4 &&) noexcept = default;                  //!< Defaulted.
+    constexpr dna4 & operator=(dna4 const &) noexcept = default; //!< Defaulted.
+    constexpr dna4 & operator=(dna4 &&) noexcept = default;      //!< Defaulted.
+    ~dna4() noexcept = default;                                  //!< Defaulted.
 
     using base_t::base_t;
 
@@ -89,6 +90,12 @@ public:
         assign_rank(r.to_rank());
     }
     //!\}
+
+    //!\brief Returns the complement of the current nucleotide.
+    constexpr dna4 complement() const noexcept
+    {
+        return dna4{}.assign_rank(to_rank() ^ 0b11);
+    }
 
 private:
     /*!\brief The lookup table used in #rank_to_char.
@@ -114,52 +121,10 @@ private:
      *
      * \sa https://gcc.gnu.org/bugzilla/show_bug.cgi?id=99320 for the progress on gcc
      */
-    static constexpr char_type rank_to_char_table[alphabet_size]
-    {
-        'A',
-        'C',
-        'G',
-        'T'
-    };
-
-    /*!\brief The lookup table used in #char_to_rank.
-     * \copydetails seqan3::dna4::rank_to_char_table
-     */
-    static constexpr std::array<rank_type, 256> char_to_rank_table
-    {
-        [] () constexpr
-        {
-            std::array<rank_type, 256> ret{};
-
-            // reverse mapping for characters and their lowercase
-            for (size_t rnk = 0u; rnk < alphabet_size; ++rnk)
-            {
-                ret[rank_to_char_table[rnk]] = rnk;
-                ret[to_lower(rank_to_char_table[rnk])] = rnk;
-            }
-
-            // set U equal to T
-            ret['U'] = ret['T']; ret['u'] = ret['t'];
-
-            // iupac characters get special treatment, because there is no N
-            ret['R'] = ret['A']; ret['r'] = ret['A']; // A or G
-            ret['Y'] = ret['C']; ret['y'] = ret['C']; // C or T
-            ret['S'] = ret['C']; ret['s'] = ret['C']; // C or G
-            ret['W'] = ret['A']; ret['w'] = ret['A']; // A or T
-            ret['K'] = ret['G']; ret['k'] = ret['G']; // G or T
-            ret['M'] = ret['A']; ret['m'] = ret['A']; // A or T
-            ret['B'] = ret['C']; ret['b'] = ret['C']; // C or G or T
-            ret['D'] = ret['A']; ret['d'] = ret['A']; // A or G or T
-            ret['H'] = ret['A']; ret['h'] = ret['A']; // A or C or T
-            ret['V'] = ret['A']; ret['v'] = ret['A']; // A or C or G
-
-            return ret;
-        }()
-    };
+    static constexpr char_type rank_to_char_table[alphabet_size]{'A', 'C', 'G', 'T'};
 
     //!\brief The rank complement table.
-    static constexpr rank_type rank_complement_table[alphabet_size]
-    {
+    static constexpr rank_type rank_complement_table[alphabet_size]{
         3, // T is complement of 'A'_dna4
         2, // G is complement of 'C'_dna4
         1, // C is complement of 'G'_dna4
@@ -193,7 +158,54 @@ private:
         using index_t = std::make_unsigned_t<char_type>;
         return char_to_rank_table[static_cast<index_t>(chr)];
     }
+
+    // clang-format off
+    /*!\brief The lookup table used in #char_to_rank.
+     * \copydetails seqan3::dna4::rank_to_char_table
+     */
+    static constexpr std::array<rank_type, 256> char_to_rank_table
+    {
+        []() constexpr {
+            std::array<rank_type, 256> ret{};
+
+            // reverse mapping for characters and their lowercase
+            for (size_t rnk = 0u; rnk < alphabet_size; ++rnk)
+            {
+                ret[rank_to_char_table[rnk]] = rnk;
+                ret[to_lower(rank_to_char_table[rnk])] = rnk;
+            }
+
+            // set U equal to T
+            ret['U'] = ret['T'];
+            ret['u'] = ret['t'];
+
+            // iupac characters get special treatment, because there is no N
+            ret['R'] = ret['A'];
+            ret['r'] = ret['A']; // A or G
+            ret['Y'] = ret['C'];
+            ret['y'] = ret['C']; // C or T
+            ret['S'] = ret['C'];
+            ret['s'] = ret['C']; // C or G
+            ret['W'] = ret['A'];
+            ret['w'] = ret['A']; // A or T
+            ret['K'] = ret['G'];
+            ret['k'] = ret['G']; // G or T
+            ret['M'] = ret['A'];
+            ret['m'] = ret['A']; // A or T
+            ret['B'] = ret['C'];
+            ret['b'] = ret['C']; // C or G or T
+            ret['D'] = ret['A'];
+            ret['d'] = ret['A']; // A or G or T
+            ret['H'] = ret['A'];
+            ret['h'] = ret['A']; // A or C or T
+            ret['V'] = ret['A'];
+            ret['v'] = ret['A']; // A or C or G
+
+            return ret;
+        }()
+    };
 };
+// clang-format on
 
 // ------------------------------------------------------------------
 // containers
@@ -243,7 +255,7 @@ constexpr dna4 operator""_dna4(char const c) noexcept
  *
  * \stableapi{Since version 3.1.}
  */
-inline dna4_vector operator""_dna4(char const * s, std::size_t n)
+SEQAN3_WORKAROUND_LITERAL dna4_vector operator""_dna4(char const * s, std::size_t n)
 {
     dna4_vector r;
     r.resize(n);
@@ -255,6 +267,6 @@ inline dna4_vector operator""_dna4(char const * s, std::size_t n)
 }
 //!\}
 
-} // inline namespace literals
+} // namespace literals
 
 } // namespace seqan3

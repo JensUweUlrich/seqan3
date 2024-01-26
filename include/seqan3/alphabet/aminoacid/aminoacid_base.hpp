@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -13,8 +13,8 @@
 #pragma once
 
 #include <seqan3/alphabet/alphabet_base.hpp>
-#include <seqan3/alphabet/detail/convert.hpp>
 #include <seqan3/alphabet/aminoacid/concept.hpp>
+#include <seqan3/alphabet/detail/convert.hpp>
 #include <seqan3/utility/char_operations/transform.hpp>
 
 namespace seqan3
@@ -28,7 +28,7 @@ namespace seqan3
  * \stableapi{Since version 3.1.}
  */
 template <typename derived_type, auto size>
-class aminoacid_base : public alphabet_base<derived_type, size, char>, public aminoacid_empty_base
+class aminoacid_base : public aminoacid_empty_base, public alphabet_base<derived_type, size, char>
 {
 private:
     //!\brief Type of the base class.
@@ -40,12 +40,12 @@ private:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr aminoacid_base()                                   noexcept = default; //!< Defaulted.
-    constexpr aminoacid_base(aminoacid_base const &)             noexcept = default; //!< Defaulted.
-    constexpr aminoacid_base(aminoacid_base &&)                  noexcept = default; //!< Defaulted.
+    constexpr aminoacid_base() noexcept = default;                                   //!< Defaulted.
+    constexpr aminoacid_base(aminoacid_base const &) noexcept = default;             //!< Defaulted.
+    constexpr aminoacid_base(aminoacid_base &&) noexcept = default;                  //!< Defaulted.
     constexpr aminoacid_base & operator=(aminoacid_base const &) noexcept = default; //!< Defaulted.
-    constexpr aminoacid_base & operator=(aminoacid_base &&)      noexcept = default; //!< Defaulted.
-    ~aminoacid_base()                                            noexcept = default; //!< Defaulted.
+    constexpr aminoacid_base & operator=(aminoacid_base &&) noexcept = default;      //!< Defaulted.
+    ~aminoacid_base() noexcept = default;                                            //!< Defaulted.
 
     //!\}
 
@@ -70,15 +70,12 @@ public:
      * \experimentalapi{Experimental since version 3.1.}
      */
     template <typename other_aa_type>
-    //!\cond
-        requires (!std::same_as<aminoacid_base, other_aa_type>) &&
-                 (!std::same_as<derived_type, other_aa_type>) &&
-                 aminoacid_alphabet<other_aa_type>
-    //!\endcond
+        requires (!std::same_as<aminoacid_base, other_aa_type>)
+              && (!std::same_as<derived_type, other_aa_type>) && aminoacid_alphabet<other_aa_type>
     explicit constexpr aminoacid_base(other_aa_type const other) noexcept
     {
-        if constexpr (is_constexpr_default_constructible_v<other_aa_type> &&
-                      detail::writable_constexpr_alphabet<other_aa_type>)
+        if constexpr (is_constexpr_default_constructible_v<other_aa_type>
+                      && detail::writable_constexpr_alphabet<other_aa_type>)
         {
             static_cast<derived_type &>(*this) =
                 detail::convert_through_char_representation<other_aa_type, derived_type>[seqan3::to_rank(other)];
@@ -115,13 +112,14 @@ public:
     }
 
 private:
-    //!\brief Implementation of #char_is_valid().
+    // clang-format off
+    //!\brief Implementation of seqan3::aminoacid_base::char_is_valid().
     static constexpr std::array<bool, 256> valid_char_table
     {
-        [] () constexpr
-        {
-            // init with false
+        []() constexpr {
             std::array<bool, 256> ret{};
+
+            ret.fill(false); // Default constructor does not initialise!
 
             // the original valid chars and their lower cases
             for (size_t rank = 0u; rank < derived_type::alphabet_size; ++rank)
@@ -135,5 +133,6 @@ private:
         }()
     };
 };
+// clang-format on
 
 } // namespace seqan3

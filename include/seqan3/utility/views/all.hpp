@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -151,7 +151,6 @@
  * elements in the original range (if all views in the pipe preserve std::ranges::output_range), but through others
  * you can't.
  *
- * \sa https://ericniebler.github.io/range-v3/index.html#range-views
  * \sa https://en.cppreference.com/w/cpp/ranges
  */
 
@@ -167,6 +166,7 @@
 
 #pragma once
 
+#include <seqan3/utility/range/to.hpp>
 #include <seqan3/utility/views/chunk.hpp>
 #include <seqan3/utility/views/convert.hpp>
 #include <seqan3/utility/views/deep.hpp>
@@ -179,6 +179,5 @@
 #include <seqan3/utility/views/repeat_n.hpp>
 #include <seqan3/utility/views/single_pass_input.hpp>
 #include <seqan3/utility/views/slice.hpp>
-#include <seqan3/utility/views/to.hpp>
 #include <seqan3/utility/views/type_reduce.hpp>
 #include <seqan3/utility/views/zip.hpp>

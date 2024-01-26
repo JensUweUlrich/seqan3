@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,12 +12,12 @@
 
 #pragma once
 
-#include <seqan3/std/ranges>
+#include <ranges>
 #include <vector>
 
 #include <seqan3/alignment/matrix/detail/affine_cell_proxy.hpp>
 #include <seqan3/alignment/matrix/detail/matrix_coordinate.hpp>
-#include <seqan3/utility/concept/exposition_only/core_language.hpp>
+#include <seqan3/utility/concept.hpp>
 #include <seqan3/utility/container/aligned_allocator.hpp>
 #include <seqan3/utility/simd/concept.hpp>
 #include <seqan3/utility/views/repeat_n.hpp>
@@ -49,9 +49,7 @@ namespace seqan3::detail
  * optimal, horizontal and vertical value of the underlying matrices.
  */
 template <typename score_t>
-//!\cond
     requires (arithmetic<score_t> || simd_concept<score_t>)
-//!\endcond
 class score_matrix_single_column
 {
 private:
@@ -75,12 +73,12 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    score_matrix_single_column() = default; //!< Defaulted.
-    score_matrix_single_column(score_matrix_single_column const &) = default; //!< Defaulted.
-    score_matrix_single_column(score_matrix_single_column &&) = default; //!< Defaulted.
+    score_matrix_single_column() = default;                                               //!< Defaulted.
+    score_matrix_single_column(score_matrix_single_column const &) = default;             //!< Defaulted.
+    score_matrix_single_column(score_matrix_single_column &&) = default;                  //!< Defaulted.
     score_matrix_single_column & operator=(score_matrix_single_column const &) = default; //!< Defaulted.
-    score_matrix_single_column & operator=(score_matrix_single_column &&) = default; //!< Defaulted.
-    ~score_matrix_single_column() = default; //!< Defaulted.
+    score_matrix_single_column & operator=(score_matrix_single_column &&) = default;      //!< Defaulted.
+    ~score_matrix_single_column() = default;                                              //!< Defaulted.
 
     //!\}
 
@@ -158,25 +156,22 @@ public:
  * tuple layout returned by the seqan3::views::zip view.
  */
 template <typename score_t>
-//!\cond
     requires (arithmetic<score_t> || simd_concept<score_t>)
-//!\endcond
 class score_matrix_single_column<score_t>::matrix_iterator
 {
 private:
-
     //!\brief The type of the zipped score column.
     using matrix_column_t = decltype(views::zip(std::declval<physical_column_t &>(),
                                                 std::declval<physical_column_t &>(),
                                                 std::declval<virtual_column_t &>()));
 
     //!\brief The transform adaptor to convert the tuple from the zip view into a seqan3::detail::affine_cell_type.
-    static constexpr auto transform_to_affine_cell = std::views::transform([] (auto && tpl)
-        -> affine_cell_proxy<std::remove_cvref_t<decltype(tpl)>>
-    {
-        using fwd_tuple_t = decltype(tpl);
-        return affine_cell_proxy<std::remove_cvref_t<fwd_tuple_t>>{std::forward<fwd_tuple_t>(tpl)};
-    });
+    static constexpr auto transform_to_affine_cell = std::views::transform(
+        [](auto && tpl) -> affine_cell_proxy<std::remove_cvref_t<decltype(tpl)>>
+        {
+            using fwd_tuple_t = decltype(tpl);
+            return affine_cell_proxy<std::remove_cvref_t<fwd_tuple_t>>{std::forward<fwd_tuple_t>(tpl)};
+        });
 
     //!\brief The pointer to the underlying matrix.
     score_matrix_single_column * host_ptr{nullptr};
@@ -202,12 +197,12 @@ public:
     /*!\name Constructor, assignment and destructor
      * \{
      */
-    matrix_iterator() noexcept = default; //!< Defaulted.
-    matrix_iterator(matrix_iterator const &) noexcept = default; //!< Defaulted.
-    matrix_iterator(matrix_iterator &&) noexcept = default; //!< Defaulted.
+    matrix_iterator() noexcept = default;                                    //!< Defaulted.
+    matrix_iterator(matrix_iterator const &) noexcept = default;             //!< Defaulted.
+    matrix_iterator(matrix_iterator &&) noexcept = default;                  //!< Defaulted.
     matrix_iterator & operator=(matrix_iterator const &) noexcept = default; //!< Defaulted.
-    matrix_iterator & operator=(matrix_iterator &&) noexcept = default; //!< Defaulted.
-    ~matrix_iterator() = default; //!< Defaulted.
+    matrix_iterator & operator=(matrix_iterator &&) noexcept = default;      //!< Defaulted.
+    ~matrix_iterator() = default;                                            //!< Defaulted.
 
     /*!\brief Initialises the iterator from the underlying matrix.
      *

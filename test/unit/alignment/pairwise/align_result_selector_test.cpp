@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -38,22 +38,17 @@ struct alignment_selector_test : public ::testing::Test
     template <typename config_t>
     using alignment_result_t = seqan3::alignment_result<alignment_result_value_t<config_t>>;
 
-    static constexpr seqan3::configuration base_config = [] ()
+    static constexpr seqan3::configuration base_config = []()
     {
-            return seqan3::align_cfg::method_global{} |
-                   seqan3::align_cfg::edit_scheme;
+        return seqan3::align_cfg::method_global{} | seqan3::align_cfg::edit_scheme;
     }();
 };
 
 TEST_F(alignment_selector_test, align_result_selector_all)
 {
-    auto cfg = base_config |
-                seqan3::align_cfg::output_score{} |
-                seqan3::align_cfg::output_begin_position{} |
-                seqan3::align_cfg::output_end_position{} |
-                seqan3::align_cfg::output_alignment{} |
-                seqan3::align_cfg::output_sequence1_id{} |
-                seqan3::align_cfg::output_sequence2_id{};
+    auto cfg = base_config | seqan3::align_cfg::output_score{} | seqan3::align_cfg::output_begin_position{}
+             | seqan3::align_cfg::output_end_position{} | seqan3::align_cfg::output_alignment{}
+             | seqan3::align_cfg::output_sequence1_id{} | seqan3::align_cfg::output_sequence2_id{};
 
     using result_t = alignment_result_t<decltype(cfg)>;
 
@@ -69,11 +64,9 @@ TEST_F(alignment_selector_test, align_result_selector_all)
 
 TEST_F(alignment_selector_test, align_result_selector_using_score_type)
 {
-    auto cfg = seqan3::align_cfg::method_global{} |  // TODO: Change to base_config once using_score_type has been fixed.
-               seqan3::align_cfg::edit_scheme |
-               seqan3::align_cfg::output_score{} |
-               seqan3::align_cfg::output_end_position{} |
-               seqan3::align_cfg::score_type<double>{};
+    auto cfg = seqan3::align_cfg::method_global{} | // TODO: Change to base_config once using_score_type has been fixed.
+               seqan3::align_cfg::edit_scheme | seqan3::align_cfg::output_score{}
+             | seqan3::align_cfg::output_end_position{} | seqan3::align_cfg::score_type<double>{};
 
     using result_t = alignment_result_t<decltype(cfg)>;
 

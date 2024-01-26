@@ -1,27 +1,27 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #include <gtest/gtest.h>
 
-#include <seqan3/alphabet/concept.hpp>
 #include <seqan3/alphabet/aminoacid/aa27.hpp>
+#include <seqan3/alphabet/concept.hpp>
 #include <seqan3/alphabet/gap/gapped.hpp>
 #include <seqan3/alphabet/nucleotide/dna4.hpp>
+#include <seqan3/alphabet/quality/aliases.hpp>
 #include <seqan3/alphabet/quality/phred42.hpp>
 #include <seqan3/alphabet/quality/phred63.hpp>
 #include <seqan3/alphabet/quality/phred94.hpp>
-#include <seqan3/alphabet/quality/aliases.hpp>
 #include <seqan3/alphabet/quality/qualified.hpp>
 
 #include "../alphabet_constexpr_test_template.hpp"
 #include "../alphabet_test_template.hpp"
+#include "../composite/alphabet_tuple_base_test_template.hpp"
 #include "../semi_alphabet_constexpr_test_template.hpp"
 #include "../semi_alphabet_test_template.hpp"
-#include "../composite/alphabet_tuple_base_test_template.hpp"
 
 template <typename alphabet_type, typename phred_type>
 class alphabet_tuple_base_test<seqan3::qualified<alphabet_type, phred_type>> : public ::testing::Test
@@ -29,11 +29,14 @@ class alphabet_tuple_base_test<seqan3::qualified<alphabet_type, phred_type>> : p
 public:
     using T = seqan3::qualified<alphabet_type, phred_type>;
 
-    using other_type = std::conditional_t<std::is_same_v<alphabet_type, seqan3::dna4>, seqan3::rna4,
-                       std::conditional_t<std::is_same_v<alphabet_type, seqan3::aa27>, seqan3::aa27,
-                       std::conditional_t<std::is_same_v<alphabet_type, seqan3::gapped<seqan3::dna4>>,
-                                          seqan3::gapped<seqan3::dna4>,
-                                          alphabet_type>>>;
+    using other_type = std::conditional_t<
+        std::is_same_v<alphabet_type, seqan3::dna4>,
+        seqan3::rna4,
+        std::conditional_t<std::is_same_v<alphabet_type, seqan3::aa27>,
+                           seqan3::aa27,
+                           std::conditional_t<std::is_same_v<alphabet_type, seqan3::gapped<seqan3::dna4>>,
+                                              seqan3::gapped<seqan3::dna4>,
+                                              alphabet_type>>>;
 
     T instance = T{value_1(), value_2()};
     T zero_instance = T{decltype(value_1()){}, decltype(value_2()){}};
@@ -59,9 +62,12 @@ public:
     }
     auto values_to_cmp()
     {
-        return std::make_tuple(/*low */alphabet_type{}.assign_char('A'), phred_type{}.assign_phred(1),
-                               /*mid */alphabet_type{}.assign_char('C'), phred_type{}.assign_phred(4),
-                               /*high*/alphabet_type{}.assign_char('T'), phred_type{}.assign_phred(9));
+        return std::make_tuple(/*low */ alphabet_type{}.assign_char('A'),
+                               phred_type{}.assign_phred(1),
+                               /*mid */ alphabet_type{}.assign_char('C'),
+                               phred_type{}.assign_phred(4),
+                               /*high*/ alphabet_type{}.assign_char('T'),
+                               phred_type{}.assign_phred(9));
     }
 };
 

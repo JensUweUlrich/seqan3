@@ -1,14 +1,14 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
-#include <gtest/gtest.h>
 #include <gtest/gtest-spi.h> // provides test utility to test google test itself
+#include <gtest/gtest.h>
 
-#include <seqan3/std/span>
+#include <span>
 #include <string_view>
 
 #include <seqan3/test/expect_range_eq.hpp>
@@ -99,15 +99,39 @@ struct input_range
 
         input_range * host;
 
-        int const & operator*() const { return *host->current; }
-        iterator & operator++() { ++host->current; return *this; }
-        value_type operator++(int) { value_type x = *(*this); ++*this; return x; }
-        bool operator==(iterator const &) const { return host->current == host->sentinel; }
-        bool operator!=(iterator const & sentinel) const { return !(*this == sentinel);}
+        int const & operator*() const
+        {
+            return *host->current;
+        }
+        iterator & operator++()
+        {
+            ++host->current;
+            return *this;
+        }
+        value_type operator++(int)
+        {
+            value_type x = *(*this);
+            ++*this;
+            return x;
+        }
+        bool operator==(iterator const &) const
+        {
+            return host->current == host->sentinel;
+        }
+        bool operator!=(iterator const & sentinel) const
+        {
+            return !(*this == sentinel);
+        }
     };
 
-    iterator begin() { return {this}; }
-    iterator end() { return {this}; }
+    iterator begin()
+    {
+        return {this};
+    }
+    iterator end()
+    {
+        return {this};
+    }
 };
 
 TEST(input_range, range_eq_pass)

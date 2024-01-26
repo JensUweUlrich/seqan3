@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,10 +12,10 @@
 
 #pragma once
 
-#include <seqan3/std/bit>
+#include <bit>
 #include <cassert>
 #include <cmath>
-#include <seqan3/std/concepts>
+#include <concepts>
 #include <stdexcept>
 
 #include <seqan3/core/platform.hpp>
@@ -118,9 +118,7 @@ namespace seqan3
  * \include test/snippet/utility/pow.cpp
  */
 template <typename base_t, std::unsigned_integral exp_t>
-//!\cond
     requires (std::same_as<base_t, uint64_t> || std::same_as<base_t, int64_t>)
-//!\endcond
 base_t pow(base_t base, exp_t exp)
 {
     base_t result{1};
@@ -132,8 +130,9 @@ base_t pow(base_t base, exp_t exp)
     {
         if ((base < 0 ? std::numeric_limits<base_t>::min() : std::numeric_limits<base_t>::max()) / base < result)
         {
-            std::string error_message{"Calculating " + std::to_string(base) + '^' + std::to_string(exp) +
-                                      " will result in an " + (std::same_as<base_t, int64_t> ? "int64_t" : "uint64_t")};
+            std::string error_message{"Calculating " + std::to_string(base) + '^' + std::to_string(exp)
+                                      + " will result in an "
+                                      + (std::same_as<base_t, int64_t> ? "int64_t" : "uint64_t")};
             if (base < 0)
                 throw std::underflow_error{error_message + " underflow."};
             else

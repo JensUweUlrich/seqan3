@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -8,7 +8,7 @@
 //! [writable_alphabet]
 #include <cassert>
 
-#include <seqan3/alphabet/concept.hpp>                   // alphabet concept checks
+#include <seqan3/alphabet/concept.hpp> // alphabet concept checks
 
 struct dna2
 {
@@ -35,7 +35,7 @@ struct dna2
     char to_char() const noexcept
     {
         // map 0 => 'S' and 1 => 'W'
-        char const rank_to_char[2] {'S', 'W'};
+        char const rank_to_char[2]{'S', 'W'};
         return rank_to_char[rank];
     }
 
@@ -43,8 +43,12 @@ struct dna2
     {
         switch (ch)
         {
-            case 'W': case 'w': rank = 1; break;         // allow assignment from uppercase and lowercase
-            default:  rank = 0;                          // unknown characters are mapped to 0 (=> 'S')
+        case 'W':
+        case 'w':
+            rank = 1;
+            break; // allow assignment from uppercase and lowercase
+        default:
+            rank = 0; // unknown characters are mapped to 0 (=> 'S')
         }
         return *this;
     }
@@ -93,8 +97,8 @@ struct dna2
 //! [writable_alphabet]
 
 //! [writable_alphabet_concept]
-static_assert(seqan3::alphabet<dna2>);                   // ok
-static_assert(seqan3::writable_alphabet<dna2>);           // ok
+static_assert(seqan3::alphabet<dna2>);          // ok
+static_assert(seqan3::writable_alphabet<dna2>); // ok
 //! [writable_alphabet_concept]
 
 //! [dummy_requirement]

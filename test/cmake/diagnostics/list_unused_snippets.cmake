@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------------------------------
-# Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-# Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+# Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+# Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 # This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 # shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 # -----------------------------------------------------------------------------------------------------
@@ -28,7 +28,7 @@ function (list_unused_snippets snippet_base_path)
 
     # get the source location of each "used" test target and collect it.
     foreach (test_target ${seqan3_test_snippets})
-        # e.g. /seqan3/test/snippet/../../doc/tutorial/pairwise_alignment/configurations.cpp
+        # e.g. /seqan3/test/snippet/../../doc/tutorial/08_pairwise_alignment/configurations.cpp
         get_target_property (source "${test_target}" SOURCES)
         # e.g. configurations
         seqan3_path_longest_stem (source_wle "${source}")

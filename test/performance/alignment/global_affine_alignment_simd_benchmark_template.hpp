@@ -1,13 +1,13 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #include <benchmark/benchmark.h>
 
-#include <seqan3/std/ranges>
+#include <ranges>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -21,16 +21,16 @@
 #include <seqan3/utility/views/zip.hpp>
 
 #ifdef SEQAN3_HAS_SEQAN2
-    #include <seqan/align.h>
-    #include <seqan/align_parallel.h>
+#    include <seqan/align.h>
+#    include <seqan/align_parallel.h>
 #endif
 
 // Globally defined constants to ensure same test data.
 inline constexpr size_t sequence_length = 150;
 #ifndef NDEBUG
-inline constexpr size_t set_size        = 16;
+inline constexpr size_t set_size = 16;
 #else
-inline constexpr size_t set_size        = 1024;
+inline constexpr size_t set_size = 1024;
 #endif // NDEBUG
 
 // We don't know if the system supports hyper-threading so we use only half the threads so that the
@@ -45,13 +45,11 @@ uint32_t get_number_of_threads()
 //  seqan3 pairwise alignment
 // ----------------------------------------------------------------------------
 
-template <typename alphabet_t, typename ...align_configs_t>
-void seqan3_affine_accelerated(benchmark::State & state, alphabet_t, align_configs_t && ...configs)
+template <typename alphabet_t, typename... align_configs_t>
+void seqan3_affine_accelerated(benchmark::State & state, alphabet_t, align_configs_t &&... configs)
 {
     size_t sequence_length_variance = state.range(0);
-    auto data = seqan3::test::generate_sequence_pairs<alphabet_t>(sequence_length,
-                                                                  set_size,
-                                                                  sequence_length_variance);
+    auto data = seqan3::test::generate_sequence_pairs<alphabet_t>(sequence_length, set_size, sequence_length_variance);
 
     int64_t total = 0;
     auto accelerate_config = (configs | ...);
@@ -72,15 +70,14 @@ void seqan3_affine_accelerated(benchmark::State & state, alphabet_t, align_confi
 //  seqan2 pairwise alignment
 // ----------------------------------------------------------------------------
 
-template <typename alphabet_t, typename ...args_t>
-void seqan2_affine_accelerated(benchmark::State & state, alphabet_t, args_t && ...args)
+template <typename alphabet_t, typename... args_t>
+void seqan2_affine_accelerated(benchmark::State & state, alphabet_t, args_t &&... args)
 {
     std::tuple captured_args{args...};
 
     size_t sequence_length_variance = state.range(0);
-    auto [vec1, vec2] = seqan3::test::generate_sequence_pairs_seqan2<alphabet_t>(sequence_length,
-                                                                                 set_size,
-                                                                                 sequence_length_variance);
+    auto [vec1, vec2] =
+        seqan3::test::generate_sequence_pairs_seqan2<alphabet_t>(sequence_length, set_size, sequence_length_variance);
 
     auto scoring_scheme = std::get<0>(captured_args);
     auto exec = std::get<1>(captured_args);
@@ -104,13 +101,13 @@ void seqan2_affine_accelerated(benchmark::State & state, alphabet_t, args_t && .
     for (auto _ : state)
     {
         // In SeqAn2 the gap open contains already the gap extension costs, that's why we use -11 here.
-        seqan::String<int> res;
+        seqan2::String<int> res;
         if constexpr (execute_with_band)
-            res = seqan::globalAlignmentScore(exec, vec1, vec2, scoring_scheme, lower_diagonal, upper_diagonal);
+            res = seqan2::globalAlignmentScore(exec, vec1, vec2, scoring_scheme, lower_diagonal, upper_diagonal);
         else
-            res = seqan::globalAlignmentScore(exec, vec1, vec2, scoring_scheme);
+            res = seqan2::globalAlignmentScore(exec, vec1, vec2, scoring_scheme);
 
-        total = std::accumulate(seqan::begin(res), seqan::end(res), total);
+        total = std::accumulate(seqan2::begin(res), seqan2::end(res), total);
     }
 
     state.counters["cells"] = seqan3::test::pairwise_cell_updates(seqan3::views::zip(vec1, vec2), seqan3_align_cfg);

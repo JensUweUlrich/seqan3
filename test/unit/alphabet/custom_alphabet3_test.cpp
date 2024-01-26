@@ -1,22 +1,23 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #include <seqan3/core/platform.hpp>
 
-#include "alphabet_test_template.hpp"
 #include "alphabet_constexpr_test_template.hpp"
-#include "semi_alphabet_test_template.hpp"
+#include "alphabet_test_template.hpp"
 #include "semi_alphabet_constexpr_test_template.hpp"
+#include "semi_alphabet_test_template.hpp"
 
 // Tests the capabilities of the explicit alphabet customisation
 
 //![third_party_type]
-#include <cstddef>                      // for size_t
-#include <seqan3/alphabet/concept.hpp>  // for seqan3::alphabet
+#include <cstddef> // for size_t
+
+#include <seqan3/alphabet/concept.hpp> // for seqan3::alphabet
 
 // this is from some other library:
 namespace third_party_ns
@@ -50,9 +51,15 @@ struct seqan3::custom::alphabet<third_party_ns::third_party_type>
     {
         switch (r)
         {
-            case 0:  a = alphabet_t::zero; return a;
-            case 1:  a = alphabet_t::one;  return a;
-            default: a = alphabet_t::two;  return a;
+        case 0:
+            a = alphabet_t::zero;
+            return a;
+        case 1:
+            a = alphabet_t::one;
+            return a;
+        default:
+            a = alphabet_t::two;
+            return a;
         }
     }
 
@@ -60,9 +67,12 @@ struct seqan3::custom::alphabet<third_party_ns::third_party_type>
     {
         switch (a)
         {
-            case alphabet_t::zero: return '0';
-            case alphabet_t::one:  return '1';
-            default:               return '2';
+        case alphabet_t::zero:
+            return '0';
+        case alphabet_t::one:
+            return '1';
+        default:
+            return '2';
         }
     }
 
@@ -70,9 +80,15 @@ struct seqan3::custom::alphabet<third_party_ns::third_party_type>
     {
         switch (c)
         {
-            case '0': a = alphabet_t::zero; return a;
-            case '1': a = alphabet_t::one;  return a;
-            default:  a = alphabet_t::two;  return a;
+        case '0':
+            a = alphabet_t::zero;
+            return a;
+        case '1':
+            a = alphabet_t::one;
+            return a;
+        default:
+            a = alphabet_t::two;
+            return a;
         }
     }
 };

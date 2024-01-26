@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,9 +12,9 @@
 
 #pragma once
 
-#include <seqan3/std/concepts>
+#include <concepts>
 #include <functional>
-#include <seqan3/std/ranges>
+#include <ranges>
 #include <thread>
 #include <type_traits>
 #include <vector>
@@ -75,17 +75,18 @@ public:
         auto * q = &(state->queue);
         for (size_t i = 0; i < thread_count; ++i)
         {
-            state->thread_pool.emplace_back([q] ()
-            {
-                for (;;)
+            state->thread_pool.emplace_back(
+                [q]()
                 {
-                    task_type task;
-                    if (q->wait_pop(task) == contrib::queue_op_status::closed)
-                        return;
+                    for (;;)
+                    {
+                        task_type task;
+                        if (q->wait_pop(task) == contrib::queue_op_status::closed)
+                            return;
 
-                    task();
-                }
-            });
+                        task();
+                    }
+                });
         }
     }
 
@@ -106,11 +107,11 @@ public:
     execution_handler_parallel() : execution_handler_parallel{1u}
     {}
 
-    execution_handler_parallel(execution_handler_parallel const &) = delete; //!< Deleted.
-    execution_handler_parallel(execution_handler_parallel &&) = default; //!< Defaulted.
+    execution_handler_parallel(execution_handler_parallel const &) = delete;             //!< Deleted.
+    execution_handler_parallel(execution_handler_parallel &&) = default;                 //!< Defaulted.
     execution_handler_parallel & operator=(execution_handler_parallel const &) = delete; //!< Deleted.
-    execution_handler_parallel & operator=(execution_handler_parallel &&) = default; //!< Defaulted.
-    ~execution_handler_parallel() = default; //!< Defaulted.
+    execution_handler_parallel & operator=(execution_handler_parallel &&) = default;     //!< Defaulted.
+    ~execution_handler_parallel() = default;                                             //!< Defaulted.
 
     //!\}
 
@@ -132,13 +133,9 @@ public:
      * type, however, is perfectly forwarded if `input` is a lvalue-reference or moved if it is a rvalue-reference.
      * Accordingly, the `algorithm_input_t` must either be a lvalue_reference or std::move_constructible.
      */
-    template <std::copy_constructible algorithm_t,
-              typename algorithm_input_t,
-              std::copy_constructible callback_t>
-    //!\cond
-        requires std::invocable<algorithm_t, algorithm_input_t, callback_t> &&
-                 (std::is_lvalue_reference_v<algorithm_input_t> || std::move_constructible<algorithm_input_t>)
-    //!\endcond
+    template <std::copy_constructible algorithm_t, typename algorithm_input_t, std::copy_constructible callback_t>
+        requires std::invocable<algorithm_t, algorithm_input_t, callback_t>
+              && (std::is_lvalue_reference_v<algorithm_input_t> || std::move_constructible<algorithm_input_t>)
     void execute(algorithm_t && algorithm, algorithm_input_t && input, callback_t && callback)
     {
         assert(state != nullptr);
@@ -156,8 +153,8 @@ public:
 
         // Asynchronously pushes the algorithm job as a task to the queue.
         // Note: that lambda is mutable, s.t. we can move out the content of input_tpl
-        task_type task = [=,
-                          input_tpl = std::tuple<algorithm_input_t>{std::forward<algorithm_input_t>(input)}] () mutable
+        task_type task =
+            [=, input_tpl = std::tuple<algorithm_input_t>{std::forward<algorithm_input_t>(input)}]() mutable
         {
             using forward_input_t = std::tuple_element_t<0, decltype(input_tpl)>;
             algorithm(std::forward<forward_input_t>(std::get<0>(input_tpl)), std::move(callback));
@@ -186,9 +183,7 @@ public:
     template <std::copy_constructible algorithm_t,
               std::ranges::input_range algorithm_input_range_t,
               std::copy_constructible callback_t>
-    //!\cond
         requires std::invocable<algorithm_t, std::ranges::range_reference_t<algorithm_input_range_t>, callback_t>
-    //!\endcond
     void bulk_execute(algorithm_t && algorithm, algorithm_input_range_t && input_range, callback_t && callback)
     {
         for (auto && input : input_range)
@@ -218,14 +213,14 @@ private:
     {
     public:
         /*!\name Constructors, destructor and assignment
-        * \brief Instances of this class are not copyable.
+        * \brief Instances of this class are not copyable and not movable.
         * \{
         */
-        internal_state() = default; //!< Defaulted.
-        internal_state(internal_state const &) = delete; //!< Deleted.
-        internal_state(internal_state &&) = default; //!< Defaulted.
+        internal_state() = default;                                  //!< Defaulted.
+        internal_state(internal_state const &) = delete;             //!< Deleted.
+        internal_state(internal_state &&) = delete;                  //!< Deleted.
         internal_state & operator=(internal_state const &) = delete; //!< Deleted.
-        internal_state & operator=(internal_state &&) = default; //!< Defaulted.
+        internal_state & operator=(internal_state &&) = delete;      //!< Deleted.
 
         //!\brief Waits for threads to finish.
         ~internal_state()
@@ -254,13 +249,13 @@ private:
         }
 
         //!\brief The thread pool.
-        std::vector<std::thread>                 thread_pool{};
+        std::vector<std::thread> thread_pool{};
         //!\brief The concurrent queue containing the algorithms to process.
-        contrib::fixed_buffer_queue<task_type>   queue{10000};
+        contrib::fixed_buffer_queue<task_type> queue{10000};
     };
 
     //!\brief Manages the internal state.
     std::unique_ptr<internal_state> state{nullptr};
 };
 
-} // namespace seqan3
+} // namespace seqan3::detail

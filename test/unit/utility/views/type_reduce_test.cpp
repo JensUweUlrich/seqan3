@@ -1,18 +1,18 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #include <gtest/gtest.h>
 
-#include <seqan3/std/algorithm>
-#include <seqan3/std/concepts>
+#include <algorithm>
+#include <concepts>
 #include <deque>
 #include <iostream>
 #include <list>
-#include <seqan3/std/ranges>
+#include <ranges>
 #include <string>
 #include <vector>
 
@@ -82,14 +82,15 @@ TEST(type_reduce, random_access_overload)
 
     auto v = seqan3::views::type_reduce(urange);
 
-    EXPECT_TRUE((std::same_as<decltype(v), std::ranges::subrange<typename std::deque<int>::iterator,
-                                                                 typename std::deque<int>::iterator>>));
+    EXPECT_TRUE(
+        (std::same_as<decltype(v),
+                      std::ranges::subrange<typename std::deque<int>::iterator, typename std::deque<int>::iterator>>));
     EXPECT_RANGE_EQ(v, urange);
 }
 
 TEST(type_reduce, generic_overload)
 {
-    {   // bidirectional container
+    { // bidirectional container
         std::list<int> urange{1, 2, 3, 4, 5, 6};
 
         auto v = seqan3::views::type_reduce(urange);
@@ -98,10 +99,15 @@ TEST(type_reduce, generic_overload)
         EXPECT_RANGE_EQ(v, urange);
     }
 
-    {   // view
+    { // view
         std::array<int, 6> urange{1, 2, 3, 4, 5, 6};
 
-        auto v = urange | std::views::filter([] (int) { return true; });
+        auto v = urange
+               | std::views::filter(
+                     [](int)
+                     {
+                         return true;
+                     });
         auto v2 = seqan3::views::type_reduce(v);
 
         EXPECT_SAME_TYPE(decltype(v2), std::views::all_t<decltype(v)>);

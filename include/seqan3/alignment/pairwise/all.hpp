@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -10,7 +10,7 @@
  * \author Rene Rahn <rene.rahn AT fu-berlin.de>
  */
 
-/*!\defgroup alignment_pairwise Pairwise
+/*!\defgroup alignment_pairwise Pairwise Alignments
  * \ingroup alignment
  * \brief Provides the algorithmic components for the computation of pairwise alignments.
  *
@@ -27,7 +27,7 @@
  * it is recommended to read through the \ref tutorial_ranges "ranges tutorial".
  * The following code snippet demonstrates a simple use of the pairwise alignment interface.
  *
- * \include doc/tutorial/pairwise_alignment/pairwise_alignment_first_global.cpp
+ * \include doc/tutorial/08_pairwise_alignment/pairwise_alignment_first_global.cpp
  *
  * In this snippet a global alignment over two nucleotide sequences is computed. Here the helper function std::tie
  * is used to pass the two sequences as a tuple to the alignment algorithm. The special interface of std::tie allows

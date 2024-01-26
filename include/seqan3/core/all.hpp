@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -32,7 +32,7 @@
  * \see \ref about_customisation
  */
 
- /*!\namespace seqan3::exposition_only
+/*!\namespace seqan3::exposition_only
   * \brief A namespace for SeqAn entities that are intended for documentation purposes only.
   *
   * \details
@@ -74,8 +74,7 @@
 #include <seqan3/core/algorithm/all.hpp>
 #include <seqan3/core/concept/all.hpp>
 #include <seqan3/core/configuration/all.hpp>
-#include <seqan3/core/debug_stream/all.hpp>
 #include <seqan3/core/debug_stream.hpp>
+#include <seqan3/core/debug_stream/all.hpp>
 #include <seqan3/core/platform.hpp>
 #include <seqan3/core/range/all.hpp>
-#include <seqan3/core/semiregular_box.hpp>

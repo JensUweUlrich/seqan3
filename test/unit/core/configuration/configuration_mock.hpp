@@ -1,11 +1,11 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 #include <array>
 
@@ -26,15 +26,10 @@ namespace seqan3::detail
 
 template <>
 inline constexpr std::array<std::array<bool, static_cast<uint8_t>(::test_algo_id::SIZE)>,
-                            static_cast<uint8_t>(::test_algo_id::SIZE)> compatibility_table<::test_algo_id>
-{{
-    {0, 1, 1, 1},
-    {1, 0, 1, 0},
-    {1, 1, 0, 1},
-    {1, 0, 1, 0}
-}};
+                            static_cast<uint8_t>(::test_algo_id::SIZE)>
+    compatibility_table<::test_algo_id>{{{0, 1, 1, 1}, {1, 0, 1, 0}, {1, 1, 0, 1}, {1, 0, 1, 0}}};
 
-}  // namespace seqan3::detail
+} // namespace seqan3::detail
 
 class bar : private seqan3::pipeable_config_element
 {

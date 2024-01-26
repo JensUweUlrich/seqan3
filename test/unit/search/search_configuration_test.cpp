@@ -1,9 +1,11 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
+
+#include <gtest/gtest.h>
 
 #include <type_traits>
 
@@ -15,8 +17,6 @@
 #include <seqan3/search/configuration/result_type.hpp>
 #include <seqan3/search/search_result.hpp>
 
-#include <gtest/gtest.h>
-
 template <typename T>
 class search_configuration_test : public ::testing::Test
 {};
@@ -27,7 +27,7 @@ using search_result_t = seqan3::search_result<seqan3::detail::empty_type,
                                               seqan3::detail::empty_type>;
 
 // Needed to test the on_result config.
-inline constexpr auto on_result_caller = [] (auto &&) {};
+inline constexpr auto on_result_caller = [](auto &&) {};
 
 using test_types = ::testing::Types<seqan3::search_cfg::max_error_total,
                                     seqan3::search_cfg::max_error_substitution,

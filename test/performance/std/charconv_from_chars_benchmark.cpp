@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -8,10 +8,9 @@
 #include <benchmark/benchmark.h>
 
 #include <cstring>
+#include <seqan3/std/charconv>
 #include <sstream>
 #include <string_view>
-
-#include <seqan3/std/charconv>
 
 // -----------------------------------------------------------------------------
 // from_char for integral types
@@ -97,7 +96,7 @@ BENCHMARK_TEMPLATE(from_atol, uint64_t);
 
 #if __has_include(<boost/spirit/include/qi.hpp>)
 
-#include <boost/spirit/include/qi.hpp>
+#    include <boost/spirit/include/qi.hpp>
 
 template <typename arithmetic_type>
 static void from_boost(benchmark::State & state)
@@ -108,8 +107,11 @@ static void from_boost(benchmark::State & state)
     for (auto _ : state)
     {
         auto it = &str[0];
-        boost::spirit::qi::phrase_parse(it, &str[0] + sizeof(str),
-                                        boost::spirit::qi::int_, boost::spirit::ascii::space, val);
+        boost::spirit::qi::phrase_parse(it,
+                                        &str[0] + sizeof(str),
+                                        boost::spirit::qi::int_,
+                                        boost::spirit::ascii::space,
+                                        val);
         sum += val;
     }
 

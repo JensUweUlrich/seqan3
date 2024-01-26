@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -29,17 +29,17 @@ TEST(config_element_test, tags)
 
 TEST(hit_strata_test, member_variable)
 {
-    {   // default construction
+    { // default construction
         seqan3::search_cfg::hit_strata strata_mode{};
         EXPECT_EQ(strata_mode.stratum, 0);
     }
 
-    {   // construct with value
+    { // construct with value
         seqan3::search_cfg::hit_strata strata_mode{3};
         EXPECT_EQ(strata_mode.stratum, 3);
     }
 
-    {   // assign value
+    { // assign value
         seqan3::search_cfg::hit_strata strata_mode{};
         strata_mode.stratum = 3;
         EXPECT_EQ(strata_mode.stratum, 3);

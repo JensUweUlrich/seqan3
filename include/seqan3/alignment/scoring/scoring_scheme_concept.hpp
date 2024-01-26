@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -58,21 +58,23 @@ namespace seqan3
 
 //!\cond
 template <typename t, typename alphabet_t, typename alphabet2_t = alphabet_t>
-concept scoring_scheme_for = requires (t scheme,
-                                       alphabet_t const alph1,
-                                       alphabet2_t const alph2)
-{
-    requires alphabet<alphabet_t>;
-    requires alphabet<alphabet2_t>;
+concept scoring_scheme_for =
+    requires (t scheme, alphabet_t const alph1, alphabet2_t const alph2) {
+        requires alphabet<alphabet_t>;
+        requires alphabet<alphabet2_t>;
 
-    { scheme.score(alph1, alph2) };
-    requires std::common_reference_with<decltype(scheme.score(alph1, alph2)),
-                                        typename std::remove_reference_t<t>::score_type>;
+        {
+            scheme.score(alph1, alph2)
+        };
+        requires std::common_reference_with<decltype(scheme.score(alph1, alph2)),
+                                            typename std::remove_reference_t<t>::score_type>;
 
-    { scheme.score(alphabet_t{}, alphabet2_t{}) };
-    requires std::common_reference_with<decltype(scheme.score(alphabet_t{}, alphabet2_t{})),
-                                        typename std::remove_reference_t<t>::score_type>;
-};
+        {
+            scheme.score(alphabet_t{}, alphabet2_t{})
+        };
+        requires std::common_reference_with<decltype(scheme.score(alphabet_t{}, alphabet2_t{})),
+                                            typename std::remove_reference_t<t>::score_type>;
+    };
 //!\endcond
 
 } // namespace seqan3

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,14 +12,14 @@
 
 #pragma once
 
-#include <seqan3/std/iterator>
-#include <seqan3/std/ranges>
-#include <seqan3/std/span>
+#include <iterator>
+#include <ranges>
+#include <span>
 
 #include <seqan3/alignment/matrix/detail/alignment_matrix_column_major_range_base.hpp>
 #include <seqan3/alignment/matrix/detail/alignment_score_matrix_one_column_base.hpp>
 #include <seqan3/alignment/matrix/detail/alignment_score_matrix_proxy.hpp>
-#include <seqan3/utility/concept/exposition_only/core_language.hpp>
+#include <seqan3/utility/concept.hpp>
 #include <seqan3/utility/simd/concept.hpp>
 
 namespace seqan3::detail
@@ -122,9 +122,9 @@ private:
     //!\copydoc seqan3::detail::alignment_matrix_column_major_range_base::initialise_column
     constexpr alignment_column_type initialise_column(size_type const SEQAN3_DOXYGEN_ONLY(column_index)) noexcept
     {
-        return alignment_column_type{*this,
-                                     column_data_view_type{std::addressof(matrix_base_t::pool[0]),
-                                                           matrix_base_t::num_rows}};
+        return alignment_column_type{
+            *this,
+            column_data_view_type{std::addressof(matrix_base_t::pool[0]), matrix_base_t::num_rows}};
     }
 
     //!\copydoc seqan3::detail::alignment_matrix_column_major_range_base::make_proxy

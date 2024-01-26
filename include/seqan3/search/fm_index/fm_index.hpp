@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,9 +12,9 @@
 
 #pragma once
 
-#include <seqan3/std/algorithm>
+#include <algorithm>
 #include <filesystem>
-#include <seqan3/std/ranges>
+#include <ranges>
 
 #include <sdsl/suffix_trees.hpp>
 
@@ -52,7 +52,7 @@ struct fm_index_validator
         {
             static_assert(std::ranges::bidirectional_range<text_t>, "The text must model bidirectional_range.");
             static_assert(std::convertible_to<range_innermost_value_t<text_t>, alphabet_t>,
-                        "The alphabet of the text collection must be convertible to the alphabet of the index.");
+                          "The alphabet of the text collection must be convertible to the alphabet of the index.");
             static_assert(range_dimension_v<text_t> == 1, "The input cannot be a text collection.");
 
             if (std::ranges::empty(text))
@@ -89,9 +89,7 @@ class bi_fm_index_cursor;
 
 namespace detail
 {
-template <semialphabet alphabet_t,
-          text_layout text_layout_mode_,
-          detail::sdsl_index sdsl_index_type_>
+template <semialphabet alphabet_t, text_layout text_layout_mode_, detail::sdsl_index sdsl_index_type_>
 class reverse_fm_index;
 }
 //!\endcond
@@ -133,11 +131,11 @@ using sdsl_wt_index_type =
                                sdsl::rank_support_v<>,
                                sdsl::select_support_scan<>,
                                sdsl::select_support_scan<0>>,
-                 16, // Sampling rate of the suffix array
-                 10'000'000, // Sampling rate of the inverse suffix array
+                 16,                           // Sampling rate of the suffix array
+                 10'000'000,                   // Sampling rate of the inverse suffix array
                  sdsl::sa_order_sa_sampling<>, // How to sample positions in the suffix array (text VS SA sampling)
-                 sdsl::isa_sampling<>, // How to sample positons in the inverse suffix array
-                 sdsl::plain_byte_alphabet>; // How to represent the alphabet
+                 sdsl::isa_sampling<>,         // How to sample positons in the inverse suffix array
+                 sdsl::plain_byte_alphabet>;   // How to represent the alphabet
 
 /*!\brief The default FM Index Configuration.
  * \ingroup search_fm_index
@@ -230,13 +228,18 @@ private:
                                         "(single sequence/collection).");
         };
 
-        return std::ranges::transform(sequence, output_it, [&warn_if_rank_out_of_range](auto const & chr)
-        {
-            uint8_t const rank = seqan3::to_rank(chr);
-            if constexpr (sigma >= max_sigma)
-                warn_if_rank_out_of_range(rank);
-            return rank + 1;
-        }).out;
+        return std::ranges::transform(sequence,
+                                      output_it,
+                                      [&warn_if_rank_out_of_range](auto const & chr)
+                                      {
+                                          uint8_t const rank = seqan3::to_rank(chr);
+                                          if constexpr (sigma >= max_sigma)
+                                              warn_if_rank_out_of_range(rank);
+                                          else
+                                              (void)warn_if_rank_out_of_range;
+                                          return rank + 1;
+                                      })
+            .out;
     }
 
     /*!\brief Constructs the index given a range.
@@ -259,9 +262,7 @@ private:
      * No guarantee. \if DEV \todo Ensure strong exception guarantee. \endif
      */
     template <std::ranges::range text_t>
-    //!\cond
         requires (text_layout_mode_ == text_layout::single)
-    //!\endcond
     void construct(text_t && text)
     {
         detail::fm_index_validator::validate<alphabet_t, text_layout_mode_>(text);
@@ -286,9 +287,7 @@ private:
 
     //!\overload
     template <std::ranges::range text_t>
-    //!\cond
         requires (text_layout_mode_ == text_layout::collection)
-    //!\endcond
     void construct(text_t && text, bool reverse = false)
     {
         detail::fm_index_validator::validate<alphabet_t, text_layout_mode_>(text);
@@ -320,7 +319,7 @@ private:
             prefix_sum += size + 1;
         }
 
-        text_begin    = sdsl::sd_vector<>(builder);
+        text_begin = sdsl::sd_vector<>(builder);
         text_begin_ss = sdsl::select_support_sd<1>(&text_begin);
         text_begin_rs = sdsl::rank_support_sd<1>(&text_begin);
 
@@ -400,16 +399,19 @@ public:
     friend class fm_index_cursor;
 
     template <typename fm_index_t>
-    friend class detail::fm_index_cursor_node;
+    friend struct detail::fm_index_cursor_node;
 
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    fm_index() = default;              //!< Defaulted.
+    fm_index() = default; //!< Defaulted.
 
     //!\brief When copy constructing, also update internal data structures.
     fm_index(fm_index const & rhs) :
-        index{rhs.index}, text_begin{rhs.text_begin}, text_begin_ss{rhs.text_begin_ss}, text_begin_rs{rhs.text_begin_rs}
+        index{rhs.index},
+        text_begin{rhs.text_begin},
+        text_begin_ss{rhs.text_begin_ss},
+        text_begin_rs{rhs.text_begin_rs}
     {
         text_begin_ss.set_vector(&text_begin);
         text_begin_rs.set_vector(&text_begin);
@@ -417,7 +419,9 @@ public:
 
     //!\brief When move constructing, also update internal data structures.
     fm_index(fm_index && rhs) :
-        index{std::move(rhs.index)}, text_begin{std::move(rhs.text_begin)},text_begin_ss{std::move(rhs.text_begin_ss)},
+        index{std::move(rhs.index)},
+        text_begin{std::move(rhs.text_begin)},
+        text_begin_ss{std::move(rhs.text_begin_ss)},
         text_begin_rs{std::move(rhs.text_begin_rs)}
     {
         text_begin_ss.set_vector(&text_begin);
@@ -438,7 +442,7 @@ public:
         return *this;
     }
 
-    ~fm_index() = default;             //!< Defaulted.
+    ~fm_index() = default; //!< Defaulted.
 
     /*!\brief Constructor that immediately constructs the index given a range. The range cannot be empty.
      * \tparam text_t The type of range to construct from; must model std::ranges::bidirectional_range.
@@ -560,23 +564,22 @@ public:
         archive(sigma);
         if (sigma != alphabet_size<alphabet_t>)
         {
-            throw std::logic_error{"The fm_index was built over an alphabet of size " + std::to_string(sigma) +
-                                   " but it is being read into an fm_index with an alphabet of size " +
-                                   std::to_string(alphabet_size<alphabet_t>) + "."};
+            throw std::logic_error{"The fm_index was built over an alphabet of size " + std::to_string(sigma)
+                                   + " but it is being read into an fm_index with an alphabet of size "
+                                   + std::to_string(alphabet_size<alphabet_t>) + "."};
         }
 
         bool tmp = text_layout_mode;
         archive(tmp);
         if (tmp != text_layout_mode)
         {
-            throw std::logic_error{std::string{"The fm_index was built over a "} +
-                                   (tmp ? "text collection" : "single text") +
-                                   " but it is being read into an fm_index expecting a " +
-                                   (text_layout_mode ? "text collection." : "single text.")};
+            throw std::logic_error{std::string{"The fm_index was built over a "}
+                                   + (tmp ? "text collection" : "single text")
+                                   + " but it is being read into an fm_index expecting a "
+                                   + (text_layout_mode ? "text collection." : "single text.")};
         }
     }
     //!\endcond
-
 };
 
 /*!\name Template argument type deduction guides
@@ -635,7 +638,6 @@ public:
     {
         construct_(std::forward<text_t>(text));
     }
-
 };
 
 } // namespace seqan3::detail

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -23,7 +23,7 @@ namespace seqan3::detail
  * \ingroup utility
  * \tparam invocable_ts The types to inherit from.
  */
-template <typename ...invocable_ts>
+template <typename... invocable_ts>
 struct multi_invocable : invocable_ts...
 {
     //!\brief Inherit the function call operators.
@@ -31,7 +31,7 @@ struct multi_invocable : invocable_ts...
 };
 
 //!\brief Deduction guides for seqan3::detail::multi_invocable.
-template <typename ...invocable_ts>
+template <typename... invocable_ts>
 multi_invocable(invocable_ts...) -> multi_invocable<invocable_ts...>;
 
 } // namespace seqan3::detail

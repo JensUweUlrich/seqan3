@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,27 +12,27 @@
 #include <sstream>
 
 #if defined(SEQAN3_HAS_ZLIB)
-    #include <seqan3/contrib/stream/bgzf_ostream.hpp>
-    #include <seqan3/contrib/stream/gz_ostream.hpp>
+#    include <seqan3/contrib/stream/bgzf_ostream.hpp>
+#    include <seqan3/contrib/stream/gz_ostream.hpp>
 #endif
 
 #if defined(SEQAN3_HAS_BZIP2)
-    #include <seqan3/contrib/stream/bz2_ostream.hpp>
+#    include <seqan3/contrib/stream/bz2_ostream.hpp>
 #endif
 
 // SEQAN2
 #if __has_include(<seqan/stream.h>)
-    #define SEQAN3_HAS_SEQAN2 1
+#    define SEQAN3_HAS_SEQAN2 1
 
-    #if defined(SEQAN3_HAS_ZLIB)
-        #define SEQAN_HAS_ZLIB 1
-    #endif
+#    if defined(SEQAN3_HAS_ZLIB)
+#        define SEQAN_HAS_ZLIB 1
+#    endif
 
-    #if defined(SEQAN3_HAS_BZIP2)
-        #define SEQAN_HAS_BZIP2 1
-    #endif
+#    if defined(SEQAN3_HAS_BZIP2)
+#        define SEQAN_HAS_BZIP2 1
+#    endif
 
-    #include <seqan/stream.h>
+#    include <seqan/stream.h>
 #endif
 
 // ============================================================================
@@ -139,7 +139,7 @@ void seqan2_compressed(benchmark::State & state)
 {
     std::ostringstream os;
 
-    seqan::VirtualStream<char, seqan::Output> ogzf;
+    seqan2::VirtualStream<char, seqan2::Output> ogzf;
     compression_type tag;
     open(ogzf, os, tag);
 
@@ -147,15 +147,15 @@ void seqan2_compressed(benchmark::State & state)
     for (auto _ : state)
         write(ogzf, static_cast<char>(i++ % 128));
 }
-BENCHMARK_TEMPLATE(seqan2_compressed, seqan::Nothing);
+BENCHMARK_TEMPLATE(seqan2_compressed, seqan2::Nothing);
 
-#ifdef SEQAN_HAS_ZLIB
-BENCHMARK_TEMPLATE(seqan2_compressed, seqan::GZFile);
-BENCHMARK_TEMPLATE(seqan2_compressed, seqan::BgzfFile);
-#endif
-#ifdef SEQAN_HAS_BZIP2
-BENCHMARK_TEMPLATE(seqan2_compressed, seqan::BZ2File);
-#endif
+#    ifdef SEQAN_HAS_ZLIB
+BENCHMARK_TEMPLATE(seqan2_compressed, seqan2::GZFile);
+BENCHMARK_TEMPLATE(seqan2_compressed, seqan2::BgzfFile);
+#    endif
+#    ifdef SEQAN_HAS_BZIP2
+BENCHMARK_TEMPLATE(seqan2_compressed, seqan2::BZ2File);
+#    endif
 
 #endif // SEQAN3_HAS_SEQAN2
 

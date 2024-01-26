@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,17 +12,20 @@
 
 #pragma once
 
-#include <seqan3/std/ranges>
+#include <ranges>
 
 #include <seqan3/core/platform.hpp>
 
 namespace seqan3::detail
 {
 
-/*!\brief Iterate over a range (consumes single-pass input ranges).
+/*!\brief Iterate over a range.
  * \ingroup core_range
  * \tparam rng_t Type of the range; must satisfy std::ranges::input_range.
  * \param rng The range.
+ * \details
+ * * `std::ranges::input_range<rng_t>`: Consumes input range.
+ * * `std::ranges::forward_range<rng_t>`: NO-OP.
  */
 template <std::ranges::input_range rng_t>
 constexpr void consume(rng_t && rng)
@@ -33,10 +36,6 @@ constexpr void consume(rng_t && rng)
         ++it;
 }
 
-/*!\brief Iterate over a range (NO-OP for forward ranges).
- * \ingroup core_range
- * \tparam rng_t Type of the range; must satisfy std::ranges::forward_range.
- */
 template <std::ranges::forward_range rng_t>
 constexpr void consume(rng_t &&)
 {}

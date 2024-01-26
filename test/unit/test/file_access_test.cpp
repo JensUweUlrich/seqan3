@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -33,16 +33,12 @@ struct file_access_test : public ::testing::Test
 
     static void remove_read_permission(std::filesystem::path const & path)
     {
-        std::filesystem::permissions(path,
-                                    std::filesystem::perms::owner_read,
-                                    std::filesystem::perm_options::remove);
+        std::filesystem::permissions(path, std::filesystem::perms::owner_read, std::filesystem::perm_options::remove);
     }
 
     static void remove_write_permission(std::filesystem::path const & path)
     {
-        std::filesystem::permissions(path,
-                                    std::filesystem::perms::owner_write,
-                                    std::filesystem::perm_options::remove);
+        std::filesystem::permissions(path, std::filesystem::perms::owner_write, std::filesystem::perm_options::remove);
     }
 
     // If we have root permissions, we can write to the file even when we do not have write permissions.

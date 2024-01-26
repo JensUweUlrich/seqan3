@@ -1,13 +1,13 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
-#include <vector>
-
 #include <gtest/gtest.h>
+
+#include <vector>
 
 #include <seqan3/alignment/pairwise/align_pairwise.hpp>
 
@@ -78,10 +78,11 @@ static auto dna4_with_empty_sequences = []()
 } // namespace seqan3::test::alignment::collection::simd::global::affine::unbanded
 
 using pairwise_collection_simd_global_affine_unbanded_testing_types = ::testing::Types<
-        pairwise_alignment_fixture<&seqan3::test::alignment::collection::simd::global::affine::unbanded::dna4_all_same>,
-        pairwise_alignment_fixture<&seqan3::test::alignment::collection::simd::global::affine::unbanded::dna4_different_length>,
-        pairwise_alignment_fixture<&seqan3::test::alignment::collection::simd::global::affine::unbanded::dna4_with_empty_sequences>
-    >;
+    pairwise_alignment_fixture<&seqan3::test::alignment::collection::simd::global::affine::unbanded::dna4_all_same>,
+    pairwise_alignment_fixture<
+        &seqan3::test::alignment::collection::simd::global::affine::unbanded::dna4_different_length>,
+    pairwise_alignment_fixture<
+        &seqan3::test::alignment::collection::simd::global::affine::unbanded::dna4_with_empty_sequences>>;
 
 INSTANTIATE_TYPED_TEST_SUITE_P(pairwise_collection_simd_global_affine_unbanded,
                                pairwise_alignment_collection_test,

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -27,8 +27,8 @@ using matrix_iterator_t = std::ranges::iterator_t<matrix_t>;
 template <>
 struct iterator_fixture<matrix_iterator_t> : public ::testing::Test
 {
-    using alignment_column_t = std::vector<std::pair<std::tuple<score_t, score_t, score_t>,
-                                                     std::tuple<trace_t, trace_t, trace_t>>>;
+    using alignment_column_t =
+        std::vector<std::pair<std::tuple<score_t, score_t, score_t>, std::tuple<trace_t, trace_t, trace_t>>>;
 
     using iterator_tag = std::input_iterator_tag;
     static constexpr bool const_iterable = false;

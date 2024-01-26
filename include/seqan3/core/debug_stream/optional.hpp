@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -32,8 +32,8 @@ namespace seqan3
 template <typename char_t>
 inline debug_stream_type<char_t> & operator<<(debug_stream_type<char_t> & s, std::nullopt_t SEQAN3_DOXYGEN_ONLY(arg))
 {
-   s << "<VALUELESS_OPTIONAL>";
-   return s;
+    s << "<VALUELESS_OPTIONAL>";
+    return s;
 }
 
 /*!\brief A std::optional can be printed by printing its value or nothing if valueless.
@@ -43,9 +43,7 @@ inline debug_stream_type<char_t> & operator<<(debug_stream_type<char_t> & s, std
  * \relates seqan3::debug_stream_type
  */
 template <typename char_t, typename optional_type>
-//!\cond
     requires detail::is_type_specialisation_of_v<std::remove_cvref_t<optional_type>, std::optional>
-//!\endcond
 inline debug_stream_type<char_t> & operator<<(debug_stream_type<char_t> & s, optional_type && arg)
 {
     if (arg.has_value())

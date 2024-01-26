@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ TEST(debug_stream_test, range)
     o.flush();
     EXPECT_EQ(o.str(), "[1,4,5,7,32,321]");
 
-    std::vector<std::vector<int>> const vec2 = {{1, 2, 33}, {22,11}};
+    std::vector<std::vector<int>> const vec2 = {{1, 2, 33}, {22, 11}};
     my_stream << vec2;
     o.flush();
     EXPECT_EQ(o.str(), "[1,4,5,7,32,321][[1,2,33],[22,11]]");
@@ -184,7 +184,7 @@ TEST(debug_stream_test, tuple)
     o.flush();
     EXPECT_EQ(o.str(), "(32,dummy)(32)");
 
-    std::tuple<size_t, std::pair<size_t, size_t>> t2{2, {3,2}};
+    std::tuple<size_t, std::pair<size_t, size_t>> t2{2, {3, 2}};
     my_stream << t2;
     o.flush();
     EXPECT_EQ(o.str(), "(32,dummy)(32)(2,(3,2))");
@@ -285,4 +285,15 @@ TEST(debug_stream_test, byte)
     my_stream << std::byte{40} << "," << std::byte{244};
     o.flush();
     EXPECT_EQ(o.str(), "40,244");
+}
+
+TEST(debug_stream_test, integers)
+{
+    std::ostringstream o{};
+    seqan3::debug_stream_type my_stream{o};
+
+    my_stream << uint8_t{1} << ',' << uint16_t{2} << ',' << uint32_t{3} << ',' << uint64_t{4} << ',' << size_t{5} << ','
+              << int8_t{6} << ',' << int16_t{7} << ',' << int32_t{8} << ',' << int64_t{9};
+    o.flush();
+    EXPECT_EQ(o.str(), "1,2,3,4,5,6,7,8,9");
 }

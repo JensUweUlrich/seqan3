@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <seqan3/std/concepts>
+#include <concepts>
 #include <stdexcept>
 #include <string>
 
@@ -33,9 +33,9 @@ struct invalid_char_assignment : std::runtime_error
      * \noapi
      */
     invalid_char_assignment(std::string const & type_name, std::string const & wrong_char) :
-        std::runtime_error{std::string{"Assigning "} + wrong_char + " to an alphabet of type " +
-                           type_name + " would incur information loss. If you want implicit conversion, use "
-                           "seqan3::assign_char instead of seqan3::assign_char_strict."}
+        std::runtime_error{std::string{"Assigning "} + wrong_char + " to an alphabet of type " + type_name
+                           + " would incur information loss. If you want implicit conversion, use "
+                             "seqan3::assign_char instead of seqan3::assign_char_strict."}
     {}
 
     /*!\overload

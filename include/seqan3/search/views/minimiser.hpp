@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <seqan3/std/algorithm>
+#include <algorithm>
 #include <deque>
 
 #include <seqan3/core/detail/empty_type.hpp>
@@ -45,8 +45,7 @@ namespace seqan3::detail
  *
  * \sa seqan3::views::minimiser
  */
-template <std::ranges::view urng1_t,
-          std::ranges::view urng2_t = std::ranges::empty_view<seqan3::detail::empty_type>>
+template <std::ranges::view urng1_t, std::ranges::view urng2_t = std::ranges::empty_view<seqan3::detail::empty_type>>
 class minimiser_view : public std::ranges::view_interface<minimiser_view<urng1_t, urng2_t>>
 {
 private:
@@ -61,13 +60,14 @@ private:
     //!\brief Boolean variable, which is true, when second range is not of empty type.
     static constexpr bool second_range_is_given = !std::same_as<urng2_t, default_urng2_t>;
 
-    static_assert(!second_range_is_given || std::totally_ordered_with<std::ranges::range_reference_t<urng1_t>,
-                                                                      std::ranges::range_reference_t<urng2_t>>,
+    static_assert(!second_range_is_given
+                      || std::totally_ordered_with<std::ranges::range_reference_t<urng1_t>,
+                                                   std::ranges::range_reference_t<urng2_t>>,
                   "The reference types of the underlying ranges must model std::totally_ordered_with.");
 
     //!\brief Whether the given ranges are const_iterable
-    static constexpr bool const_iterable = seqan3::const_iterable_range<urng1_t> &&
-                                           seqan3::const_iterable_range<urng2_t>;
+    static constexpr bool const_iterable =
+        seqan3::const_iterable_range<urng1_t> && seqan3::const_iterable_range<urng2_t>;
 
     //!\brief The first underlying range.
     urng1_t urange1{};
@@ -89,19 +89,19 @@ public:
      */
     minimiser_view()
         requires std::default_initializable<urng1_t> && std::default_initializable<urng2_t>
-        = default; //!< Defaulted.
-    minimiser_view(minimiser_view const & rhs) = default; //!< Defaulted.
-    minimiser_view(minimiser_view && rhs) = default; //!< Defaulted.
+    = default;                                                        //!< Defaulted.
+    minimiser_view(minimiser_view const & rhs) = default;             //!< Defaulted.
+    minimiser_view(minimiser_view && rhs) = default;                  //!< Defaulted.
     minimiser_view & operator=(minimiser_view const & rhs) = default; //!< Defaulted.
-    minimiser_view & operator=(minimiser_view && rhs) = default; //!< Defaulted.
-    ~minimiser_view() = default; //!< Defaulted.
+    minimiser_view & operator=(minimiser_view && rhs) = default;      //!< Defaulted.
+    ~minimiser_view() = default;                                      //!< Defaulted.
 
     /*!\brief Construct from a view and a given number of values in one window.
     * \param[in] urange1     The input range to process. Must model std::ranges::viewable_range and
     *                        std::ranges::forward_range.
     * \param[in] window_size The number of values in one window.
     */
-    minimiser_view(urng1_t urange1, size_t const window_size) :
+    explicit minimiser_view(urng1_t urange1, size_t const window_size) :
         minimiser_view{std::move(urange1), default_urng2_t{}, window_size}
     {}
 
@@ -113,11 +113,9 @@ public:
     * \param[in] window_size The number of values in one window.
     */
     template <typename other_urng1_t>
-    //!\cond
-        requires (std::ranges::viewable_range<other_urng1_t> &&
-                  std::constructible_from<urng1_t, ranges::ref_view<std::remove_reference_t<other_urng1_t>>>)
-    //!\endcond
-    minimiser_view(other_urng1_t && urange1, size_t const window_size) :
+        requires (std::ranges::viewable_range<other_urng1_t>
+                  && std::constructible_from<urng1_t, std::ranges::ref_view<std::remove_reference_t<other_urng1_t>>>)
+    explicit minimiser_view(other_urng1_t && urange1, size_t const window_size) :
         urange1{std::views::all(std::forward<other_urng1_t>(urange1))},
         urange2{default_urng2_t{}},
         window_size{window_size}
@@ -130,7 +128,7 @@ public:
     *                        std::ranges::forward_range.
     * \param[in] window_size The number of values in one window.
     */
-    minimiser_view(urng1_t urange1, urng2_t urange2, size_t const window_size) :
+    explicit minimiser_view(urng1_t urange1, urng2_t urange2, size_t const window_size) :
         urange1{std::move(urange1)},
         urange2{std::move(urange2)},
         window_size{window_size}
@@ -154,13 +152,11 @@ public:
     * \param[in] window_size The number of values in one window.
     */
     template <typename other_urng1_t, typename other_urng2_t>
-    //!\cond
-        requires (std::ranges::viewable_range<other_urng1_t> &&
-                  std::constructible_from<urng1_t, std::views::all_t<other_urng1_t>> &&
-                  std::ranges::viewable_range<other_urng2_t> &&
-                  std::constructible_from<urng2_t, std::views::all_t<other_urng2_t>>)
-    //!\endcond
-    minimiser_view(other_urng1_t && urange1, other_urng2_t && urange2, size_t const window_size) :
+        requires (std::ranges::viewable_range<other_urng1_t>
+                  && std::constructible_from<urng1_t, std::views::all_t<other_urng1_t>>
+                  && std::ranges::viewable_range<other_urng2_t>
+                  && std::constructible_from<urng2_t, std::views::all_t<other_urng2_t>>)
+    explicit minimiser_view(other_urng1_t && urange1, other_urng2_t && urange2, size_t const window_size) :
         urange1{std::views::all(std::forward<other_urng1_t>(urange1))},
         urange2{std::views::all(std::forward<other_urng2_t>(urange2))},
         window_size{window_size}
@@ -191,22 +187,14 @@ public:
      */
     basic_iterator<false> begin()
     {
-        return {std::ranges::begin(urange1),
-                std::ranges::end(urange1),
-                std::ranges::begin(urange2),
-                window_size};
+        return {std::ranges::begin(urange1), std::ranges::end(urange1), std::ranges::begin(urange2), window_size};
     }
 
     //!\copydoc begin()
     basic_iterator<true> begin() const
-    //!\cond
         requires const_iterable
-    //!\endcond
     {
-        return {std::ranges::cbegin(urange1),
-                std::ranges::cend(urange1),
-                std::ranges::cbegin(urange2),
-                window_size};
+        return {std::ranges::begin(urange1), std::ranges::end(urange1), std::ranges::begin(urange2), window_size};
     }
 
     /*!\brief Returns an iterator to the element following the last element of the range.
@@ -268,23 +256,22 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    basic_iterator() = default; //!< Defaulted.
-    basic_iterator(basic_iterator const &) = default; //!< Defaulted.
-    basic_iterator(basic_iterator &&) = default; //!< Defaulted.
+    basic_iterator() = default;                                   //!< Defaulted.
+    basic_iterator(basic_iterator const &) = default;             //!< Defaulted.
+    basic_iterator(basic_iterator &&) = default;                  //!< Defaulted.
     basic_iterator & operator=(basic_iterator const &) = default; //!< Defaulted.
-    basic_iterator & operator=(basic_iterator &&) = default; //!< Defaulted.
-    ~basic_iterator() = default; //!< Defaulted.
+    basic_iterator & operator=(basic_iterator &&) = default;      //!< Defaulted.
+    ~basic_iterator() = default;                                  //!< Defaulted.
 
     //!\brief Allow iterator on a const range to be constructible from an iterator over a non-const range.
     basic_iterator(basic_iterator<!const_range> const & it)
-    //!\cond
         requires const_range
-    //!\endcond
-        : minimiser_value{std::move(it.minimiser_value)},
-          urng1_iterator{std::move(it.urng1_iterator)},
-          urng1_sentinel{std::move(it.urng1_sentinel)},
-          urng2_iterator{std::move(it.urng2_iterator)},
-          window_values{std::move(it.window_values)}
+        :
+        minimiser_value{std::move(it.minimiser_value)},
+        urng1_iterator{std::move(it.urng1_iterator)},
+        urng1_sentinel{std::move(it.urng1_sentinel)},
+        urng2_iterator{std::move(it.urng2_iterator)},
+        window_values{std::move(it.window_values)}
     {}
 
     /*!\brief Construct from begin and end iterators of a given range over std::totally_ordered values, and the number
@@ -322,9 +309,8 @@ public:
     //!\brief Compare to another basic_iterator.
     friend bool operator==(basic_iterator const & lhs, basic_iterator const & rhs)
     {
-        return (lhs.urng1_iterator == rhs.urng1_iterator) &&
-               (rhs.urng2_iterator == rhs.urng2_iterator) &&
-               (lhs.window_values.size() == rhs.window_values.size());
+        return (lhs.urng1_iterator == rhs.urng1_iterator) && (rhs.urng2_iterator == rhs.urng2_iterator)
+            && (lhs.window_values.size() == rhs.window_values.size());
     }
 
     //!\brief Compare to another basic_iterator.
@@ -411,7 +397,8 @@ private:
     //!\brief Increments iterator by 1.
     void next_unique_minimiser()
     {
-        while (!next_minimiser()) {}
+        while (!next_minimiser())
+        {}
     }
 
     //!\brief Returns new window value.
@@ -444,7 +431,7 @@ private:
         }
         window_values.push_back(window_value());
         auto minimiser_it = std::ranges::min_element(window_values, std::less_equal<value_type>{});
-        minimiser_value = *minimiser_it ;
+        minimiser_value = *minimiser_it;
         minimiser_position_offset = std::distance(std::begin(window_values), minimiser_it);
     }
 
@@ -468,7 +455,7 @@ private:
         if (minimiser_position_offset == 0)
         {
             auto minimiser_it = std::ranges::min_element(window_values, std::less_equal<value_type>{});
-            minimiser_value = *minimiser_it ;
+            minimiser_value = *minimiser_it;
             minimiser_position_offset = std::distance(std::begin(window_values), minimiser_it);
             return true;
         }
@@ -491,8 +478,8 @@ minimiser_view(rng1_t &&, size_t const window_size) -> minimiser_view<std::views
 
 //!\brief A deduction guide for the view class template.
 template <std::ranges::viewable_range rng1_t, std::ranges::viewable_range rng2_t>
-minimiser_view(rng1_t &&, rng2_t &&, size_t const window_size) -> minimiser_view<std::views::all_t<rng1_t>,
-                                                                                        std::views::all_t<rng2_t>>;
+minimiser_view(rng1_t &&, rng2_t &&, size_t const window_size)
+    -> minimiser_view<std::views::all_t<rng1_t>, std::views::all_t<rng2_t>>;
 
 // ---------------------------------------------------------------------------------------------------------------------
 // minimiser_fn (adaptor definition)
@@ -564,7 +551,7 @@ namespace seqan3::views
  * In case there are multiple minimal values within one window, the minimum and therefore the minimiser is ambiguous.
  * We choose the rightmost value as the minimiser of the window, and when shifting the window, the minimiser is only
  * changed if there appears a value that is strictly smaller than the current minimum. This approach is termed
- * *robust winnowing* by [Chirag et al.](https://www.biorxiv.org/content/10.1101/2020.02.11.943241v1.full.pdf)
+ * *robust winnowing* by [Chirag et al.](https://doi.org/10.1093/bioinformatics/btaa435)
  * and is proven to work especially well on repeat regions.
  *
  * ### Example

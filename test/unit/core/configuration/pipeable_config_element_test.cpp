@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -25,7 +25,6 @@ enum struct incompatible_id : uint8_t
 class incompatible_config : private seqan3::pipeable_config_element
 {
 public:
-
     incompatible_config() = default;
     incompatible_config(incompatible_config const &) = default;
     incompatible_config(incompatible_config &&) = default;
@@ -199,7 +198,6 @@ TEST(pipeable_config_element, special_cases)
 
 TEST(pipeable_config_element, multiple_elements)
 {
-    seqan3::configuration<bar> tmp{};
     bax b2{};
     {
         auto cfg = foo{} | bar{} | bax{};

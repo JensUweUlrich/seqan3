@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,8 +12,8 @@
 
 #pragma once
 
-#include <seqan3/std/concepts>
-#include <seqan3/std/ranges>
+#include <concepts>
+#include <ranges>
 
 #include <seqan3/alignment/pairwise/detail/type_traits.hpp>
 #include <seqan3/core/detail/empty_type.hpp>
@@ -41,10 +41,8 @@ namespace seqan3::detail
  * The algorithm computes a column based dynamic programming matrix given two sequences.
  * After the computation a user defined callback function is invoked with the computed seqan3::alignment_result.
  */
-template <typename alignment_configuration_t, typename ...policies_t>
-//!\cond
+template <typename alignment_configuration_t, typename... policies_t>
     requires is_type_specialisation_of_v<alignment_configuration_t, configuration>
-//!\endcond
 class pairwise_alignment_algorithm : protected policies_t...
 {
 protected:
@@ -61,12 +59,12 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    pairwise_alignment_algorithm() = default; //!< Defaulted.
-    pairwise_alignment_algorithm(pairwise_alignment_algorithm const &) = default; //!< Defaulted.
-    pairwise_alignment_algorithm(pairwise_alignment_algorithm &&) = default; //!< Defaulted.
+    pairwise_alignment_algorithm() = default;                                                 //!< Defaulted.
+    pairwise_alignment_algorithm(pairwise_alignment_algorithm const &) = default;             //!< Defaulted.
+    pairwise_alignment_algorithm(pairwise_alignment_algorithm &&) = default;                  //!< Defaulted.
     pairwise_alignment_algorithm & operator=(pairwise_alignment_algorithm const &) = default; //!< Defaulted.
-    pairwise_alignment_algorithm & operator=(pairwise_alignment_algorithm &&) = default; //!< Defaulted.
-    ~pairwise_alignment_algorithm() = default; //!< Defaulted.
+    pairwise_alignment_algorithm & operator=(pairwise_alignment_algorithm &&) = default;      //!< Defaulted.
+    ~pairwise_alignment_algorithm() = default;                                                //!< Defaulted.
 
     /*!\brief Constructs and initialises the algorithm using the alignment configuration.
      * \param config The configuration passed into the algorithm.
@@ -125,9 +123,7 @@ public:
      * |space (alignment)       |\f$ O(n*m) \f$    |\f$ O(n*k) \f$     |
      */
     template <indexed_sequence_pair_range indexed_sequence_pairs_t, typename callback_t>
-    //!\cond
         requires std::invocable<callback_t, alignment_result_type>
-    //!\endcond
     void operator()(indexed_sequence_pairs_t && indexed_sequence_pairs, callback_t && callback)
     {
         using std::get;
@@ -152,9 +148,7 @@ public:
 
     //!\overload
     template <indexed_sequence_pair_range indexed_sequence_pairs_t, typename callback_t>
-    //!\cond
         requires traits_type::is_vectorised && std::invocable<callback_t, alignment_result_type>
-    //!\endcond
     auto operator()(indexed_sequence_pairs_t && indexed_sequence_pairs, callback_t && callback)
     {
         using simd_collection_t = std::vector<score_type, aligned_allocator<score_type, alignof(score_type)>>;
@@ -187,8 +181,8 @@ public:
         size_t index = 0;
         for (auto && [sequence_pair, idx] : indexed_sequence_pairs)
         {
-            original_score_t score = this->optimal_score[index] -
-                                     (this->padding_offsets[index] * this->scoring_scheme.padding_match_score());
+            original_score_t score = this->optimal_score[index]
+                                   - (this->padding_offsets[index] * this->scoring_scheme.padding_match_score());
             matrix_coordinate coordinate{row_index_type{size_t{this->optimal_coordinate.row[index]}},
                                          column_index_type{size_t{this->optimal_coordinate.col[index]}}};
             this->make_result_and_invoke(std::forward<decltype(sequence_pair)>(sequence_pair),
@@ -221,12 +215,8 @@ protected:
      * the collection. For all sequences with a smaller size the padding symbol will be appended during the simd
      * transformation to fill up the remaining size difference.
      */
-    template <typename simd_sequence_t,
-              std::ranges::forward_range sequence_collection_t,
-              arithmetic padding_symbol_t>
-    //!\cond
+    template <typename simd_sequence_t, std::ranges::forward_range sequence_collection_t, arithmetic padding_symbol_t>
         requires std::ranges::output_range<simd_sequence_t, score_type>
-    //!\endcond
     void convert_batch_of_sequences_to_simd_vector(simd_sequence_t & simd_sequence,
                                                    sequence_collection_t & sequences,
                                                    padding_symbol_t const & padding_symbol)
@@ -235,7 +225,7 @@ protected:
 
         simd_sequence.clear();
         for (auto && simd_vector_chunk : sequences | views::to_simd<score_type>(padding_symbol))
-            std::ranges::move(simd_vector_chunk, std::cpp20::back_inserter(simd_sequence));
+            std::ranges::move(simd_vector_chunk, std::back_inserter(simd_sequence));
     }
 
     /*!\brief Compute the actual alignment.
@@ -255,10 +245,8 @@ protected:
               std::ranges::forward_range sequence2_t,
               std::ranges::input_range alignment_matrix_t,
               std::ranges::input_range index_matrix_t>
-    //!\cond
-        requires std::ranges::forward_range<std::ranges::range_reference_t<alignment_matrix_t>> &&
-                 std::ranges::forward_range<std::ranges::range_reference_t<index_matrix_t>>
-    //!\endcond
+        requires std::ranges::forward_range<std::ranges::range_reference_t<alignment_matrix_t>>
+              && std::ranges::forward_range<std::ranges::range_reference_t<index_matrix_t>>
     void compute_matrix(sequence1_t && sequence1,
                         sequence2_t && sequence2,
                         alignment_matrix_t && alignment_matrix,
@@ -343,8 +331,8 @@ protected:
         for ([[maybe_unused]] auto const & unused : sequence2)
         {
             ++first_column_it;
-            *first_column_it = this->track_cell(this->initialise_first_column_cell(*first_column_it),
-                                                *++cell_index_column_it);
+            *first_column_it =
+                this->track_cell(this->initialise_first_column_cell(*first_column_it), *++cell_index_column_it);
         }
 
         // ---------------------------------------------------------------------
@@ -376,9 +364,7 @@ protected:
               std::ranges::input_range cell_index_column_t,
               typename alphabet1_t,
               std::ranges::input_range sequence2_t>
-    //!\cond
         requires semialphabet<alphabet1_t> || simd_concept<alphabet1_t>
-    //!\endcond
     void compute_column(alignment_column_t && alignment_column,
                         cell_index_column_t && cell_index_column,
                         alphabet1_t const & alphabet1,

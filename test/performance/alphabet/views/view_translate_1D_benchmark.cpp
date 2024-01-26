@@ -1,30 +1,32 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
+#include <benchmark/benchmark.h>
+
 #include <random>
 #include <vector>
-
-#include <benchmark/benchmark.h>
 
 #include <seqan3/alphabet/nucleotide/dna4.hpp>
 #include <seqan3/alphabet/views/translate.hpp>
 #include <seqan3/test/performance/sequence_generator.hpp>
 #include <seqan3/test/seqan2.hpp>
-#include <seqan3/utility/views/to.hpp>
+#include <seqan3/utility/range/to.hpp>
 
 #ifdef SEQAN3_HAS_SEQAN2
-#include <seqan/sequence.h>
-#include <seqan/seq_io.h>
-#include <seqan/translation.h>
+#    include <seqan/seq_io.h>
+#    include <seqan/sequence.h>
+#    include <seqan/translation.h>
 #endif
 
 // Tags used to define the benchmark type
-struct baseline_tag{}; // Baseline where view is applied and only iterating the output range is benchmarked
-struct translate_tag{}; // Benchmark seqan3::views::translate_single
+struct baseline_tag
+{}; // Baseline where view is applied and only iterating the output range is benchmarked
+struct translate_tag
+{}; // Benchmark seqan3::views::translate_single
 
 // ============================================================================
 //  sequential_read
@@ -34,8 +36,13 @@ template <typename rng_t>
 void sequential_read_impl(benchmark::State & state, rng_t && rng)
 {
     for (auto _ : state)
+    {
         for (seqan3::aa27 c : rng)
-            benchmark::DoNotOptimize(c.to_rank());
+        {
+            auto rank = c.to_rank();
+            benchmark::DoNotOptimize(rank);
+        }
+    }
 }
 
 template <typename tag_t>
@@ -45,8 +52,8 @@ void sequential_read(benchmark::State & state)
 
     if constexpr (std::is_same_v<tag_t, baseline_tag>)
     {
-        seqan3::aa27_vector translated_aa_sequence = dna_sequence | seqan3::views::translate_single
-                                                                  | seqan3::views::to<seqan3::aa27_vector>;
+        seqan3::aa27_vector translated_aa_sequence =
+            dna_sequence | seqan3::views::translate_single | seqan3::ranges::to<seqan3::aa27_vector>();
         sequential_read_impl(state, translated_aa_sequence);
     }
     else if constexpr (std::is_same_v<tag_t, translate_tag>)
@@ -67,8 +74,13 @@ template <typename rng_t>
 void random_access_impl(benchmark::State & state, rng_t && rng, std::vector<size_t> const & access_positions)
 {
     for (auto _ : state)
+    {
         for (auto pos : access_positions)
-            benchmark::DoNotOptimize(rng[pos].to_rank());
+        {
+            auto access = rng[pos].to_rank();
+            benchmark::DoNotOptimize(access);
+        }
+    }
 }
 
 template <typename tag_t>
@@ -86,8 +98,8 @@ void random_access(benchmark::State & state)
 
     if constexpr (std::is_same_v<tag_t, baseline_tag>)
     {
-        seqan3::aa27_vector translated_aa_sequence = dna_sequence | seqan3::views::translate_single
-                                                                  | seqan3::views::to<seqan3::aa27_vector>;
+        seqan3::aa27_vector translated_aa_sequence =
+            dna_sequence | seqan3::views::translate_single | seqan3::ranges::to<seqan3::aa27_vector>();
         random_access_impl(state, translated_aa_sequence, access_positions);
     }
     else
@@ -110,19 +122,19 @@ void copy_impl(benchmark::State & state, std::vector<seqan3::dna4> const & dna_s
     for (auto _ : state)
     {
         seqan3::aa27_vector translated_aa_sequence{};
-        benchmark::DoNotOptimize(translated_aa_sequence = dna_sequence | adaptor
-                                                                       | seqan3::views::to<seqan3::aa27_vector>);
+        benchmark::DoNotOptimize(translated_aa_sequence =
+                                     dna_sequence | adaptor | seqan3::ranges::to<seqan3::aa27_vector>());
     }
 }
 
 #ifdef SEQAN3_HAS_SEQAN2
 template <typename tag_t>
-void copy_impl_seqan2(benchmark::State & state, seqan::DnaString const & dna_sequence)
+void copy_impl_seqan2(benchmark::State & state, seqan2::DnaString const & dna_sequence)
 {
     for (auto _ : state)
     {
-        seqan::String<seqan::AminoAcid> out{};
-        seqan::translate(out, dna_sequence, seqan::SINGLE_FRAME, seqan::CANONICAL, tag_t{});
+        seqan2::String<seqan2::AminoAcid> out{};
+        seqan2::translate(out, dna_sequence, seqan2::SINGLE_FRAME, seqan2::CANONICAL, tag_t{});
     }
 }
 #endif // SEQAN3_HAS_SEQAN2
@@ -133,7 +145,7 @@ void copy(benchmark::State & state)
     std::vector<seqan3::dna4> seqan3_dna_sequence{seqan3::test::generate_sequence<seqan3::dna4>(1000, 0, 0)};
 
 #ifdef SEQAN3_HAS_SEQAN2
-    seqan::DnaString seqan2_dna_sequence{seqan3::test::generate_sequence_seqan2<seqan::Dna>(1000, 0, 0)};
+    seqan2::DnaString seqan2_dna_sequence{seqan3::test::generate_sequence_seqan2<seqan2::Dna>(1000, 0, 0)};
 #endif // SEQAN3_HAS_SEQAN2
 
     if constexpr (std::is_same_v<tag_t, translate_tag>)
@@ -152,8 +164,8 @@ void copy(benchmark::State & state)
 BENCHMARK_TEMPLATE(copy, translate_tag);
 
 #ifdef SEQAN3_HAS_SEQAN2
-BENCHMARK_TEMPLATE(copy, seqan::Serial);
-BENCHMARK_TEMPLATE(copy, seqan::Parallel);
+BENCHMARK_TEMPLATE(copy, seqan2::Serial);
+BENCHMARK_TEMPLATE(copy, seqan2::Parallel);
 #endif // SEQAN3_HAS_SEQAN2
 
 // ============================================================================

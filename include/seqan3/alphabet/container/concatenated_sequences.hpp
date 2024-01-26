@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,8 +12,8 @@
 
 #pragma once
 
-#include <seqan3/std/iterator>
-#include <seqan3/std/ranges>
+#include <iterator>
+#include <ranges>
 #include <type_traits>
 #include <vector>
 
@@ -23,119 +23,16 @@
 #include <seqan3/utility/views/slice.hpp>
 
 #if SEQAN3_WITH_CEREAL
-#include <cereal/types/vector.hpp>
+#    include <cereal/types/vector.hpp>
 #endif
-
-namespace seqan3::detail
-{
-
-//!\brief Function object for seqan3::detail::as_const.
-//!\ingroup alphabet_container
-struct as_const_fn
-{
-    //!\brief Operator that returns rvalues as rvalues.
-    template <typename t>
-    t operator()(t const && arg) const
-    {
-        return std::move(arg);
-    }
-
-    //!\brief Operator that returns lvalue references as lvalue-to-const-references.
-    template <typename t>
-    t const & operator()(t const & arg) const
-    {
-        return arg;
-    }
-};
-
-/*!\brief               A view that provides only `const &` to elements of the underlying range.
- * \tparam urng_t       The type of the range being processed. See below for requirements. [template parameter is
- *                      omitted in pipe notation]
- * \param[in] urange    The range being processed. [parameter is omitted in pipe notation]
- * \returns             A range of `const`-protected elements.
- * \ingroup alphabet_container
- *
- * \details
- *
- * \header_file{seqan3/alphabet/container/concatenated_sequences.hpp}
- *
- * ### View properties
- *
- *
- * | Concepts and traits              | `urng_t` (underlying range type)      | `rrng_t` (returned range type)                     |
- * |----------------------------------|:-------------------------------------:|:--------------------------------------------------:|
- * | std::ranges::input_range         | *required*                            | *preserved*                                        |
- * | std::ranges::forward_range       |                                       | *preserved*                                        |
- * | std::ranges::bidirectional_range |                                       | *preserved*                                        |
- * | std::ranges::random_access_range |                                       | *preserved*                                        |
- * | std::ranges::contiguous_range    |                                       | *preserved*                                        |
- * |                                  |                                       |                                                    |
- * | std::ranges::viewable_range      | *required*                            | *guaranteed*                                       |
- * | std::ranges::view                |                                       | *guaranteed*                                       |
- * | std::ranges::sized_range         |                                       | *preserved*                                        |
- * | std::ranges::common_range        |                                       | *preserved*                                        |
- * | std::ranges::output_range        |                                       | *lost*                                             |
- * | seqan3::const_iterable_range     |                                       | *preserved*                                        |
- * | std::semiregular                 |                                       | *preserved*                                        |
- * |                                  |                                       |                                                    |
- * | std::ranges::range_reference_t   |                                       | `t &` -> `t const &` but `t` -> `t`                |
- *
- * See the \link views views submodule documentation \endlink for detailed descriptions of the view properties.
- *
- * \hideinitializer
- */
-inline constexpr auto as_const = std::views::transform(seqan3::detail::as_const_fn{});
-
-/*!\brief The reference type of seqan3::concatenated_sequences.
- * \ingroup alphabet_container
- * \tparam value_type The value_type of the seqan3::concatenated_sequences.
- * \tparam is_const_ref Reference type or const reference type.
- *
- * \details
- *
- * A light-weight type that inherits from the returned type of the seqan3::views::slice adaptor (std::span, std::ranges::subrange, ...),
- * but additionally provides implicit convertibility to the `value_type`. This is needed so that `value_type` and
- * `reference` type of seqan3::concatenated_sequences satisfy std::common_reference_with.
- *
- * The const version of this type additionally ensures deep constness to maintain container-like behaviour.
- */
-template <typename value_type, bool const_>
-struct concatenated_sequences_reference_proxy :
-    public std::conditional_t<const_,
-                              decltype(std::declval<value_type const &>() | detail::as_const | views::slice(0,1)),
-                              decltype(std::declval<value_type &>() | views::slice(0,1))>
-{
-    //!\brief The base type.
-    using base_t =
-        std::conditional_t<const_,
-                           decltype(std::declval<value_type const &>() | detail::as_const | views::slice(0,1)),
-                           decltype(std::declval<value_type &>() | views::slice(0,1))>;
-
-    //!\brief Inherit the base type's constructors.
-    using base_t::base_t;
-
-    //!\brief Construct from base type.
-    concatenated_sequences_reference_proxy(base_t && rhs) : base_t{std::move(rhs)} {}
-
-    //!\brief Implicitly convert to the `value_type` of seqan3::concatenated_sequences.
-    operator value_type() const
-    {
-        value_type ret;
-        ret.resize(std::ranges::size(*this));
-        std::ranges::copy(*this, std::ranges::begin(ret));
-        return ret;
-    }
-};
-
-} // namespace seqan3::detail
 
 namespace seqan3
 {
 
 /*!\brief Container that stores sequences concatenated internally.
- * \tparam inner_type The type of sequences that will be stored. Must satisfy seqan3::reservible_container.
- * \tparam data_delimiters_type A container that stores the begin/end positions in the inner_type. Must be
- * seqan3::reservible_container and have inner_type's size_type as value_type.
+ * \tparam underlying_container_type Type of the underlying container. Must satisfy seqan3::reservible_container.
+ * \tparam data_delimiters_type A container that stores the begin/end positions in the underlying_container_type. Must
+ * satifsy seqan3::reservible_container and have underlying_container_type's size_type as value_type.
  * \implements seqan3::cerealisable
  * \implements seqan3::reservible_container
  * \ingroup alphabet_container
@@ -145,7 +42,7 @@ namespace seqan3
  * the `StringSet<TString, Owner<ConcatDirect>>` from SeqAn2.
  *
  * It saves all of the member sequences inside one concatenated sequence internally. If you access an element,
- * you instead get a view on the internal string as a proxy. This has the following
+ * you instead get a view on the internal string. This has the following
  * advantages:
  *
  * * Better cache locality when parsing the sequences linearly (and often also on random access).
@@ -160,6 +57,10 @@ namespace seqan3
  * * Modifying elements is limited to operations on elements of that element, i.e. you can change a character,
  * but you can't assign a new member sequence to an existing position.
  *
+ * Note that the "value type" of `seqan3::concatenated_sequences<T>` is **not** `T`. It is a view –– typically
+ * a std::span or a std::string_view. This view becomes invalid when the container is destroyed or any
+ * operation is performed on the container that invalidates its iterators, e.g. #push_back().
+ *
  * ### Example
  *
  * \include test/snippet/alphabet/container/concatenated_sequences.cpp
@@ -167,8 +68,8 @@ namespace seqan3
  * ### Exceptions
  *
  * Whenever a strong exception guarantee is given for this class, it presumes that
- * `std::is_nothrow_move_constructible<typename inner_type::value_type>` otherwise only basic exception safety can
- * be assumed.
+ * `std::is_nothrow_move_constructible<typename underlying_container_type::value_type>` otherwise only basic exception
+ * safety can be assumed.
  *
  * ### Thread safety
  *
@@ -178,19 +79,18 @@ namespace seqan3
  *
  * \experimentalapi{Experimental since version 3.1.}
  */
-template <typename inner_type,
-          typename data_delimiters_type = std::vector<typename inner_type::size_type>>
-//!\cond
-    requires reservible_container<std::remove_reference_t<inner_type>> &&
-             reservible_container<std::remove_reference_t<data_delimiters_type>> &&
-             std::is_same_v<std::ranges::range_size_t<inner_type>, std::ranges::range_value_t<data_delimiters_type>>
-//!\endcond
+template <typename underlying_container_type,
+          typename data_delimiters_type = std::vector<typename underlying_container_type::size_type>>
+    requires reservible_container<std::remove_reference_t<underlying_container_type>>
+          && reservible_container<std::remove_reference_t<data_delimiters_type>>
+          && std::is_same_v<std::ranges::range_size_t<underlying_container_type>,
+                            std::ranges::range_value_t<data_delimiters_type>>
 class concatenated_sequences
 {
 protected:
     //!\privatesection
     //!\brief Where the concatenation is stored.
-    std::decay_t<inner_type> data_values;
+    std::decay_t<underlying_container_type> data_values;
     //!\brief Where the delimiters are stored; begins with 0, has size of size() + 1.
     data_delimiters_type data_delimiters{0};
 
@@ -200,26 +100,27 @@ public:
      * \{
      */
 
-    /*!\brief == inner_type.
+    /*!\brief A views::slice that represents "one element", typically a std::span.
      * \hideinitializer
      * \details
      * \experimentalapi{Experimental since version 3.1.}
      */
-    using value_type = std::decay_t<inner_type>;
+    using value_type = decltype(std::declval<std::decay_t<underlying_container_type> &>() | views::slice(0, 1));
 
-    /*!\brief A proxy of type views::slice that represents the range on the concatenated vector.
+    /*!\brief A views::slice that represents "one element", typically a std::span.
      * \hideinitializer
      * \details
      * \experimentalapi{Experimental since version 3.1.}
      */
-    using reference = detail::concatenated_sequences_reference_proxy<value_type, false>;
+    using reference = value_type;
 
-    /*!\brief An immutable proxy of type views::slice that represents the range on the concatenated vector.
+    /*!\brief An immutable views::slice that represents "one element", typically a std::span or std::string_view.
      * \hideinitializer
      * \details
      * \experimentalapi{Experimental since version 3.1.}
      */
-    using const_reference = detail::concatenated_sequences_reference_proxy<value_type, true>;
+    using const_reference =
+        decltype(std::declval<std::decay_t<underlying_container_type> const &>() | views::slice(0, 1));
 
     /*!\brief The iterator type of this container (a random access iterator).
      * \hideinitializer
@@ -250,11 +151,6 @@ public:
     using size_type = std::ranges::range_size_t<data_delimiters_type>;
     //!\}
 
-    //!\cond
-    // this signals to range-v3 that something is a container :|
-    using allocator_type    = void;
-    //!\endcond
-
 protected:
     /*!\name Compatibility
      * \brief Static constexpr variables that emulate whether the ranges are compatible
@@ -266,8 +162,8 @@ protected:
     template <std::ranges::range t>
     static constexpr bool is_compatible_with_value_type_aux(std::type_identity<t>)
     {
-        return range_dimension_v<t> == range_dimension_v<value_type> &&
-               std::convertible_to<std::ranges::range_reference_t<t>, std::ranges::range_value_t<value_type>>;
+        return range_dimension_v<t> == range_dimension_v<value_type>
+            && std::convertible_to<std::ranges::range_reference_t<t>, std::ranges::range_value_t<value_type>>;
     }
 
     static constexpr bool is_compatible_with_value_type_aux(...)
@@ -292,9 +188,7 @@ protected:
      */
     // cannot use the concept, because this class is not yet fully defined
     template <typename t>
-    //!\cond
         requires is_compatible_with_value_type<std::iter_reference_t<t>>
-    //!\endcond
     static constexpr bool iter_value_t_is_compatible_with_value_type = true;
 
     /*!\brief Whether a type is compatible with this class.
@@ -304,9 +198,7 @@ protected:
      */
     // cannot use the concept, because this class is not yet fully defined
     template <std::ranges::range t>
-    //!\cond
         requires is_compatible_with_value_type<std::ranges::range_reference_t<t>>
-    //!\endcond
     static constexpr bool range_value_t_is_compatible_with_value_type = true;
     //!\}
 
@@ -344,9 +236,7 @@ public:
      */
     template <std::ranges::input_range rng_of_rng_type>
     concatenated_sequences(rng_of_rng_type && rng_of_rng)
-    //!\cond
         requires range_value_t_is_compatible_with_value_type<rng_of_rng_type>
-    //!\endcond
     {
         if constexpr (std::ranges::sized_range<rng_of_rng_type>)
             data_delimiters.reserve(std::ranges::size(rng_of_rng) + 1);
@@ -375,9 +265,7 @@ public:
      */
     template <std::ranges::forward_range rng_type>
     concatenated_sequences(size_type const count, rng_type && value)
-    //!\cond
         requires is_compatible_with_value_type<rng_type>
-    //!\endcond
     {
         // TODO SEQAN_UNLIKELY
         if (count == 0)
@@ -405,10 +293,8 @@ public:
      */
     template <std::forward_iterator begin_iterator_type, typename end_iterator_type>
     concatenated_sequences(begin_iterator_type begin_it, end_iterator_type end_it)
-    //!\cond
-        requires std::sized_sentinel_for<end_iterator_type, begin_iterator_type> &&
-                 iter_value_t_is_compatible_with_value_type<begin_iterator_type>
-    //!\endcond
+        requires std::sized_sentinel_for<end_iterator_type, begin_iterator_type>
+              && iter_value_t_is_compatible_with_value_type<begin_iterator_type>
     {
         insert(cend(), begin_it, end_it);
     }
@@ -428,9 +314,7 @@ public:
      * \experimentalapi{Experimental since version 3.1.}
      */
     template <std::ranges::forward_range value_type_t = value_type>
-    //!\cond
         requires is_compatible_with_value_type<value_type_t>
-    //!\endcond
     concatenated_sequences(std::initializer_list<value_type_t> ilist)
     {
         assign(std::begin(ilist), std::end(ilist));
@@ -452,9 +336,7 @@ public:
      */
     template <std::ranges::forward_range value_type_t>
     concatenated_sequences & operator=(std::initializer_list<value_type_t> ilist)
-    //!\cond
         requires is_compatible_with_value_type<value_type_t>
-    //!\endcond
     {
         assign(std::begin(ilist), std::end(ilist));
         return *this;
@@ -477,9 +359,7 @@ public:
      */
     template <std::ranges::input_range rng_of_rng_type>
     void assign(rng_of_rng_type && rng_of_rng)
-    //!\cond
         requires range_value_t_is_compatible_with_value_type<rng_of_rng_type>
-    //!\endcond
     {
         concatenated_sequences rhs{std::forward<rng_of_rng_type>(rng_of_rng)};
         swap(rhs);
@@ -502,9 +382,7 @@ public:
      */
     template <std::ranges::forward_range rng_type>
     void assign(size_type const count, rng_type && value)
-    //!\cond
         requires (is_compatible_with_value_type<rng_type>)
-    //!\endcond
     {
         concatenated_sequences rhs{count, value};
         swap(rhs);
@@ -529,10 +407,8 @@ public:
      */
     template <std::forward_iterator begin_iterator_type, typename end_iterator_type>
     void assign(begin_iterator_type begin_it, end_iterator_type end_it)
-    //!\cond
-        requires iter_value_t_is_compatible_with_value_type<begin_iterator_type> &&
-                 std::sized_sentinel_for<end_iterator_type, begin_iterator_type>
-    //!\endcond
+        requires iter_value_t_is_compatible_with_value_type<begin_iterator_type>
+              && std::sized_sentinel_for<end_iterator_type, begin_iterator_type>
     {
         concatenated_sequences rhs{begin_it, end_it};
         swap(rhs);
@@ -554,9 +430,7 @@ public:
      */
     template <std::ranges::forward_range rng_type = value_type>
     void assign(std::initializer_list<rng_type> ilist)
-    //!\cond
         requires is_compatible_with_value_type<rng_type>
-    //!\endcond
     {
         assign(std::begin(ilist), std::end(ilist));
     }
@@ -685,14 +559,14 @@ public:
     reference operator[](size_type const i)
     {
         assert(i < size());
-        return data_values | views::slice(data_delimiters[i], data_delimiters[i+1]);
+        return data_values | views::slice(data_delimiters[i], data_delimiters[i + 1]);
     }
 
     //!\copydoc operator[]()
     const_reference operator[](size_type const i) const
     {
         assert(i < size());
-        return data_values | detail::as_const | views::slice(data_delimiters[i], data_delimiters[i+1]);
+        return data_values | views::slice(data_delimiters[i], data_delimiters[i + 1]);
     }
 
     /*!\brief Return the first element as a view. Calling front on an empty container is undefined.
@@ -739,14 +613,14 @@ public:
     reference back()
     {
         assert(size() > 0);
-        return (*this)[size()-1];
+        return (*this)[size() - 1];
     }
 
     //!\copydoc back()
     const_reference back() const
     {
         assert(size() > 0);
-        return (*this)[size()-1];
+        return (*this)[size() - 1];
     }
 
     /*!\brief Return the concatenation of all members.
@@ -773,7 +647,7 @@ public:
     //!\copydoc concat()
     const_reference concat() const
     {
-        return data_values | detail::as_const | views::slice(static_cast<size_type>(0), concat_size());
+        return data_values | views::slice(static_cast<size_type>(0), concat_size());
     }
 
     /*!\brief Provides direct, unsafe access to underlying data structures.
@@ -791,7 +665,7 @@ public:
     //!\copydoc raw_data()
     std::pair<decltype(data_values) const &, decltype(data_delimiters) const &> raw_data() const
     {
-        return {std::as_const(data_values), std::as_const(data_delimiters)};
+        return {data_values, data_delimiters};
     }
 
     //!\}
@@ -996,7 +870,6 @@ public:
     }
     //!\}
 
-
     /*!\name Modifiers
      * \{
      */
@@ -1047,9 +920,7 @@ public:
      */
     template <std::ranges::forward_range rng_type>
     iterator insert(const_iterator pos, rng_type && value)
-    //!\cond
         requires is_compatible_with_value_type<rng_type>
-    //!\endcond
     {
         return insert(pos, 1, std::forward<rng_type>(value));
     }
@@ -1083,9 +954,7 @@ public:
      */
     template <std::ranges::forward_range rng_type>
     iterator insert(const_iterator pos, size_type const count, rng_type && value)
-    //!\cond
         requires is_compatible_with_value_type<rng_type>
-    //!\endcond
     {
         auto const pos_as_num = std::distance(cbegin(), pos); // we want to insert BEFORE this position
         // TODO SEQAN_UNLIKELY
@@ -1108,8 +977,8 @@ public:
             value_len = std::distance(std::ranges::begin(value), std::ranges::end(value));
 
         data_values.reserve(data_values.size() + count * value_len);
-        auto placeholder = views::repeat_n(std::ranges::range_value_t<rng_type>{}, count * value_len)
-                         | std::views::common;
+        auto placeholder =
+            views::repeat_n(std::ranges::range_value_t<rng_type>{}, count * value_len) | std::views::common;
         // insert placeholder so the tail is moved once:
         data_values.insert(data_values.begin() + data_delimiters[pos_as_num],
                            std::ranges::begin(placeholder),
@@ -1122,9 +991,7 @@ public:
                 data_values[i++] = v;
 
         data_delimiters.reserve(data_values.size() + count);
-        data_delimiters.insert(data_delimiters.begin() + pos_as_num,
-                               count,
-                               *(data_delimiters.begin() + pos_as_num));
+        data_delimiters.insert(data_delimiters.begin() + pos_as_num, count, *(data_delimiters.begin() + pos_as_num));
 
         // adapt delimiters of inserted
         for (size_type i = 0; i < count; ++i)
@@ -1134,7 +1001,10 @@ public:
         // TODO parallel execution policy or vectorization?
         std::for_each(data_delimiters.begin() + pos_as_num + count + 1,
                       data_delimiters.end(),
-                      [full_len = value_len * count] (auto & d) { d += full_len; });
+                      [full_len = value_len * count](auto & d)
+                      {
+                          d += full_len;
+                      });
 
         return begin() + pos_as_num;
     }
@@ -1167,10 +1037,8 @@ public:
      */
     template <std::forward_iterator begin_iterator_type, typename end_iterator_type>
     iterator insert(const_iterator pos, begin_iterator_type first, end_iterator_type last)
-    //!\cond
-        requires iter_value_t_is_compatible_with_value_type<begin_iterator_type> &&
-                 std::sized_sentinel_for<end_iterator_type, begin_iterator_type>
-    //!\endcond
+        requires iter_value_t_is_compatible_with_value_type<begin_iterator_type>
+              && std::sized_sentinel_for<end_iterator_type, begin_iterator_type>
     {
         auto const pos_as_num = std::distance(cbegin(), pos);
         // TODO SEQAN_UNLIKELY
@@ -1187,7 +1055,6 @@ public:
                                ilist.size(),
                                *(data_delimiters.begin() + pos_as_num));
 
-
         // adapt delimiters of inserted region
         size_type full_len = 0;
         for (size_type i = 0; i < ilist.size(); ++i, ++first)
@@ -1197,8 +1064,7 @@ public:
         }
 
         // adapt values of inserted region
-        auto placeholder = views::repeat_n(std::ranges::range_value_t<value_type>{}, full_len)
-                         | std::views::common;
+        auto placeholder = views::repeat_n(std::ranges::range_value_t<value_type>{}, full_len) | std::views::common;
         // insert placeholder so the tail is moved only once:
         data_values.insert(data_values.begin() + data_delimiters[pos_as_num],
                            std::ranges::begin(placeholder),
@@ -1210,12 +1076,14 @@ public:
             for (auto && v1 : v0)
                 data_values[i++] = v1;
 
-
         // adapt delimiters behind inserted region
         // TODO parallel execution policy or vectorization?
         std::for_each(data_delimiters.begin() + pos_as_num + ilist.size() + 1,
                       data_delimiters.end(),
-                      [full_len] (auto & d) { d += full_len; });
+                      [full_len](auto & d)
+                      {
+                          d += full_len;
+                      });
 
         return begin() + pos_as_num;
     }
@@ -1243,9 +1111,7 @@ public:
      */
     template <std::ranges::forward_range rng_type>
     iterator insert(const_iterator pos, std::initializer_list<rng_type> const & ilist)
-    //!\cond
         requires is_compatible_with_value_type<rng_type>
-    //!\endcond
     {
         return insert(pos, ilist.begin(), ilist.end());
     }
@@ -1284,17 +1150,18 @@ public:
         for (; first != last; ++first)
             sum_size += std::ranges::size(*first);
 
-        data_values.erase(data_values.begin() + data_delimiters[distf],
-                          data_values.begin() + data_delimiters[dist]);
+        data_values.erase(data_values.begin() + data_delimiters[distf], data_values.begin() + data_delimiters[dist]);
 
-        data_delimiters.erase(data_delimiters.begin() + distf + 1,
-                              data_delimiters.begin() + dist + 1);
+        data_delimiters.erase(data_delimiters.begin() + distf + 1, data_delimiters.begin() + dist + 1);
 
         // adapt delimiters after that
         // TODO parallel execution policy or vectorization?
         std::for_each(data_delimiters.begin() + distf + 1,
                       data_delimiters.end(),
-                      [sum_size] (auto & d) { d -= sum_size; });
+                      [sum_size](auto & d)
+                      {
+                          d -= sum_size;
+                      });
         return begin() + dist;
     }
 
@@ -1320,15 +1187,18 @@ public:
      */
     iterator erase(const_iterator pos)
     {
-       return erase(pos, pos + 1);
+        return erase(pos, pos + 1);
     }
 
     /*!\brief Appends the given element value to the end of the container.
      * \tparam rng_type The type of range to be inserted; must satisfy \ref is_compatible_with_value_type.
      * \param value The value to append.
      *
-     * If the new size() is greater than capacity() then all iterators and references (including the past-the-end
-     * iterator) are invalidated. Otherwise only the past-the-end iterator is invalidated.
+     * This conceptionally adds another element to the container with the specified content,
+     * i.e. the "outer container" grows by 1.
+     *
+     * If the new concat_size() is greater than concat_capacity(), all iterators and references (including the
+     * past-the-end iterator) are invalidated. Otherwise, only the past-the-end iterator is invalidated.
      *
      * ### Complexity
      *
@@ -1343,12 +1213,88 @@ public:
      */
     template <std::ranges::forward_range rng_type>
     void push_back(rng_type && value)
-    //!\cond
         requires is_compatible_with_value_type<rng_type>
-    //!\endcond
     {
         data_values.insert(data_values.end(), std::ranges::begin(value), std::ranges::end(value));
         data_delimiters.push_back(data_delimiters.back() + std::ranges::size(value));
+    }
+
+    /*!\brief Appends an empty element to the end of the container.
+     *
+     * This conceptionally adds an empty element to the container,
+     * i.e. the "outer container" grows by 1 and the new back() will be empty.
+     *
+     * No iterators are invalidated.
+     *
+     * ### Complexity
+     *
+     * Amortised constant. Wort-case linear in size().
+     *
+     * ### Exceptions
+     *
+     * Basic exception guarantee, i.e. guaranteed not to leak. However, the container may contain invalid data after
+     * an exception is thrown.
+     *
+     * \experimentalapi{Experimental since version 3.1.}
+     */
+    void push_back()
+    {
+        data_delimiters.push_back(data_delimiters.back());
+    }
+
+    /*!\brief Appends the given element-of-element value to the end of the underlying container.
+     * \param value The value to append.
+     *
+     * This conceptionally performs a `push_back()` on the `back()` of this container,
+     * i.e. that last inner container grows by 1.
+     *
+     * If the new concat_size() is greater than concat_capacity(), all iterators and references (including the
+     * past-the-end iterator) are invalidated. Otherwise, only the past-the-end iterator is invalidated.
+     *
+     * ### Complexity
+     *
+     * Amortised constant. Wort-case linear in concat_size().
+     *
+     * ### Exceptions
+     *
+     * Basic exception guarantee, i.e. guaranteed not to leak. However, the container may contain invalid data after
+     * an exception is thrown.
+     *
+     * \experimentalapi{Experimental since version 3.1.}
+     */
+    void last_push_back(std::ranges::range_value_t<underlying_container_type> const value)
+    {
+        data_values.push_back(value);
+        ++data_delimiters.back();
+    }
+
+    /*!\brief Appends the given elements to the end of the underlying container (increases size of last element by n).
+     * \tparam rng_type The type of range to be inserted; must satisfy \ref is_compatible_with_value_type.
+     * \param value The value to append.
+     *
+     * This conceptionally performs an `insert()` on the `back()` of this container,
+     * i.e. the last inner container grows by value.size().
+     *
+     * If the new concat_size() is greater than concat_capacity(), all iterators and references (including the
+     * past-the-end iterator) are invalidated. Otherwise, only the past-the-end iterator is invalidated.
+     *
+     * ### Complexity
+     *
+     * Amortised linear in the size of value. Wort-case linear in concat_size().
+     *
+     * ### Exceptions
+     *
+     * Basic exception guarantee, i.e. guaranteed not to leak. However, the container may contain invalid data after
+     * an exception is thrown.
+     *
+     * \experimentalapi{Experimental since version 3.1.}
+     */
+    template <std::ranges::forward_range rng_type>
+    void last_append(rng_type && value)
+        requires is_compatible_with_value_type<rng_type>
+    {
+        data_values.insert(data_values.end(), std::ranges::begin(value), std::ranges::end(value));
+        data_delimiters.back() += std::ranges::size(value);
     }
 
     /*!\brief Removes the last element of the container.
@@ -1419,9 +1365,7 @@ public:
      */
     template <std::ranges::forward_range rng_type>
     void resize(size_type const count, rng_type && value)
-    //!\cond
         requires is_compatible_with_value_type<rng_type>
-    //!\endcond
     {
         assert(count < max_size());
         assert(concat_size() + count * std::ranges::size(value) < data_values.max_size());

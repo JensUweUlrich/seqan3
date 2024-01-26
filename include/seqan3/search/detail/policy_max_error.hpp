@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include <seqan3/std/ranges>
+#include <ranges>
 
 #include <seqan3/search/detail/search_common.hpp>
 #include <seqan3/search/detail/search_traits.hpp>
@@ -43,12 +43,12 @@ protected:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    policy_max_error() = default; //!< Defaulted.
-    policy_max_error(policy_max_error const &) = default; //!< Defaulted.
-    policy_max_error(policy_max_error &&) = default; //!< Defaulted.
+    policy_max_error() = default;                                     //!< Defaulted.
+    policy_max_error(policy_max_error const &) = default;             //!< Defaulted.
+    policy_max_error(policy_max_error &&) = default;                  //!< Defaulted.
     policy_max_error & operator=(policy_max_error const &) = default; //!< Defaulted.
-    policy_max_error & operator=(policy_max_error &&) = default; //!< Defaulted.
-    ~policy_max_error() = default; //!< Defaulted.
+    policy_max_error & operator=(policy_max_error &&) = default;      //!< Defaulted.
+    ~policy_max_error() = default;                                    //!< Defaulted.
 
     /*!\brief Initialises the policy with the given configuration.
      *
@@ -60,9 +60,7 @@ protected:
      * Initialises the maximal errors for the respective edit operations from the given configuration.
      */
     template <typename configuration_t>
-    //!\cond
         requires is_type_specialisation_of_v<configuration_t, seqan3::configuration>
-    //!\endcond
     explicit policy_max_error(configuration_t const & config)
     {
         using search_traits_t = search_traits<configuration_t>;
@@ -132,9 +130,10 @@ private:
      * based on the length of the query sequence.
      */
     uint8_t to_error_count(std::variant<search_cfg::error_count, search_cfg::error_rate> const & error_variant,
-                            [[maybe_unused]] size_t const query_size)
+                           [[maybe_unused]] size_t const query_size)
     {
-        return std::visit([&query_size] (auto error)
+        return std::visit(
+            [&query_size](auto error)
             {
                 if constexpr (std::same_as<decltype(error), search_cfg::error_count>)
                     return error.get();
@@ -148,7 +147,8 @@ private:
                     uint8_t const calculated_error_count = std::clamp(error.get() * query_size, 0.0, 255.0);
                     return calculated_error_count;
                 }
-            }, error_variant);
+            },
+            error_variant);
     }
 };
 

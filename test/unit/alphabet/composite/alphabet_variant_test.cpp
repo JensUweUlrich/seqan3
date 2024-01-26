@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -44,39 +44,39 @@ TYPED_TEST_SUITE(alphabet_variant_test, alphabet_variant_types, );
 
 TEST(alphabet_variant_test, initialise_from_component_alphabet)
 {
-    seqan3::dna5 l('A'_rna5);
+    [[maybe_unused]] seqan3::dna5 l('A'_rna5);
 
     using alphabet_t = seqan3::alphabet_variant<seqan3::dna4, seqan3::dna5, seqan3::gap>;
     using variant_t = std::variant<seqan3::dna4, seqan3::dna5, seqan3::gap>;
 
-    constexpr variant_t variant0{'A'_dna4};
+    [[maybe_unused]] constexpr variant_t variant0{'A'_dna4};
     constexpr alphabet_t letter0{'A'_dna4};
 
-    constexpr variant_t variant1 = 'C'_dna4;
+    [[maybe_unused]] constexpr variant_t variant1 = 'C'_dna4;
     constexpr alphabet_t letter1 = 'C'_dna4;
 
-    constexpr variant_t variant2 = {'G'_dna4};
+    [[maybe_unused]] constexpr variant_t variant2 = {'G'_dna4};
     constexpr alphabet_t letter2 = {'G'_dna4};
 
-    constexpr variant_t variant3 = static_cast<variant_t>('T'_dna4);
+    [[maybe_unused]] constexpr variant_t variant3 = static_cast<variant_t>('T'_dna4);
     constexpr alphabet_t letter3 = static_cast<alphabet_t>('T'_dna4);
 
-    constexpr variant_t variant4 = {static_cast<variant_t>('A'_dna5)};
+    [[maybe_unused]] constexpr variant_t variant4 = {static_cast<variant_t>('A'_dna5)};
     constexpr alphabet_t letter4 = {static_cast<alphabet_t>('A'_dna5)};
 
-    variant_t variant5{'C'_dna5};
+    [[maybe_unused]] variant_t variant5{'C'_dna5};
     alphabet_t letter5{'C'_dna5};
 
-    variant_t variant6 = 'G'_dna5;
+    [[maybe_unused]] variant_t variant6 = 'G'_dna5;
     alphabet_t letter6 = 'G'_dna5;
 
-    variant_t variant7 = {'N'_dna5};
+    [[maybe_unused]] variant_t variant7 = {'N'_dna5};
     alphabet_t letter7 = {'N'_dna5};
 
-    variant_t variant8 = static_cast<variant_t>('T'_dna5);
+    [[maybe_unused]] variant_t variant8 = static_cast<variant_t>('T'_dna5);
     alphabet_t letter8 = static_cast<alphabet_t>('T'_dna5);
 
-    variant_t variant9 = {static_cast<variant_t>(seqan3::gap{})};
+    [[maybe_unused]] variant_t variant9 = {static_cast<variant_t>(seqan3::gap{})};
     alphabet_t letter9 = {static_cast<alphabet_t>(seqan3::gap{})};
 
     EXPECT_EQ(letter0.to_rank(), 0);
@@ -96,31 +96,31 @@ TEST(alphabet_variant_test, initialise_from_component_alphabet_subtype)
     using alphabet_t = seqan3::alphabet_variant<seqan3::dna4, seqan3::dna5, seqan3::gap>;
     using variant_t = std::variant<seqan3::dna4, seqan3::dna5, seqan3::gap>;
 
-    variant_t variant0{'A'_rna4};
+    [[maybe_unused]] variant_t variant0{'A'_rna4};
     alphabet_t letter0{'A'_rna4};
 
-    variant_t variant1 = 'C'_rna4;
+    [[maybe_unused]] variant_t variant1 = 'C'_rna4;
     alphabet_t letter1 = 'C'_rna4;
 
-    variant_t variant2 = {'G'_rna4};
+    [[maybe_unused]] variant_t variant2 = {'G'_rna4};
     alphabet_t letter2 = {'G'_rna4};
 
-    variant_t variant3 = static_cast<variant_t>('T'_rna4);
+    [[maybe_unused]] variant_t variant3 = static_cast<variant_t>('T'_rna4);
     alphabet_t letter3 = static_cast<alphabet_t>('T'_rna4);
 
-    variant_t variant4 = {static_cast<variant_t>('A'_rna5)};
+    [[maybe_unused]] variant_t variant4 = {static_cast<variant_t>('A'_rna5)};
     alphabet_t letter4 = {static_cast<alphabet_t>('A'_rna5)};
 
-    variant_t variant5{'C'_rna5};
+    [[maybe_unused]] variant_t variant5{'C'_rna5};
     alphabet_t letter5{'C'_rna5};
 
-    variant_t variant6 = 'G'_rna5;
+    [[maybe_unused]] variant_t variant6 = 'G'_rna5;
     alphabet_t letter6 = 'G'_rna5;
 
-    variant_t variant7 = {'N'_rna5};
+    [[maybe_unused]] variant_t variant7 = {'N'_rna5};
     alphabet_t letter7 = {'N'_rna5};
 
-    variant_t variant8 = static_cast<variant_t>('T'_rna5);
+    [[maybe_unused]] variant_t variant8 = static_cast<variant_t>('T'_rna5);
     alphabet_t letter8 = static_cast<alphabet_t>('T'_rna5);
 
     EXPECT_EQ(letter0.to_rank(), 0);
@@ -268,9 +268,9 @@ TEST(alphabet_variant_test, alphabet_size)
     using alphabet2_t = seqan3::alphabet_variant<seqan3::gap, seqan3::dna5, seqan3::dna4>;
     using alphabet3_t = seqan3::alphabet_variant<char, seqan3::gap>;
 
-    EXPECT_TRUE((std::is_same_v<decltype(alphabet1_t::alphabet_size), const uint8_t>));
-    EXPECT_TRUE((std::is_same_v<decltype(alphabet2_t::alphabet_size), const uint8_t>));
-    EXPECT_TRUE((std::is_same_v<decltype(alphabet3_t::alphabet_size), const uint16_t>));
+    EXPECT_TRUE((std::is_same_v<decltype(alphabet1_t::alphabet_size), uint8_t const>));
+    EXPECT_TRUE((std::is_same_v<decltype(alphabet2_t::alphabet_size), uint8_t const>));
+    EXPECT_TRUE((std::is_same_v<decltype(alphabet3_t::alphabet_size), uint16_t const>));
 
     EXPECT_EQ(alphabet1_t::alphabet_size, 10);
     EXPECT_EQ(alphabet2_t::alphabet_size, 10);
@@ -350,11 +350,12 @@ TYPED_TEST(alphabet_variant_test, char_is_valid_for)
     for (; i_no_overflow <= static_cast<uint64_t>(end); ++i, ++i_no_overflow)
     {
         bool is_valid{};
-        seqan3::detail::for_each<gapped_alphabet_bases_t>([&is_valid, i](auto id)
-        {
-             using type = typename decltype(id)::type;
-             is_valid = is_valid || seqan3::char_is_valid_for<type>(i);
-        });
+        seqan3::detail::for_each<gapped_alphabet_bases_t>(
+            [&is_valid, i](auto id)
+            {
+                using type = typename decltype(id)::type;
+                is_valid = is_valid || seqan3::char_is_valid_for<type>(i);
+            });
         EXPECT_EQ(seqan3::char_is_valid_for<gapped_alphabet_t>(i), is_valid);
     }
 }

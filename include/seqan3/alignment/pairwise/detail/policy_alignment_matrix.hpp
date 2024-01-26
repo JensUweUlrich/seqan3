@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -38,13 +38,11 @@ namespace seqan3::detail
  * additional parameter to initialise the allocated matrix memory.
  */
 template <typename traits_t, typename alignment_matrix_t>
-//!\cond
     requires (is_type_specialisation_of_v<traits_t, alignment_configuration_traits> &&
               requires (alignment_matrix_t & matrix, typename traits_t::score_type const initial_score)
               {
                   { matrix.resize(column_index_type{size_t{}}, row_index_type{size_t{}}, initial_score) };
               })
-//!\endcond
 class policy_alignment_matrix
 {
 protected:
@@ -65,12 +63,12 @@ protected:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    policy_alignment_matrix() = default; //!< Defaulted.
-    policy_alignment_matrix(policy_alignment_matrix const &) = default; //!< Defaulted.
-    policy_alignment_matrix(policy_alignment_matrix &&) = default; //!< Defaulted.
+    policy_alignment_matrix() = default;                                            //!< Defaulted.
+    policy_alignment_matrix(policy_alignment_matrix const &) = default;             //!< Defaulted.
+    policy_alignment_matrix(policy_alignment_matrix &&) = default;                  //!< Defaulted.
     policy_alignment_matrix & operator=(policy_alignment_matrix const &) = default; //!< Defaulted.
-    policy_alignment_matrix & operator=(policy_alignment_matrix &&) = default; //!< Defaulted.
-    ~policy_alignment_matrix() = default; //!< Defaulted.
+    policy_alignment_matrix & operator=(policy_alignment_matrix &&) = default;      //!< Defaulted.
+    ~policy_alignment_matrix() = default;                                           //!< Defaulted.
 
     /*!\brief Constructs and initialises the algorithm using the alignment configuration.
      * \tparam alignment_configuration_t The type of the alignment configuration; must be an instance of
@@ -86,9 +84,7 @@ protected:
      * \throws seqan3::invalid_alignment_configuration if the given band settings are invalid.
      */
     template <typename alignment_configuration_t>
-    //!\cond
         requires (is_type_specialisation_of_v<alignment_configuration_t, configuration>)
-    //!\endcond
     policy_alignment_matrix(alignment_configuration_t const & config)
     {
         using seqan3::get;
@@ -116,9 +112,11 @@ protected:
         }
 
         if (invalid_band)
-            throw invalid_alignment_configuration{"The selected band [" + std::to_string(lower_diagonal) + ":" +
-                                                  std::to_string(upper_diagonal) + "] cannot be used with the current "
-                                                  "alignment configuration:" + error_cause};
+            throw invalid_alignment_configuration{"The selected band [" + std::to_string(lower_diagonal) + ":"
+                                                  + std::to_string(upper_diagonal)
+                                                  + "] cannot be used with the current "
+                                                    "alignment configuration:"
+                                                  + error_cause};
     }
     //!\}
 
@@ -194,15 +192,17 @@ protected:
         if constexpr (traits_t::is_global)
         {
             // band ends in last column without free gaps or band ends in last row without free gaps.
-            invalid_band |= (lower_diagonal_ends_behind_last_cell && !last_column_is_free) ||
-                            (upper_diagonal_ends_before_last_cell && !last_row_is_free);
+            invalid_band |= (lower_diagonal_ends_behind_last_cell && !last_column_is_free)
+                         || (upper_diagonal_ends_before_last_cell && !last_row_is_free);
             error_cause = "The band ends in a region without free gaps.";
         }
 
         if (invalid_band)
-            throw invalid_alignment_configuration{"The selected band [" + std::to_string(lower_diagonal) + ":" +
-                                                  std::to_string(upper_diagonal) + "] cannot be used with the current "
-                                                  "alignment configuration: " + error_cause};
+            throw invalid_alignment_configuration{"The selected band [" + std::to_string(lower_diagonal) + ":"
+                                                  + std::to_string(upper_diagonal)
+                                                  + "] cannot be used with the current "
+                                                    "alignment configuration: "
+                                                  + error_cause};
     }
 };
 } // namespace seqan3::detail

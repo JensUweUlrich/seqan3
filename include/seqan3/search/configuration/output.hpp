@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -33,12 +33,12 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr output_query_id() = default; //!< Defaulted.
-    constexpr output_query_id(output_query_id const &) = default; //!< Defaulted.
-    constexpr output_query_id(output_query_id &&) = default; //!< Defaulted.
+    constexpr output_query_id() = default;                                    //!< Defaulted.
+    constexpr output_query_id(output_query_id const &) = default;             //!< Defaulted.
+    constexpr output_query_id(output_query_id &&) = default;                  //!< Defaulted.
     constexpr output_query_id & operator=(output_query_id const &) = default; //!< Defaulted.
-    constexpr output_query_id & operator=(output_query_id &&) = default; //!< Defaulted.
-    ~output_query_id() = default; //!< Defaulted.
+    constexpr output_query_id & operator=(output_query_id &&) = default;      //!< Defaulted.
+    ~output_query_id() = default;                                             //!< Defaulted.
 
     //!\}
 
@@ -58,12 +58,12 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr output_reference_id() = default; //!< Defaulted.
-    constexpr output_reference_id(output_reference_id const &) = default; //!< Defaulted.
-    constexpr output_reference_id(output_reference_id &&) = default; //!< Defaulted.
+    constexpr output_reference_id() = default;                                        //!< Defaulted.
+    constexpr output_reference_id(output_reference_id const &) = default;             //!< Defaulted.
+    constexpr output_reference_id(output_reference_id &&) = default;                  //!< Defaulted.
     constexpr output_reference_id & operator=(output_reference_id const &) = default; //!< Defaulted.
-    constexpr output_reference_id & operator=(output_reference_id &&) = default; //!< Defaulted.
-    ~output_reference_id() = default; //!< Defaulted.
+    constexpr output_reference_id & operator=(output_reference_id &&) = default;      //!< Defaulted.
+    ~output_reference_id() = default;                                                 //!< Defaulted.
 
     //!\}
 
@@ -83,12 +83,13 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr output_reference_begin_position() = default; //!< Defaulted.
+    constexpr output_reference_begin_position() = default;                                        //!< Defaulted.
     constexpr output_reference_begin_position(output_reference_begin_position const &) = default; //!< Defaulted.
-    constexpr output_reference_begin_position(output_reference_begin_position &&) = default; //!< Defaulted.
-    constexpr output_reference_begin_position & operator=(output_reference_begin_position const &) = default; //!< Defaulted.
+    constexpr output_reference_begin_position(output_reference_begin_position &&) = default;      //!< Defaulted.
+    constexpr output_reference_begin_position &
+    operator=(output_reference_begin_position const &) = default;                                        //!< Defaulted.
     constexpr output_reference_begin_position & operator=(output_reference_begin_position &&) = default; //!< Defaulted.
-    ~output_reference_begin_position() = default; //!< Defaulted.
+    ~output_reference_begin_position() = default;                                                        //!< Defaulted.
 
     //!\}
 
@@ -108,12 +109,12 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr output_index_cursor() = default; //!< Defaulted.
-    constexpr output_index_cursor(output_index_cursor const &) = default; //!< Defaulted.
-    constexpr output_index_cursor(output_index_cursor &&) = default; //!< Defaulted.
+    constexpr output_index_cursor() = default;                                        //!< Defaulted.
+    constexpr output_index_cursor(output_index_cursor const &) = default;             //!< Defaulted.
+    constexpr output_index_cursor(output_index_cursor &&) = default;                  //!< Defaulted.
     constexpr output_index_cursor & operator=(output_index_cursor const &) = default; //!< Defaulted.
-    constexpr output_index_cursor & operator=(output_index_cursor &&) = default; //!< Defaulted.
-    ~output_index_cursor() = default; //!< Defaulted.
+    constexpr output_index_cursor & operator=(output_index_cursor &&) = default;      //!< Defaulted.
+    ~output_index_cursor() = default;                                                 //!< Defaulted.
 
     //!\}
 

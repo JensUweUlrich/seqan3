@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------------------------------
-# Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-# Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+# Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+# Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 # This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 # shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 # -----------------------------------------------------------------------------------------------------
@@ -18,8 +18,6 @@ cmake_minimum_required (VERSION 3.10)
 #         foo bar # user-specified data
 #         seqan3_version 3.0.1 # automatically set
 #         seqan3_git_version a1829272d7bafea48580af6eaac2bfbb678c3861 # automatically set
-#         range-v3_version 0.10.0 # automatically set
-#         range-v3_git_version 5daa38e80238a1b50a18c08b4a582178f414404c # automatically set
 #         sdsl_version 3.0.0 # automatically set
 #         sdsl_git_version 9a0d5676fd09fb8b52af214eca2d5809c9a32dbe # automatically set
 # )
@@ -64,6 +62,7 @@ function (seqan3_macro_benchmark macro_benchmark_cpp)
               COMMAND ${target} #
                       --benchmark_repetitions=${MACRO_BENCHMARK_REPETITIONS} #
                       --benchmark_min_time=0 #
+                      --benchmark_enable_random_interleaving=true #
                       --benchmark_out=$<TARGET_FILE_NAME:${target}>.json #
                       --benchmark_out_format=json)
 endfunction ()

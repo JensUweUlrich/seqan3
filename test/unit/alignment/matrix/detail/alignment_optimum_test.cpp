@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -10,10 +10,9 @@
 #include <type_traits>
 
 #include <seqan3/alignment/matrix/detail/alignment_optimum.hpp>
-#include <seqan3/utility/simd/simd.hpp>
-#include <seqan3/utility/simd/concept.hpp>
-
 #include <seqan3/test/simd_utility.hpp>
+#include <seqan3/utility/simd/concept.hpp>
+#include <seqan3/utility/simd/simd.hpp>
 
 template <typename scalar_t>
 struct extract_scalar_type

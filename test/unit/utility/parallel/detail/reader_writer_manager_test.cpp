@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -18,7 +18,7 @@ TEST(reader_writer_manager, parallel)
         threads = 4;
 
     if (threads > 1)
-        --threads;  // One less for the parallel reader
+        --threads; // One less for the parallel reader
 
     EXPECT_GE(threads, 1u);
 
@@ -34,7 +34,7 @@ TEST(reader_writer_manager, parallel)
                                                          seqan3::detail::writer_count{threads},
                                                          target_queue};
 
-    auto work = [&] () mutable
+    auto work = [&]() mutable
     {
         {
             auto reader_agent = source_manager.register_reader();
@@ -55,31 +55,31 @@ TEST(reader_writer_manager, parallel)
     uint64_t counter{0};
 
     // start the producer of source/consumer of target.
-    std::thread t1{[&] ()
-    {
-        {
-            auto writer_agent = source_manager.register_writer();
+    std::thread t1{[&]()
+                   {
+                       {
+                           auto writer_agent = source_manager.register_writer();
 
-            // Initialise source_queue.
-            for (size_t i = 0; i < job_size; ++i)
-            {
-                seqan3::contrib::queue_op_status status = source_queue.try_push(i + 1);
-                EXPECT_TRUE(status == seqan3::contrib::queue_op_status::success);
-            }
-            EXPECT_FALSE(source_queue.is_closed());
-        }
-        EXPECT_TRUE(source_queue.is_closed());
+                           // Initialise source_queue.
+                           for (size_t i = 0; i < job_size; ++i)
+                           {
+                               seqan3::contrib::queue_op_status status = source_queue.try_push(i + 1);
+                               EXPECT_TRUE(status == seqan3::contrib::queue_op_status::success);
+                           }
+                           EXPECT_FALSE(source_queue.is_closed());
+                       }
+                       EXPECT_TRUE(source_queue.is_closed());
 
-        auto reader_agent = target_manager.register_reader();
-        for (;;)
-        {
-            uint32_t val = 0;
-            if (target_queue.wait_pop(val) == seqan3::contrib::queue_op_status::closed)
-                return;
+                       auto reader_agent = target_manager.register_reader();
+                       for (;;)
+                       {
+                           uint32_t val = 0;
+                           if (target_queue.wait_pop(val) == seqan3::contrib::queue_op_status::closed)
+                               return;
 
-            counter += val;
-        }
-    }};
+                           counter += val;
+                       }
+                   }};
 
     // Start the consumer of source/producer of target.
     std::vector<std::thread> pool;

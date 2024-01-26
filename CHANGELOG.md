@@ -24,37 +24,178 @@ The following API changes should be documented as such:
 If possible, provide tooling that performs the changes, e.g. a shell-script.
 -->
 
+# 3.3.1
+
+## New features
+
+## Notable Bug-fixes
+
+## API changes
+
+#### Dependencies
+  * We now use Doxygen version 1.9.8 to build our documentation ([\#3197](https://github.com/seqan/seqan3/pull/3197)).
+  * We bumped the minimal CMake version to 3.5 ([\#3223](https://github.com/seqan/seqan3/pull/3223)).
+
+# 3.3.0
+
+## New features
+
+#### Alignment
+  * The function `seqan3::alignment_from_cigar` creates an alignment (tuple of two aligned sequences) from a
+    CIGAR vector (`std::vector<seqan3::cigar>`) ([\#3057](https://github.com/seqan/seqan3/pull/3057)) or a
+    CIGAR string (`std::string`) ([\#3077](https://github.com/seqan/seqan3/pull/3077)).
+  * The function `seqan3::cigar_from_alignment` creates a CIGAR vector (`std::vector<seqan3::cigar>`) from an alignment
+    (tuple of 2 aligned sequences) ([\#3057](https://github.com/seqan/seqan3/pull/3057)).
+
+#### Alphabet
+  * Improved performance of vector assignment for alphabets ([\#3038](https://github.com/seqan/seqan3/pull/3038)).
+  * Improved performance of `seqan3::dna4::complement()` ([\#3026](https://github.com/seqan/seqan3/pull/3026)).
+  * Char literals returning `std::vector` are now `constexpr` if supported by the compiler
+    ([\#3073](https://github.com/seqan/seqan3/pull/3073)).
+
+#### I/O
+  * Made `seqan3::sam_file_header::program_info_t` easier to copy ([\#3145](https://github.com/seqan/seqan3/pull/3145)).
+
+#### Search
+
+  * Added a constructor to the `seqan3::interleaved_bloom_filter` for decompressing a compressed
+    `seqan3::interleaved_bloom_filter` ([\#3082](https://github.com/seqan/seqan3/pull/3082)).
+
+## Notable Bug-fixes
+
+#### Alignment
+  * Resolved an issue resulting in a wrong alignment score ([\#3098](https://github.com/seqan/seqan3/pull/3098)).
+
+#### I/O
+  * Empty SAM/BAM files must at least write a header to ensure a valid file
+    ([\#3081](https://github.com/seqan/seqan3/pull/3081)).
+  * Reading SAM/BAM files is 2x faster than before
+    ([\#3106](https://github.com/seqan/seqan3/pull/3106)).
+  * `seqan3::sequence_file_input_traits` now allows `char` as a sequence alphabet
+    ([\#3128](https://github.com/seqan/seqan3/pull/3128)).
+
+#### Utility
+  * Fixed spin delay having no effect on the PowerPC platform ([\#3129](https://github.com/seqan/seqan3/pull/3129)).
+
+## API changes
+
+#### Alignment
+  * The fields `seqan3::field::offset` and `seqan3::field::alignment` have been removed from `seqan3::sam_record`
+    ([\#3058](https://github.com/seqan/seqan3/pull/3058), [\#3089](https://github.com/seqan/seqan3/pull/3089)).
+    For `seqan3::field::offset`, please check the soft clipping of the CIGAR string (`seqan3::sam_record::cigar()`).
+    For `seqan3::field::alignment`, please use `seqan3::alignment_from_cigar`.
+
+#### Compiler
+  * Dropped support for GCC 10 ([\#3148](https://github.com/seqan/seqan3/pull/3148)).
+  * Added support for GCC 13 ([\#3148](https://github.com/seqan/seqan3/pull/3148)).
+
+#### Dependencies
+  * We require at least CMake 3.16 for our test suite. Note that the minimum requirement for using SeqAn3 is unchanged
+    ([\#3050](https://github.com/seqan/seqan3/pull/3050)).
+  * We now use Doxygen version 1.9.6 to build our documentation ([\#3116](https://github.com/seqan/seqan3/pull/3116)).
+  * Updated sdsl-lite to 3.0.3 ([\#3170](https://github.com/seqan/seqan3/pull/3170),
+    [\#3174](https://github.com/seqan/seqan3/pull/3174)).
+  * Compatibility with SeqAn2: SeqAn2's namespace was changed from `seqan` to `seqan2`. For interoperability, an
+    up-to-date checkout of [SeqAn2's main branch](https://github.com/seqan/seqan) is required
+    ([\#3156](https://github.com/seqan/seqan3/pull/3156)).
+
 # 3.2.0
 
 ## New features
 
-#### Build system
+#### Alphabet
+  * `seqan3::cigar` can now be assigned from `std::string_view` ([\#2966](https://github.com/seqan/seqan3/pull/2966)).
+  * Added `seqan3::views::char_strictly_to`. Behaves like `seqan3::views::char_to`, but throws on invalid
+    input ([\#2898](https://github.com/seqan/seqan3/pull/2898)).
 
-* We now use Doxygen version 1.9.3 to build our documentation ([\#2923](https://github.com/seqan/seqan3/pull/2923)).
+#### I/O
+ * Added `seqan3::sequence_file_option::fasta_ignore_blanks_before_id` to ignore blanks before IDs when reading FASTA
+   files. E.g., `>       some_id` will only store `"some_id"` as ID
+   ([\#2770](https://github.com/seqan/seqan3/pull/2770)).
+
+#### Search
+  * Improved performance of `seqan3::counting_vector::operator+=` ([\#2930](https://github.com/seqan/seqan3/pull/2930)).
+
+#### Utility
+  * Added `seqan3::list_traits::repeat` ([\#2899](https://github.com/seqan/seqan3/pull/2899)).
 
 ## Notable Bug-fixes
 
+#### Core
+  * Added missing implementations for AVX512 ([\#2920](https://github.com/seqan/seqan3/pull/2920) and
+    [\#2926](https://github.com/seqan/seqan3/pull/2926)).
+
+#### IO
+  * FASTA files containing IDs starting with `>`, e.g., `> >MyID`, are now parsed correctly
+    ([\#2869](https://github.com/seqan/seqan3/pull/2869)).
+
+#### Search
+  * Relaxed `kmer_hash_view::iterator` difference requirement ([\#2931](https://github.com/seqan/seqan3/pull/2931)).
+  * Relaxed `seqan3::views::minimiser` requirements to be C++20-compatible
+    ([\#2845](https://github.com/seqan/seqan3/pull/2845)).
+  * Relaxed `seqan3::views::kmer_hash` requirements to be C++20-compatible
+    ([\#2843](https://github.com/seqan/seqan3/pull/2843)).
+
 #### Utility
 
-* `seqan3::views::single_pass_input` cannot propagate the `std::ranges::output_range` property, because it cannot
-  satisfy the following requirement ([\#2775](https://github.com/seqan/seqan3/pull/2775)):
-  ```cpp
-  *it++ = value;
-  // must be the same as
-  *it = value; ++it;
-  // but it actually would be the same as
-  ++it; *it = value;
-  ```
+  * `seqan3::views::single_pass_input` cannot propagate the `std::ranges::output_range` property because it cannot
+    satisfy the following requirement ([\#2775](https://github.com/seqan/seqan3/pull/2775)):
+    ```cpp
+    *it++ = value;
+    // must be the same as
+    *it = value; ++it;
+    // but it actually would be the same as
+    ++it; *it = value;
+    ```
+  * Fixed signature of `seqan3::detail::store_sse4`. This might have affected some public API
+    ([\#2893](https://github.com/seqan/seqan3/pull/2893)).
+  * Relaxed `seqan3::views::to_simd` requirements to be C++20-compatible
+    ([\#2849](https://github.com/seqan/seqan3/pull/2849)).
 
 ## API changes
+GCC 7, 8, and 9 have been removed. All headers in `seqan3/std/` except `charconv` and `new` have been deprecated, please
+use the equivalent `std` includes.
+The namespace `std::cpp20` has been deprecated, please use `std::`.
+
+`seqan3::views::to` has been changed to `seqan3::ranges::to`. Since it is not a view anymore, it cannot be properly
+deprecated. Please keep this in mind if you encounter errors with `seqan3::views::to`.
+
+#### Compiler
+  * Dropped support for GCC 7 and 8 ([\#2891](https://github.com/seqan/seqan3/pull/2891)).
+  * Dropped support for GCC 9 ([\#2952](https://github.com/seqan/seqan3/pull/2952)).
+  * Removed C++17 support ([\#2915](https://github.com/seqan/seqan3/pull/2915)).
 
 #### I/O
- * Changed default of `output_options::fasta_blank_before_id` to `false`
+ * Changed the default of `output_options::fasta_blank_before_id` to `false`
    ([\#2769](https://github.com/seqan/seqan3/pull/2769)).
- * Changed default of `bgzf_thread_count` to `4` instead of determining the numbers of cores of the
-   machine it is running on ([\#2911](https://github.com/seqan/seqan3/pull/2911)).
- * `bgzf_thread_count` is now a single global variable instead of having an instance per translation unit
+ * Changed the default of `bgzf_thread_count` to `4`. Previously, all available threads on the machine were utilised
+   ([\#2911](https://github.com/seqan/seqan3/pull/2911)).
+ * The global variable `bgzf_thread_count` is not static anymore. Modifying the variable now affects the runtime of the
+   entire program. Formerly, this variable was specific to each translation unit
    ([\#2752](https://github.com/seqan/seqan3/pull/2752)).
+
+#### Range
+  * Replaced `seqan3::views::to` (implemented via range-v3) with `seqan3::ranges::to` (implemented in SeqAn3).
+    `seqan3::ranges::to` provides a subset of C++23's `std::ranges::to` and will be replaced with the STL-equivalent
+    in a future version ([\#2969](https://github.com/seqan/seqan3/pull/2969)).
+  * Replaced the implementation of `seqan3::views::chunk`. It is now implemented in SeqAn3 and does not use
+    the range-v3 implementation anymore. `seqan3::views::chunk` is similar to C++23's `std::views::chunk`
+    and will be replaced with the STL-equivalent in a future version
+    ([\#2975](https://github.com/seqan/seqan3/pull/2975)).
+  * Replaced the implementation of `seqan3::views::join_with`. It is now implemented in SeqAn3 and does not use
+    the range-v3 implementation anymore. `seqan3::views::join_with` is equivalent to C++23's `std::views::join_with`
+    and will be replaced with the STL-equivalent in a future version
+    ([\#2973](https://github.com/seqan/seqan3/pull/2973)).
+  * Replaced the implementation of `seqan3::views::zip`. It is now implemented in SeqAn3 and does not use
+    the range-v3 implementation anymore. `seqan3::views::zip` is equivalent to C++23's `std::views::zip`
+    and will be replaced with the STL-equivalent in a future version
+    ([\#2971](https://github.com/seqan/seqan3/pull/2971)).
+
+#### Dependencies
+  * We now use Doxygen version 1.9.4 to build our documentation ([\#2979](https://github.com/seqan/seqan3/pull/2979)).
+  * Removed range-v3 ([\#2998](https://github.com/seqan/seqan3/pull/2998)).
+  * Updated cereal to 1.3.2 ([\#3012](https://github.com/seqan/seqan3/pull/3012)).
+  * Updated sdsl-lite to 3.0.1 ([\#3012](https://github.com/seqan/seqan3/pull/3012)).
 
 # 3.1.0
 
@@ -179,7 +320,7 @@ Note that 3.1.0 will be the first API stable release and interfaces in this rele
   * The order of tags within the header may be arbitrary. Before, necessary tags where required to be first.
   * Unknown tags will emit a warning. Before, a error was raised.
 
-## API changes {#api303}
+## API changes
 <a name="api303"></a>
 Most of our API or header file changes will trigger a deprecation warning to let you know if something changed and, if
 applicable, when it will be removed. We recommend upgrading version-by-version to check whether you need to change code.
@@ -335,7 +476,7 @@ Header Changes:
   * If you used files as views with `seqan3::views::get<seqan3::field::id>` to project a single field, e.g.
     * `seqan3::views::get<seqan3::field::id>(fin)` => `std::views::transform(fin, [](auto && record){ return record.id(); })`
     * `fin | seqan3::views::get<seqan3::field::id>()` => `fin | std::views::transform([](auto && record){ return record.id(); })`
-    * or per projection: `fin | std::views::transform(&decltype(fin)::record_type::id)`
+    * or per projection: `fin | std::views::transform(&decltype(fin)::%record_type::id)`
   * `seqan3::sequence_record`:
     * `seqan3::get<seqan3::field::id>(record)` => `record.id()`
     * `seqan3::get<seqan3::field::seq>(record)` => `record.sequence()`
@@ -832,7 +973,7 @@ Note that 3.1.0 will be the first API stable release and interfaces in this rele
 
 #### Argument parser
 
-* The `seqan3::value_list_validator` is not constructible from a std::initialiser_list any more
+* The `seqan3::value_list_validator` is not constructible from a std::initialiser_list anymore
   (e.g. `seqan3::value_list_validator{{1,2,3}}` does not work, use `seqan3::value_list_validator{1,2,3}` instead)
   ([\#1298](https://github.com/seqan/seqan3/pull/1298)).
 * Changed class signature of input/output file validators:

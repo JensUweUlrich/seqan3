@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -14,6 +14,17 @@
  * \ingroup alignment
  * \brief Provides seqan3::aligned_sequence, as well as various ranges that model it.
  * \see alignment
+ *
+ * The seqan3::aligned_sequence concept can be used to describe a sequence that is augmented with gaps, e.g.
+ * a sequence that is part of an alignment.
+ *
+ * The data structure that we use most often to model `seqan3::aligned_sequence` is the `seqan3::gap_decorator`.
+ * It is a lightweight data structure that only holds a view on the sequence (no copy is made) and on top can hold
+ * `seqan3::gap`s.
+ *
+ * E.g. `AC-GA` is a aligned sequences where `-` represents a gap.
+ *
+ * \sa alignment_pairwise
  */
 
 #pragma once

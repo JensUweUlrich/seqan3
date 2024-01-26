@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -72,9 +72,7 @@ private:
      * unmodified value.
      */
     template <typename alphabet_t>
-    //!\cond
         requires simd_concept<std::remove_cvref_t<alphabet_t>>
-    //!\endcond
     auto scoring_scheme_profile_column(alphabet_t && alphabet) const noexcept
     {
         return scoring_scheme.make_score_profile(std::forward<alphabet_t>(alphabet));
@@ -82,8 +80,7 @@ private:
 
     //!\overload
     template <semialphabet alphabet_t>
-    alphabet_t scoring_scheme_profile_column(alphabet_t && alphabet) const
-        noexcept
+    alphabet_t scoring_scheme_profile_column(alphabet_t && alphabet) const noexcept
     {
         return std::forward<alphabet_t>(alphabet);
     }

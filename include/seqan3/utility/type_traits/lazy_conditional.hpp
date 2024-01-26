@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <seqan3/std/type_traits>
+#include <type_traits>
 
 #include <seqan3/core/platform.hpp>
 
@@ -28,7 +28,7 @@ namespace seqan3::detail
  * \tparam template_t The uninstantiated template.
  * \tparam spec_t     The arguments to template_t.
  */
-template <template <typename ...> typename template_t, typename ...spec_t>
+template <template <typename...> typename template_t, typename... spec_t>
 struct lazy
 {};
 
@@ -51,7 +51,7 @@ struct instantiate : std::type_identity<t>
  * \tparam spec_t     The arguments to template_t.
  * \implements seqan3::transformation_trait
  */
-template <template <typename ...> typename template_t, typename ...spec_t>
+template <template <typename...> typename template_t, typename... spec_t>
 struct instantiate<lazy<template_t, spec_t...>>
 {
     //!\brief Return type of the trait [instantiates the template arguments].
@@ -63,9 +63,7 @@ struct instantiate<lazy<template_t, spec_t...>>
  * \relates seqan3::detail::instantiate
  */
 template <typename t>
-//!\cond
     requires requires { typename instantiate<t>::type; }
-//!\endcond
 using instantiate_t = typename instantiate<t>::type;
 
 // ----------------------------------------------------------------------------
@@ -99,7 +97,7 @@ struct instantiate_if<t, true> : std::type_identity<t>
  * \tparam spec_t     The arguments to template_t.
  * \implements seqan3::transformation_trait
  */
-template <template <typename ...> typename template_t, typename ...spec_t>
+template <template <typename...> typename template_t, typename... spec_t>
 struct instantiate_if<lazy<template_t, spec_t...>, true>
 {
     //!\brief Return type of the trait [instantiates the template arguments].
@@ -111,9 +109,7 @@ struct instantiate_if<lazy<template_t, spec_t...>, true>
  * \relates seqan3::detail::instantiate_if
  */
 template <typename t, bool condition>
-//!\cond
     requires requires { typename instantiate_if<t, condition>::type; }
-//!\endcond
 using instantiate_if_t = typename instantiate_if<t, condition>::type;
 
 /*!\brief A transformation trait that instantiates seqan3::lazy types, conditionally. Type trait shortcut.
@@ -121,9 +117,7 @@ using instantiate_if_t = typename instantiate_if<t, condition>::type;
  * \relates seqan3::detail::instantiate_if
  */
 template <typename t, bool condition>
-//!\cond
     requires requires { instantiate_if_t<t, condition>::value; }
-//!\endcond
 inline constexpr auto instantiate_if_v = instantiate_if_t<t, condition>::value;
 
 // ----------------------------------------------------------------------------
@@ -154,9 +148,7 @@ struct lazy_conditional : instantiate<std::conditional_t<decision, on_true_t, on
  * \relates seqan3::detail::lazy_conditional
  */
 template <bool decision, typename on_true_t, typename on_false_t>
-//!\cond
     requires requires { typename instantiate_t<std::conditional_t<decision, on_true_t, on_false_t>>; }
-//!\endcond
 using lazy_conditional_t = instantiate_t<std::conditional_t<decision, on_true_t, on_false_t>>;
 
 } // namespace seqan3::detail

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -44,8 +44,8 @@ public:
     // Can't use `using format_type::read_structure_record` as it produces a hard failure in the format concept check
     // for types that do not model the format concept, i.e. don't offer the proper read_structure_record interface.
     //!\brief Forwards to the seqan3::structure_file_input_format::read_structure_record interface.
-    template <typename ...ts>
-    void read_structure_record(ts && ...args)
+    template <typename... ts>
+    void read_structure_record(ts &&... args)
     {
         format_type::read_structure_record(std::forward<ts>(args)...);
     }
@@ -70,73 +70,77 @@ namespace seqan3
  */
 //!\cond
 template <typename t>
-concept structure_file_input_format = requires(detail::structure_file_input_format_exposer<t> & v,
-                                               std::ifstream & f,
-                                               structure_file_input_options<rna5, false> & options,
-                                               rna5_vector & seq,
-                                               std::string & id,
-                                               std::vector<std::set<std::pair<double, size_t>>> & bpp,
-                                               std::vector<wuss51> & structure,
-                                               std::vector<structured_rna<rna5, wuss51>> & structured_seq,
-                                               double energy,
-                                               double react,
-                                               double react_err,
-                                               std::string & comment,
-                                               size_t offset)
-{
-    t::file_extensions;
+concept structure_file_input_format =
+    requires (detail::structure_file_input_format_exposer<t> & v,
+              std::ifstream & f,
+              structure_file_input_options<rna5, false> & options,
+              rna5_vector & seq,
+              std::string & id,
+              std::vector<std::set<std::pair<double, size_t>>> & bpp,
+              std::vector<wuss51> & structure,
+              std::vector<structured_rna<rna5, wuss51>> & structured_seq,
+              double energy,
+              double react,
+              double react_err,
+              std::string & comment,
+              size_t offset) {
+        t::file_extensions;
 
-    SEQAN3_RETURN_TYPE_CONSTRAINT(v.read_structure_record(f,
-                                                          options,
-                                                          seq,
-                                                          id,
-                                                          bpp,
-                                                          structure,
-                                                          energy,
-                                                          react,
-                                                          react_err,
-                                                          comment,
-                                                          offset),
-                                  std::same_as, void);
-    SEQAN3_RETURN_TYPE_CONSTRAINT(v.read_structure_record(f,
-                                                          options,
-                                                          seq,
-                                                          id,
-                                                          bpp,
-                                                          std::ignore,
-                                                          std::ignore,
-                                                          std::ignore,
-                                                          std::ignore,
-                                                          std::ignore,
-                                                          std::ignore),
-                                  std::same_as, void);
-    SEQAN3_RETURN_TYPE_CONSTRAINT(v.read_structure_record(f,
-                                                          options,
-                                                          structured_seq,
-                                                          id,
-                                                          std::ignore,
-                                                          structured_seq,
-                                                          energy,
-                                                          std::ignore,
-                                                          std::ignore,
-                                                          std::ignore,
-                                                          std::ignore),
-                                  std::same_as, void);
-    SEQAN3_RETURN_TYPE_CONSTRAINT(v.read_structure_record(f,
-                                                          options,
-                                                          std::ignore,
-                                                          std::ignore,
-                                                          std::ignore,
-                                                          std::ignore,
-                                                          std::ignore,
-                                                          std::ignore,
-                                                          std::ignore,
-                                                          std::ignore,
-                                                          std::ignore),
-                                  std::same_as, void);
-    // the last is required to be compile time valid, but should always throw at run-time.
-};
+        {
+            v.read_structure_record(f, options, seq, id, bpp, structure, energy, react, react_err, comment, offset)
+            } -> std::same_as<void>;
+
+        {
+            v.read_structure_record(f,
+                                    options,
+                                    seq,
+                                    id,
+                                    bpp,
+                                    std::ignore,
+                                    std::ignore,
+                                    std::ignore,
+                                    std::ignore,
+                                    std::ignore,
+                                    std::ignore)
+            } -> std::same_as<void>;
+
+        {
+            v.read_structure_record(f,
+                                    options,
+                                    structured_seq,
+                                    id,
+                                    std::ignore,
+                                    structured_seq,
+                                    energy,
+                                    std::ignore,
+                                    std::ignore,
+                                    std::ignore,
+                                    std::ignore)
+            } -> std::same_as<void>;
+
+        {
+            v.read_structure_record(f,
+                                    options,
+                                    std::ignore,
+                                    std::ignore,
+                                    std::ignore,
+                                    std::ignore,
+                                    std::ignore,
+                                    std::ignore,
+                                    std::ignore,
+                                    std::ignore,
+                                    std::ignore)
+            } -> std::same_as<void>;
+        // the last is required to be compile time valid, but should always throw at run-time.
+    };
 //!\endcond
+
+// Workaround for https://github.com/doxygen/doxygen/issues/9379
+#if SEQAN3_DOXYGEN_ONLY(1) 0
+template <typename t>
+class structure_file_input_format
+{};
+#endif
 
 /*!\name Requirements for seqan3::structure_file_input_format
  * \brief You can expect these **members** on all types that implement seqan3::structure_file_input_format.
@@ -194,7 +198,7 @@ concept structure_file_input_format = requires(detail::structure_file_input_form
  *     a specialisation of seqan3::structured_rna and the second template parameter to
  *     seqan3::structure_file_input_options must be set to true.
  */
- /*!\var static inline std::vector<std::string> seqan3::structure_file_input_format::file_extensions
+/*!\var static inline std::vector<std::string> seqan3::structure_file_input_format::file_extensions
  * \brief The format type is required to provide a vector of all supported file extensions.
  */
 //!\}
@@ -217,9 +221,9 @@ constexpr bool is_type_list_of_structure_file_input_formats_v = false;
  * \ingroup core
  * \see seqan3::type_list_specialisationOfstructure_file_input_formats
  */
-template <typename ...ts>
-constexpr bool is_type_list_of_structure_file_input_formats_v<type_list<ts...>>
-                = (structure_file_input_format<ts> && ...);
+template <typename... ts>
+constexpr bool is_type_list_of_structure_file_input_formats_v<type_list<ts...>> =
+    (structure_file_input_format<ts> && ...);
 
 /*!\brief Auxiliary concept that checks whether a type is a seqan3::type_list and all types meet
  * seqan3::structure_file_input_format.

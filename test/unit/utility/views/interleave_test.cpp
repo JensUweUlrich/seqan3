@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -8,7 +8,7 @@
 #include <gtest/gtest.h>
 
 #include <forward_list>
-#include <seqan3/std/ranges>
+#include <ranges>
 
 #include <seqan3/alphabet/detail/debug_stream_alphabet.hpp>
 #include <seqan3/alphabet/nucleotide/dna4.hpp>
@@ -47,10 +47,8 @@ TEST(view_interleave, basic)
 
     // combinability
     // explicitly call seqan3::views::type_reduce
-    auto v4 = seqan3::views::type_reduce(u)
-            | seqan3::views::interleave(s, seqan3::views::type_reduce(i))
-            | std::views::reverse
-            | std::views::take(5);
+    auto v4 = seqan3::views::type_reduce(u) | seqan3::views::interleave(s, seqan3::views::type_reduce(i))
+            | std::views::reverse | std::views::take(5);
     EXPECT_RANGE_EQ(cmp_rev, v4);
     // don't call seqan3::views::type_reduce
     auto v5 = u | seqan3::views::interleave(s, i) | std::views::reverse | std::views::take(5);

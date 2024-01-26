@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,10 +12,10 @@
 
 #pragma once
 
-#include <seqan3/std/algorithm>
-#include <seqan3/std/charconv>
+#include <algorithm>
 #include <iterator>
-#include <seqan3/std/ranges>
+#include <ranges>
+#include <seqan3/std/charconv>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -75,45 +75,47 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    format_genbank() noexcept = default; //!< Defaulted.
-    format_genbank(format_genbank const &) noexcept = default; //!< Defaulted.
+    format_genbank() noexcept = default;                                   //!< Defaulted.
+    format_genbank(format_genbank const &) noexcept = default;             //!< Defaulted.
     format_genbank & operator=(format_genbank const &) noexcept = default; //!< Defaulted.
-    format_genbank(format_genbank &&) noexcept = default; //!< Defaulted.
-    format_genbank & operator=(format_genbank &&) noexcept = default; //!< Defaulted.
-    ~format_genbank() noexcept = default; //!< Defaulted.
+    format_genbank(format_genbank &&) noexcept = default;                  //!< Defaulted.
+    format_genbank & operator=(format_genbank &&) noexcept = default;      //!< Defaulted.
+    ~format_genbank() noexcept = default;                                  //!< Defaulted.
 
     //!\}
 
     //!\brief The valid file extensions for this format; note that you can modify this value.
-    static inline std::vector<std::string> file_extensions
-    {
-        { "genbank" },
-        { "gb" },
-        { "gbk" },
+    static inline std::vector<std::string> file_extensions{
+        {"genbank"},
+        {"gb"},
+        {"gbk"},
     };
 
 protected:
     //!\copydoc sequence_file_input_format::read_sequence_record
-    template <typename stream_type,     // constraints checked by file
+    template <typename stream_type, // constraints checked by file
               typename seq_legal_alph_type,
               typename stream_pos_type,
-              typename seq_type,        // other constraints checked inside function
+              typename seq_type, // other constraints checked inside function
               typename id_type,
               typename qual_type>
     void read_sequence_record(stream_type & stream,
                               sequence_file_input_options<seq_legal_alph_type> const & options,
                               stream_pos_type & position_buffer,
-                              seq_type    & sequence,
-                              id_type     & id,
-                              qual_type   & SEQAN3_DOXYGEN_ONLY(qualities))
+                              seq_type & sequence,
+                              id_type & id,
+                              qual_type & SEQAN3_DOXYGEN_ONLY(qualities))
     {
+        // Store current position in buffer
+        // Must happen before constructing the view.
+        // With libc++, tellg invalidates the I/O buffer.
+        position_buffer = stream.tellg();
+
         auto stream_view = detail::istreambuf(stream);
         auto stream_it = std::ranges::begin(stream_view);
 
-        // Store current position in buffer.
-        position_buffer = stream.tellg();
-
-        if (!(std::ranges::equal(stream_view | detail::take_until_or_throw(is_cntrl || is_blank), std::string{"LOCUS"})))
+        if (!(std::ranges::equal(stream_view | detail::take_until_or_throw(is_cntrl || is_blank),
+                                 std::string{"LOCUS"})))
             throw parse_error{"An entry has to start with the code word LOCUS."};
 
         //ID
@@ -121,25 +123,25 @@ protected:
         {
             if (options.embl_genbank_complete_header)
             {
-                std::ranges::copy(std::string_view{"LOCUS"}, std::cpp20::back_inserter(id));
+                std::ranges::copy(std::string_view{"LOCUS"}, std::back_inserter(id));
 
                 while (!is_char<'O'>(*std::ranges::begin(stream_view)))
                 {
-                        std::ranges::copy(stream_view | detail::take_line_or_throw
-                                                      | views::char_to<std::ranges::range_value_t<id_type>>,
-                                                        std::cpp20::back_inserter(id));
-                        id.push_back('\n');
+                    std::ranges::copy(stream_view | detail::take_line_or_throw
+                                          | views::char_to<std::ranges::range_value_t<id_type>>,
+                                      std::back_inserter(id));
+                    id.push_back('\n');
                 }
             }
             else
             {
                 detail::consume(stream_view | detail::take_until(!is_blank));
 
-                auto read_id_until = [&stream_view, &id] (auto predicate)
+                auto read_id_until = [&stream_view, &id](auto predicate)
                 {
                     std::ranges::copy(stream_view | detail::take_until_or_throw(predicate)
-                                                  | views::char_to<std::ranges::range_value_t<id_type>>,
-                                      std::cpp20::back_inserter(id));
+                                          | views::char_to<std::ranges::range_value_t<id_type>>,
+                                      std::back_inserter(id));
                 };
 
                 if (options.truncate_ids)
@@ -157,57 +159,59 @@ protected:
 
         // Sequence
         detail::consume(stream_view | detail::take_line_or_throw); // consume "ORIGIN"
-        auto constexpr is_end = is_char<'/'> ;
+        constexpr auto is_end = is_char<'/'>;
         if constexpr (!detail::decays_to_ignore_v<seq_type>)
         {
-            auto constexpr is_legal_alph = char_is_valid_for<seq_legal_alph_type>;
-            std::ranges::copy(stream_view | std::views::filter(!(is_space || is_digit))
-                                          | detail::take_until_or_throw_and_consume(is_end) // consume "//"
-                                          | std::views::transform([is_legal_alph] (char const c) // enforce legal alphabet
-                                            {
-                                                if (!is_legal_alph(c))
-                                                {
-                                                    throw parse_error{std::string{"Encountered an unexpected letter: "} +
-                                                                      "char_is_valid_for<" +
-                                                                      detail::type_name_as_string<seq_legal_alph_type> +
-                                                                      "> evaluated to false on " +
-                                                                      detail::make_printable(c)};
-                                                }
-                                                return c;
-                                            })
-                                          | views::char_to<std::ranges::range_value_t<seq_type>>,    // convert to actual target alphabet
-                                            std::cpp20::back_inserter(sequence));
+            constexpr auto is_legal_alph = char_is_valid_for<seq_legal_alph_type>;
+            std::ranges::copy(
+                stream_view | std::views::filter(!(is_space || is_digit)) // ignore whitespace and numbers
+                    | detail::take_until_or_throw(is_end)                 // until //
+                    | std::views::transform(
+                        [is_legal_alph](char const c) // enforce legal alphabet
+                        {
+                            if (!is_legal_alph(c))
+                            {
+                                throw parse_error{std::string{"Encountered an unexpected letter: "}
+                                                  + "char_is_valid_for<"
+                                                  + detail::type_name_as_string<seq_legal_alph_type>
+                                                  + "> evaluated to false on " + detail::make_printable(c)};
+                            }
+                            return c;
+                        })
+                    | views::char_to<std::ranges::range_value_t<seq_type>>, // convert to actual target alphabet
+                std::back_inserter(sequence));
         }
         else
         {
-            detail::consume(stream_view | detail::take_until_or_throw_and_consume(is_end)); // consume until "//"
-            ++stream_it; // consume "/n"
+            detail::consume(stream_view | detail::take_until_or_throw(is_end)); // consume until "//"
         }
+
+        std::ranges::advance(stream_it, 3u, std::ranges::end(stream_view)); // Skip `//` and potentially '\n'
     }
 
     //!\copydoc sequence_file_output_format::write_sequence_record
-    template <typename stream_type,     // constraints checked by file
-              typename seq_type,        // other constraints checked inside function
+    template <typename stream_type, // constraints checked by file
+              typename seq_type,    // other constraints checked inside function
               typename id_type,
               typename qual_type>
-    void write_sequence_record(stream_type                        & stream,
+    void write_sequence_record(stream_type & stream,
                                sequence_file_output_options const & options,
-                               seq_type                           && sequence,
-                               id_type                            && id,
-                               qual_type                          && SEQAN3_DOXYGEN_ONLY(qualities))
+                               seq_type && sequence,
+                               id_type && id,
+                               qual_type && SEQAN3_DOXYGEN_ONLY(qualities))
     {
-        std::cpp20::ostreambuf_iterator stream_it{stream};
+        std::ostreambuf_iterator stream_it{stream};
         size_t sequence_size{0};
         [[maybe_unused]] char buffer[50];
         if constexpr (!detail::decays_to_ignore_v<seq_type>)
-            sequence_size = ranges::size(sequence);
+            sequence_size = std::ranges::size(sequence);
 
         // ID
         if constexpr (detail::decays_to_ignore_v<id_type>)
         {
             throw std::logic_error{"The ID field may not be set to ignore when writing genbank files."};
         }
-        else if (ranges::empty(id)) //[[unlikely]]
+        else if (std::ranges::empty(id)) //[[unlikely]]
         {
             throw std::runtime_error{"The ID field may not be empty when writing genbank files."};
         }
@@ -249,16 +253,15 @@ protected:
                     stream_it = ' ';
                 std::ranges::copy(std::to_string(bp), stream_it);
                 stream_it = ' ';
-                std::ranges::copy(seq[i] | views::to_char
-                                         | views::interleave(10, std::string_view{" "}), stream_it);
+                std::ranges::copy(seq[i] | views::to_char | views::interleave(10, std::string_view{" "}), stream_it);
                 bp += 60;
                 ++i;
-                detail::write_eol(stream_it,false);
+                detail::write_eol(stream_it, false);
             }
             std::ranges::copy(std::string_view{"//"}, stream_it);
-            detail::write_eol(stream_it,false);
+            detail::write_eol(stream_it, false);
         }
     }
 };
 
-} // namespace seqan
+} // namespace seqan3

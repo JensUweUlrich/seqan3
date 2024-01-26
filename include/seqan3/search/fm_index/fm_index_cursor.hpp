@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -13,7 +13,7 @@
 #pragma once
 
 #include <array>
-#include <seqan3/std/ranges>
+#include <ranges>
 #include <type_traits>
 
 #include <sdsl/suffix_trees.hpp>
@@ -137,17 +137,15 @@ private:
     }
 
     //!\brief Optimized backward search without alphabet mapping
-    bool backward_search(sdsl_index_type const & csa,
-                         sdsl_char_type const c,
-                         size_type & l,
-                         size_type & r) const noexcept
+    bool
+    backward_search(sdsl_index_type const & csa, sdsl_char_type const c, size_type & l, size_type & r) const noexcept
     {
         assert(l <= r && r < csa.size());
 
         size_type _l, _r;
 
         size_type cc = c;
-        if constexpr(!std::same_as<index_alphabet_type, sdsl::plain_byte_alphabet>)
+        if constexpr (!std::same_as<index_alphabet_type, sdsl::plain_byte_alphabet>)
         {
             cc = csa.char2comp[c];
             if (cc == 0 && c > 0) // [[unlikely]]
@@ -163,7 +161,7 @@ private:
         }
         else
         {
-            _l = c_begin + csa.bwt.rank(l, c);		   // count c in bwt[0..l-1]
+            _l = c_begin + csa.bwt.rank(l, c);         // count c in bwt[0..l-1]
             _r = c_begin + csa.bwt.rank(r + 1, c) - 1; // count c in bwt[0..r]
         }
 
@@ -178,7 +176,6 @@ private:
     }
 
 public:
-
     /*!\name Constructors, destructor and assignment
      * \{
      */
@@ -297,16 +294,14 @@ public:
      * No-throw guarantee.
      */
     template <typename char_t>
-    //!\cond
-        requires std::convertible_to<char_t, index_alphabet_type>
-    //!\endcond
-    bool extend_right(char_t const c) noexcept
+        requires std::convertible_to<char_t, index_alphabet_type> bool
+    extend_right(char_t const c) noexcept
     {
         assert(index != nullptr);
         // The rank cannot exceed 255 for single text and 254 for text collections as they are reserved as sentinels
         // for the indexed text.
-        assert(seqan3::to_rank(static_cast<index_alphabet_type>(c)) <
-               ((index_type::text_layout_mode == text_layout::single) ? 255 : 254));
+        assert(seqan3::to_rank(static_cast<index_alphabet_type>(c))
+               < ((index_type::text_layout_mode == text_layout::single) ? 255 : 254));
 
         size_type _lb = node.lb, _rb = node.rb;
 
@@ -324,10 +319,8 @@ public:
 
     //!\overload
     template <typename char_type>
-    //!\cond
-        requires detail::is_char_adaptation_v<char_type>
-    //!\endcond
-    bool extend_right(char_type const * cstring) noexcept
+        requires detail::is_char_adaptation_v<char_type> bool
+    extend_right(char_type const * cstring) noexcept
     {
         return extend_right(std::basic_string_view<char_type>{cstring});
     }
@@ -353,7 +346,7 @@ public:
     {
         static_assert(std::ranges::forward_range<seq_t>, "The query must model forward_range.");
         static_assert(std::convertible_to<range_innermost_value_t<seq_t>, index_alphabet_type>,
-                     "The alphabet of the sequence must be convertible to the alphabet of the index.");
+                      "The alphabet of the sequence must be convertible to the alphabet of the index.");
 
         assert(index != nullptr); // range must not be empty!
 
@@ -367,8 +360,8 @@ public:
         {
             // The rank cannot exceed 255 for single text and 254 for text collections as they are reserved as sentinels
             // for the indexed text.
-            assert(seqan3::to_rank(static_cast<index_alphabet_type>(*it)) <
-                   ((index_type::text_layout_mode == text_layout::single) ? 255 : 254));
+            assert(seqan3::to_rank(static_cast<index_alphabet_type>(*it))
+                   < ((index_type::text_layout_mode == text_layout::single) ? 255 : 254));
 
             c = seqan3::to_rank(static_cast<index_alphabet_type>(*it)) + 1;
 
@@ -522,9 +515,7 @@ public:
      */
     template <std::ranges::range text_t>
     auto path_label(text_t && text) const noexcept
-    //!\cond
         requires (index_t::text_layout_mode == text_layout::single)
-    //!\endcond
     {
         static_assert(std::ranges::input_range<text_t>, "The text must model input_range.");
         static_assert(range_dimension_v<text_t> == 1, "The input cannot be a text collection.");
@@ -539,9 +530,7 @@ public:
     //!\overload
     template <std::ranges::range text_t>
     auto path_label(text_t && text) const noexcept
-    //!\cond
         requires (index_t::text_layout_mode == text_layout::collection)
-    //!\endcond
     {
         static_assert(std::ranges::input_range<text_t>, "The text collection must model input_range.");
         static_assert(range_dimension_v<text_t> == 2, "The input must be a text collection.");
@@ -597,9 +586,7 @@ public:
      * Strong exception guarantee (no data is modified in case an exception is thrown).
      */
     locate_result_type locate() const
-    //!\cond
         requires (index_t::text_layout_mode == text_layout::single)
-    //!\endcond
     {
         assert(index != nullptr);
 
@@ -615,9 +602,7 @@ public:
 
     //!\overload
     locate_result_type locate() const
-    //!\cond
         requires (index_t::text_layout_mode == text_layout::collection)
-    //!\endcond
     {
         assert(index != nullptr);
 
@@ -646,35 +631,33 @@ public:
      * Strong exception guarantee (no data is modified in case an exception is thrown).
      */
     auto lazy_locate() const
-    //!\cond
         requires (index_t::text_layout_mode == text_layout::single)
-    //!\endcond
     {
         assert(index != nullptr);
 
         return std::views::iota(node.lb, node.lb + count())
-             | std::views::transform([*this, _offset = offset()] (auto sa_pos)
-               {
-                   return locate_result_value_type{0u, _offset - index->index[sa_pos]};
-               });
+             | std::views::transform(
+                   [*this, _offset = offset()](auto sa_pos)
+                   {
+                       return locate_result_value_type{0u, _offset - index->index[sa_pos]};
+                   });
     }
 
     //!\overload
     auto lazy_locate() const
-    //!\cond
         requires (index_t::text_layout_mode == text_layout::collection)
-    //!\endcond
     {
         assert(index != nullptr);
 
         return std::views::iota(node.lb, node.lb + count())
-             | std::views::transform([*this, _offset = offset()] (auto sa_pos)
-               {
-                   auto loc = _offset - index->index[sa_pos];
-                   size_type sequence_rank = index->text_begin_rs.rank(loc + 1);
-                   size_type sequence_position = loc - index->text_begin_ss.select(sequence_rank);
-                   return locate_result_value_type{sequence_rank - 1, sequence_position};
-               });
+             | std::views::transform(
+                   [*this, _offset = offset()](auto sa_pos)
+                   {
+                       auto loc = _offset - index->index[sa_pos];
+                       size_type sequence_rank = index->text_begin_rs.rank(loc + 1);
+                       size_type sequence_position = loc - index->text_begin_ss.select(sequence_rank);
+                       return locate_result_value_type{sequence_rank - 1, sequence_position};
+                   });
     }
 
     /*!\cond DEV

@@ -25,7 +25,7 @@
     The picture, or alternative text, should link to `[2]`.
 -->
 
-[1]: https://img.shields.io/github/workflow/status/seqan/seqan3/SeqAn3%20CI%20on%20Linux/master?style=flat&logo=github&label=SeqAn3%20CI "Open GitHub actions page"
+[1]: https://img.shields.io/github/actions/workflow/status/seqan/seqan3/ci_linux.yml?branch=master&style=flat&logo=github&label=SeqAn3%20CI "Open GitHub actions page"
 [2]: https://github.com/seqan/seqan3/actions?query=branch%3Amaster
 [3]: https://codecov.io/gh/seqan/seqan3/branch/master/graph/badge.svg?token=BH1FQiBBle "Open Codecov page"
 [4]: https://codecov.io/gh/seqan/seqan3
@@ -66,11 +66,10 @@ Please see the [online documentation](https://docs.seqan.de/seqan/3-master-user/
 
 |                   | requirement                                          | version  | comment                                     |
 |-------------------|------------------------------------------------------|----------|---------------------------------------------|
-|**compiler**       | [GCC](https://gcc.gnu.org)                           | ≥ 7      | no other compiler is currently supported!   |
-|**build system**   | [CMake](https://cmake.org)                           | ≥ 3.4    | optional, but recommended                   |
-|**required libs**  | [SDSL](https://github.com/xxsds/sdsl-lite)           | ≥ 3      |                                             |
-|                   | [Range-V3](https://github.com/ericniebler/range-v3)  | ≥ 0.11.0 |                                             |
-|**optional libs**  | [cereal](https://github.com/USCiLab/cereal)          | ≥ 1.2.3  | required for serialisation and CTD support  |
+|**compiler**       | [GCC](https://gcc.gnu.org)                           | ≥ 11     | no other compiler is currently supported!   |
+|**build system**   | [CMake](https://cmake.org)                           | ≥ 3.5    | optional, but recommended                   |
+|**required libs**  | [SDSL](https://github.com/xxsds/sdsl-lite)           | ≥ 3.0.3  |                                             |
+|**optional libs**  | [cereal](https://github.com/USCiLab/cereal)          | ≥ 1.3.1  | required for serialisation and CTD support  |
 |                   | [zlib](https://github.com/madler/zlib)               | ≥ 1.2    | required for `*.gz` and `.bam` file support |
 |                   | [bzip2](https://www.sourceware.org/bzip2)            | ≥ 1.0    | required for `*.bz2` file support           |
 
@@ -86,18 +85,17 @@ Quick-Setup without CMake:
   * Clone the repository with submodules: `git clone --recurse-submodules https://github.com/seqan/seqan3.git`
   * Add the following to your compiler invocation:
     * the include directories of SeqAn and its dependencies
-    * C++17 mode with concepts support
+    * C++20 mode
     * Macros indicating the presence of zlib and bzip2 (set only if actually available in your paths!)
   * The command could look like this:
 ```sh
-g++-7 -O3 -DNDEBUG -Wall -Wextra                                \
-    -std=c++17 -fconcepts                                       \
+g++-11 -O3 -DNDEBUG -Wall -Wextra                               \
+    -std=c++20                                                  \
     -I       /path/to/seqan3/include                            \
-    -isystem /path/to/seqan3/submodules/range-v3/include        \
     -isystem /path/to/seqan3/submodules/sdsl-lite/include       \
     -isystem /path/to/seqan3/submodules/cereal/include          \
     -DSEQAN3_HAS_ZLIB=1 -DSEQAN3_HAS_BZIP2=1                    \
-    -lz -lbz2 -lstdc++fs -pthread                               \
+    -lz -lbz2 -pthread                                          \
   your_file.cpp
 ```
 

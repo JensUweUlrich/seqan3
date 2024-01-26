@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -44,7 +44,8 @@ private:
 
     //!\brief Befriend seqan3::phred_base.
     friend base_t;
-    //!\cond \brief Befriend seqan3::alphabet_base.
+    //!\cond
+    //!\brief Befriend seqan3::alphabet_base.
     friend base_t::base_t;
     //!\endcond
 
@@ -52,12 +53,12 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr phred68solexa()                                   noexcept = default; //!< Defaulted.
-    constexpr phred68solexa(phred68solexa const &)              noexcept = default; //!< Defaulted.
-    constexpr phred68solexa(phred68solexa &&)                   noexcept = default; //!< Defaulted.
-    constexpr phred68solexa & operator=(phred68solexa const &)  noexcept = default; //!< Defaulted.
-    constexpr phred68solexa & operator=(phred68solexa &&)       noexcept = default; //!< Defaulted.
-    ~phred68solexa()                                            noexcept = default; //!< Defaulted.
+    constexpr phred68solexa() noexcept = default;                                  //!< Defaulted.
+    constexpr phred68solexa(phred68solexa const &) noexcept = default;             //!< Defaulted.
+    constexpr phred68solexa(phred68solexa &&) noexcept = default;                  //!< Defaulted.
+    constexpr phred68solexa & operator=(phred68solexa const &) noexcept = default; //!< Defaulted.
+    constexpr phred68solexa & operator=(phred68solexa &&) noexcept = default;      //!< Defaulted.
+    ~phred68solexa() noexcept = default;                                           //!< Defaulted.
 
     // Inherit converting constructor
     using base_t::base_t;
@@ -112,7 +113,7 @@ constexpr phred68solexa operator""_phred68solexa(char const c) noexcept
  *
  * \stableapi{Since version 3.1.}
  */
-inline std::vector<phred68solexa> operator""_phred68solexa(char const * s, std::size_t n)
+SEQAN3_WORKAROUND_LITERAL std::vector<phred68solexa> operator""_phred68solexa(char const * s, std::size_t n)
 {
     std::vector<phred68solexa> r;
     r.resize(n);
@@ -124,6 +125,6 @@ inline std::vector<phred68solexa> operator""_phred68solexa(char const * s, std::
 }
 //!\}
 
-} // inline namespace literals
+} // namespace literals
 
 } // namespace seqan3

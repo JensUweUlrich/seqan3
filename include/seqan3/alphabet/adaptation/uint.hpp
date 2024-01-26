@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -34,9 +34,8 @@ namespace seqan3::detail
 //!\ingroup alphabet_adaptation
 //!\hideinitializer
 template <typename type>
-constexpr bool is_uint_adaptation_v = std::same_as<type, uint8_t>  ||
-                                      std::same_as<type, uint16_t> ||
-                                      std::same_as<type, uint32_t>;
+constexpr bool is_uint_adaptation_v =
+    std::same_as<type, uint8_t> || std::same_as<type, uint16_t> || std::same_as<type, uint32_t>;
 } // namespace seqan3::detail
 
 namespace seqan3::custom
@@ -49,9 +48,7 @@ namespace seqan3::custom
  * \stableapi{Since version 3.1.}
  */
 template <typename uint_type>
-//!\cond
     requires seqan3::detail::is_uint_adaptation_v<uint_type>
-//!\endcond
 struct alphabet<uint_type>
 {
     /*!\brief Return the number of values the uint type can take (e.g. 256 for `uint8_t`).

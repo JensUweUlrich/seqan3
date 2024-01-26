@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,9 +12,9 @@
 
 #pragma once
 
-#include <seqan3/std/concepts>
+#include <concepts>
 #include <sstream>
-#include <seqan3/std/type_traits>
+#include <type_traits>
 #include <unordered_map>
 #include <vector>
 
@@ -65,7 +65,7 @@ struct argument_parsing<t const &> : argument_parsing<t>
 {};
 //!\endcond
 
-} // seqan3::custom
+} // namespace seqan3::custom
 
 namespace seqan3::detail::adl_only
 {
@@ -89,17 +89,16 @@ struct enumeration_names_cpo : public detail::customisation_point_object<enumera
      *        std::type_identity instead of a default constructed alphabet.
      */
     template <typename option_type>
-    using option_or_type_identity
-        = std::conditional_t<std::is_nothrow_default_constructible_v<std::remove_cvref_t<option_type>>,
-                             std::remove_cvref_t<option_type>,
-                             std::type_identity<option_type>>;
+    using option_or_type_identity =
+        std::conditional_t<std::is_nothrow_default_constructible_v<std::remove_cvref_t<option_type>>,
+                           std::remove_cvref_t<option_type>,
+                           std::type_identity<option_type>>;
 
     /*!\brief CPO overload (check 1 out of 2): explicit customisation via `seqan3::custom::argument_parsing`
      * \tparam option_type The type of the option. (Needed to defer instantiation for incomplete types.)
      */
     template <typename option_type = option_t>
-    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<1>)
-    (
+    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<1>)(
         /*return*/ seqan3::custom::argument_parsing<option_type>::enumeration_names /*;*/
     );
 
@@ -113,8 +112,7 @@ struct enumeration_names_cpo : public detail::customisation_point_object<enumera
      * `enumeration_names(std::type_identity<option_t>{})` will be called.
      */
     template <typename option_type = option_t>
-    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<0>)
-    (
+    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<0>)(
         /*return*/ enumeration_names(option_or_type_identity<option_type>{}) /*;*/
     );
 };
@@ -163,9 +161,11 @@ namespace seqan3
  * simply provide one of the two functions specified above.
  */
 template <typename option_type>
-//!\cond
-    requires requires { { detail::adl_only::enumeration_names_cpo<option_type>{}() }; }
-//!\endcond
+    requires requires {
+                 {
+                     detail::adl_only::enumeration_names_cpo<option_type>{}()
+                 };
+             }
 inline auto const enumeration_names = detail::adl_only::enumeration_names_cpo<option_type>{}();
 //!\}
 
@@ -183,10 +183,11 @@ inline auto const enumeration_names = detail::adl_only::enumeration_names_cpo<op
  */
 //!\cond
 template <typename option_type>
-concept named_enumeration = requires
-{
-    { seqan3::enumeration_names<option_type> };
-};
+concept named_enumeration = requires {
+                                {
+                                    seqan3::enumeration_names<option_type>
+                                };
+                            };
 //!\endcond
 
 /*!\interface seqan3::argument_parser_compatible_option <>
@@ -203,8 +204,8 @@ concept named_enumeration = requires
  */
 //!\cond
 template <typename option_type>
-concept argument_parser_compatible_option = input_stream_over<std::istringstream, option_type> ||
-                                            named_enumeration<option_type>;
+concept argument_parser_compatible_option =
+    input_stream_over<std::istringstream, option_type> || named_enumeration<option_type>;
 //!\endcond
 
 /*!\name Formatted output overloads
@@ -222,9 +223,7 @@ concept argument_parser_compatible_option = input_stream_over<std::istringstream
  * respective string if found or '\<UNKNOWN_VALUE\>' if the value cannot be found in the map.
  */
 template <typename char_t, typename option_type>
-//!\cond
     requires named_enumeration<std::remove_cvref_t<option_type>>
-//!\endcond
 inline debug_stream_type<char_t> & operator<<(debug_stream_type<char_t> & s, option_type && op)
 {
     for (auto & [key, value] : enumeration_names<option_type>)

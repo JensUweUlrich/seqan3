@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -19,9 +19,9 @@
 namespace seqan3::test
 {
 
-inline std::vector<cigar> operator""_cigar(char const * s, std::size_t n)
+SEQAN3_WORKAROUND_LITERAL std::vector<cigar> operator""_cigar(char const * s, std::size_t n)
 {
-    return std::get<0>(seqan3::detail::parse_cigar(std::string_view{s, n}));
+    return seqan3::detail::parse_cigar(std::string_view{s, n});
 }
 
 } // namespace seqan3::test

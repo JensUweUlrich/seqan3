@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -13,10 +13,10 @@
 
 #pragma once
 
-#include <seqan3/std/concepts>
+#include <concepts>
 
 #include <seqan3/core/detail/strong_type.hpp>
-#include <seqan3/utility/concept/exposition_only/core_language.hpp>
+#include <seqan3/utility/concept.hpp>
 
 namespace seqan3::search_cfg
 {
@@ -26,9 +26,9 @@ namespace seqan3::search_cfg
  * \see search_configuration
  * \tparam value_t The underlying type.
  */
-struct error_count : detail::strong_type<uint8_t,
-                                         error_count,
-                                         detail::strong_type_skill::convert | detail::strong_type_skill::comparable>
+struct error_count :
+    detail::
+        strong_type<uint8_t, error_count, detail::strong_type_skill::convert | detail::strong_type_skill::comparable>
 {
     //!!\brief Import base class constructor.
     using detail::strong_type<uint8_t,
@@ -41,9 +41,8 @@ struct error_count : detail::strong_type<uint8_t,
  * \see search_configuration
  * \tparam value_t The underlying type.
  */
-struct error_rate : detail::strong_type<double,
-                                        error_rate,
-                                        detail::strong_type_skill::convert | detail::strong_type_skill::comparable>
+struct error_rate :
+    detail::strong_type<double, error_rate, detail::strong_type_skill::convert | detail::strong_type_skill::comparable>
 {
     //!!\brief Import base class constructor.
     using detail::strong_type<double,

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -39,17 +39,17 @@ struct stream_buffer_exposer : public std::basic_streambuf<char_t, traits_t>
     //!\cond
     // Expose protected members:
     using base_t::eback;
-    using base_t::gptr;
     using base_t::egptr;
-    using base_t::setg;
     using base_t::gbump;
+    using base_t::gptr;
+    using base_t::setg;
     using base_t::underflow;
 
-    using base_t::pbase;
-    using base_t::pptr;
     using base_t::epptr;
-    using base_t::pbump;
     using base_t::overflow;
+    using base_t::pbase;
+    using base_t::pbump;
+    using base_t::pptr;
     //!\endcond
 };
 } // namespace seqan3::detail

@@ -1,21 +1,21 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
+
+#include <benchmark/benchmark.h>
 
 #include <algorithm>
 #include <cctype>
 #include <cstring>
 
-#include <benchmark/benchmark.h>
-
 #include <seqan3/test/seqan2.hpp>
 #include <seqan3/utility/char_operations/predicate.hpp>
 
 #if SEQAN3_HAS_SEQAN2
-#include <seqan/stream.h>
+#    include <seqan/stream.h>
 #endif
 
 enum class tag
@@ -48,7 +48,7 @@ static void simple(benchmark::State & state)
             sum += seqan3::is_alpha(arr[i]);
 #if SEQAN3_HAS_SEQAN2
         else if constexpr (id == tag::seqan2)
-            sum += seqan::IsAlpha{}(arr[i]);
+            sum += seqan2::IsAlpha{}(arr[i]);
 #endif
     }
 
@@ -83,9 +83,9 @@ static void combined(benchmark::State & state)
             sum += seqan3::is_alpha(arr[i]) || seqan3::is_blank(arr[i]) || seqan3::is_digit(arr[i]);
 #if SEQAN3_HAS_SEQAN2
         else if constexpr (id == tag::seqan2)
-            sum += seqan::OrFunctor<seqan::OrFunctor<seqan::IsAlpha, seqan::IsBlank>, seqan::IsDigit>{}(arr[i]);
+            sum += seqan2::OrFunctor<seqan2::OrFunctor<seqan2::IsAlpha, seqan2::IsBlank>, seqan2::IsDigit>{}(arr[i]);
         else if constexpr (id == tag::seqan2_serial)
-            sum += seqan::IsAlpha{}(arr[i]) || seqan::IsBlank{}(arr[i]) || seqan::IsDigit{}(arr[i]);
+            sum += seqan2::IsAlpha{}(arr[i]) || seqan2::IsBlank{}(arr[i]) || seqan2::IsDigit{}(arr[i]);
 #endif
     }
 

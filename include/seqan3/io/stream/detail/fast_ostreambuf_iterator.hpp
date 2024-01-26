@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -13,10 +13,11 @@
 
 #pragma once
 
-#include <seqan3/std/algorithm>
+#include <algorithm>
+#include <cassert>
+#include <iterator>
+#include <ranges>
 #include <seqan3/std/charconv>
-#include <seqan3/std/iterator>
-#include <seqan3/std/ranges>
 
 #include <seqan3/io/stream/detail/stream_buffer_exposer.hpp>
 
@@ -45,22 +46,22 @@ public:
     /*!\name Associated types
      * \{
      */
-    using difference_type   = ptrdiff_t;                //!< Defaults to ptrdiff_t.
-    using value_type        = char_t;                   //!< The char type of the stream.
-    using reference         = char_t;                   //!< The char type of the stream.
-    using pointer           = void;                     //!< Has no pointer type.
+    using difference_type = ptrdiff_t;                  //!< Defaults to ptrdiff_t.
+    using value_type = char_t;                          //!< The char type of the stream.
+    using reference = char_t;                           //!< The char type of the stream.
+    using pointer = void;                               //!< Has no pointer type.
     using iterator_category = std::output_iterator_tag; //!< Pure output iterator.
     //!\}
 
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    fast_ostreambuf_iterator() noexcept = default; //!< Defaulted.
-    fast_ostreambuf_iterator(fast_ostreambuf_iterator const &) noexcept = default; //!< Defaulted.
-    fast_ostreambuf_iterator(fast_ostreambuf_iterator &&) noexcept = default; //!< Defaulted.
+    fast_ostreambuf_iterator() noexcept = default;                                             //!< Defaulted.
+    fast_ostreambuf_iterator(fast_ostreambuf_iterator const &) noexcept = default;             //!< Defaulted.
+    fast_ostreambuf_iterator(fast_ostreambuf_iterator &&) noexcept = default;                  //!< Defaulted.
     fast_ostreambuf_iterator & operator=(fast_ostreambuf_iterator const &) noexcept = default; //!< Defaulted.
-    fast_ostreambuf_iterator & operator=(fast_ostreambuf_iterator &&) noexcept = default; //!< Defaulted.
-    ~fast_ostreambuf_iterator() noexcept = default; //!< Defaulted.
+    fast_ostreambuf_iterator & operator=(fast_ostreambuf_iterator &&) noexcept = default;      //!< Defaulted.
+    ~fast_ostreambuf_iterator() noexcept = default;                                            //!< Defaulted.
 
     //!\brief Construct from a stream buffer.
     explicit fast_ostreambuf_iterator(std::basic_streambuf<char_t, traits_t> & ibuf) :
@@ -139,9 +140,7 @@ public:
      * \include test/snippet/io/detail/iterator_write_range.cpp
      */
     template <std::ranges::forward_range range_type>
-    //!\cond
         requires std::ranges::borrowed_range<range_type>
-    //!\endcond
     auto write_range(range_type && rng)
     {
         using sen_t = std::ranges::sentinel_t<range_type>;
@@ -200,9 +199,7 @@ public:
      * \param[in] num The number to write.
      */
     template <typename number_type>
-    //!\cond
         requires std::is_arithmetic_v<number_type>
-    //!\endcond
     auto write_number(number_type num)
     {
         if (stream_buf->epptr() - stream_buf->pptr() > 300) // enough space for any number, should be likely

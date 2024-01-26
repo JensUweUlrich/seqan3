@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -14,18 +14,18 @@
 
 TEST(search_config_parallel, member_variable)
 {
-    {   // default construction
+    { // default construction
         seqan3::search_cfg::parallel cfg{};
         EXPECT_FALSE(cfg.thread_count);
         EXPECT_THROW(cfg.thread_count.value(), std::bad_optional_access);
     }
 
-    {   // construct with value
+    { // construct with value
         seqan3::search_cfg::parallel cfg{4};
         EXPECT_EQ(cfg.thread_count.value(), 4u);
     }
 
-    {   // assign value
+    { // assign value
         seqan3::search_cfg::parallel cfg{};
         cfg.thread_count = 4;
         EXPECT_EQ(cfg.thread_count.value(), 4u);

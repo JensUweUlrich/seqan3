@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -52,7 +52,8 @@ private:
 
     //!\brief Befriend seqan3::nucleotide_base.
     friend base_t;
-    //!\cond \brief Befriend seqan3::alphabet_base.
+    //!\cond
+    //!\brief Befriend seqan3::alphabet_base.
     friend base_t::base_t;
     //!\endcond
 
@@ -60,66 +61,23 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr dna16sam()                             noexcept = default; //!< Defaulted.
-    constexpr dna16sam(dna16sam const &)             noexcept = default; //!< Defaulted.
-    constexpr dna16sam(dna16sam &&)                  noexcept = default; //!< Defaulted.
+    constexpr dna16sam() noexcept = default;                             //!< Defaulted.
+    constexpr dna16sam(dna16sam const &) noexcept = default;             //!< Defaulted.
+    constexpr dna16sam(dna16sam &&) noexcept = default;                  //!< Defaulted.
     constexpr dna16sam & operator=(dna16sam const &) noexcept = default; //!< Defaulted.
-    constexpr dna16sam & operator=(dna16sam &&)      noexcept = default; //!< Defaulted.
-    ~dna16sam()                                      noexcept = default; //!< Defaulted.
+    constexpr dna16sam & operator=(dna16sam &&) noexcept = default;      //!< Defaulted.
+    ~dna16sam() noexcept = default;                                      //!< Defaulted.
 
     using base_t::base_t;
     //!\}
 
 private:
     //!\copydoc seqan3::dna4::rank_to_char_table
-    static constexpr char_type rank_to_char_table[alphabet_size]
-    {
-        '=',
-        'A',
-        'C',
-        'M',
-        'G',
-        'R',
-        'S',
-        'V',
-        'T',
-        'W',
-        'Y',
-        'H',
-        'K',
-        'D',
-        'B',
-        'N'
-    };
-
-    //!\copydoc seqan3::dna4::char_to_rank_table
-    static constexpr std::array<rank_type, 256> char_to_rank_table
-    {
-        [] () constexpr
-        {
-            std::array<rank_type, 256> ret{};
-
-            // initialize with UNKNOWN (std::array::fill unfortunately not constexpr)
-            for (auto & c : ret)
-                c = 15; // rank of 'N'
-
-            // reverse mapping for characters and their lowercase
-            for (size_t rnk = 0u; rnk < alphabet_size; ++rnk)
-            {
-                ret[rank_to_char_table[rnk]] = rnk;
-                ret[to_lower(rank_to_char_table[rnk])] = rnk;
-            }
-
-            // set U equal to T
-            ret['U'] = ret['T']; ret['u'] = ret['t'];
-
-            return ret;
-        }()
-    };
+    static constexpr char_type rank_to_char_table
+        [alphabet_size]{'=', 'A', 'C', 'M', 'G', 'R', 'S', 'V', 'T', 'W', 'Y', 'H', 'K', 'D', 'B', 'N'};
 
     //!\copydoc seqan3::dna4::rank_complement_table
-    static constexpr rank_type rank_complement_table[alphabet_size]
-    {
+    static constexpr rank_type rank_complement_table[alphabet_size]{
         15, // N is complement of '='_dna16sam  0
         8,  // T is complement of 'A'_dna16sam  1
         4,  // G is complement of 'C'_dna16sam  2
@@ -159,7 +117,31 @@ private:
         using index_t = std::make_unsigned_t<char_type>;
         return char_to_rank_table[static_cast<index_t>(chr)];
     }
+
+    // clang-format off
+    //!\copydoc seqan3::dna4::char_to_rank_table
+    static constexpr std::array<rank_type, 256> char_to_rank_table{
+        []() constexpr {
+            std::array<rank_type, 256> ret{};
+
+            ret.fill(15u); // initialize with UNKNOWN ('N')
+
+            // reverse mapping for characters and their lowercase
+            for (size_t rnk = 0u; rnk < alphabet_size; ++rnk)
+            {
+                ret[rank_to_char_table[rnk]] = rnk;
+                ret[to_lower(rank_to_char_table[rnk])] = rnk;
+            }
+
+            // set U equal to T
+            ret['U'] = ret['T'];
+            ret['u'] = ret['t'];
+
+            return ret;
+        }()
+    };
 };
+// clang-format on
 
 // ------------------------------------------------------------------
 // containers
@@ -208,7 +190,7 @@ constexpr dna16sam operator""_dna16sam(char const c) noexcept
  *
  * \stableapi{Since version 3.1.}
  */
-inline dna16sam_vector operator""_dna16sam(char const * s, size_t n)
+SEQAN3_WORKAROUND_LITERAL dna16sam_vector operator""_dna16sam(char const * s, size_t n)
 {
     dna16sam_vector r;
     r.resize(n);
@@ -220,6 +202,6 @@ inline dna16sam_vector operator""_dna16sam(char const * s, size_t n)
 }
 //!\}
 
-} // inline namespace literals
+} // namespace literals
 
 } // namespace seqan3

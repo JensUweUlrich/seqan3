@@ -1,17 +1,17 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #include <gtest/gtest.h>
 
-#include <seqan3/std/algorithm>
-#include <seqan3/std/concepts>
+#include <algorithm>
+#include <concepts>
 #include <deque>
 #include <list>
-#include <seqan3/std/ranges>
+#include <ranges>
 #include <string>
 #include <vector>
 
@@ -35,7 +35,7 @@ void do_test(adaptor_t const & adaptor, std::string const & vec)
     using namespace std::literals;
 
     // pipe notation
-    EXPECT_RANGE_EQ("foo"sv, vec | adaptor(3) );
+    EXPECT_RANGE_EQ("foo"sv, vec | adaptor(3));
 
     // function notation
     EXPECT_RANGE_EQ("foo"sv, adaptor(vec, 3));
@@ -73,7 +73,13 @@ void do_concepts(adaptor_t && adaptor, bool const exactly)
     EXPECT_TRUE(seqan3::const_iterable_range<decltype(v1)>);
     EXPECT_TRUE((std::ranges::output_range<decltype(v1), int>));
 
-    auto v3 = vec | std::views::transform([] (auto && v) { return v; }) | adaptor;
+    auto v3 = vec
+            | std::views::transform(
+                  [](auto && v)
+                  {
+                      return v;
+                  })
+            | adaptor;
 
     EXPECT_TRUE(std::ranges::input_range<decltype(v3)>);
     EXPECT_TRUE(std::ranges::forward_range<decltype(v3)>);
@@ -134,7 +140,7 @@ TEST(view_take_exactly, underlying_is_shorter)
     using namespace std::literals;
 
     std::string vec{"foo"};
-    EXPECT_NO_THROW(( seqan3::detail::take_exactly(vec, 4) )); // no parsing
+    EXPECT_NO_THROW((seqan3::detail::take_exactly(vec, 4))); // no parsing
 
     // full parsing on conversion
     EXPECT_RANGE_EQ("foo"sv, vec | seqan3::views::single_pass_input | seqan3::detail::take_exactly(4));
@@ -219,10 +225,10 @@ struct view_take_exactly2_test_fixture : public range_test_fixture
     static constexpr bool common_range = false;
     static constexpr bool viewable_range = true;
     static constexpr bool view = true;
-    static constexpr bool sized_range = true; // seqan3::detail::take_exactly adds this property
+    static constexpr bool sized_range = true;           // seqan3::detail::take_exactly adds this property
     static constexpr bool const_iterable_range = false; // seqan3::detail::take_exactly loses this property
-    static constexpr bool size_member = true; // seqan3::detail::take_exactly adds this property
-    static constexpr bool const_size_member = true; // seqan3::detail::take_exactly adds this property
+    static constexpr bool size_member = true;           // seqan3::detail::take_exactly adds this property
+    static constexpr bool const_size_member = true;     // seqan3::detail::take_exactly adds this property
     static constexpr bool subscript_member = false;
 
     std::string_view expected_range()
@@ -265,14 +271,15 @@ TEST(view_take_exactly_or_throw, concepts)
 TEST(view_take_exactly_or_throw, underlying_is_shorter)
 {
     std::string vec{"foo"};
-    EXPECT_THROW(( seqan3::detail::take_exactly_or_throw(vec, 4) ),
-                   std::invalid_argument); // no parsing, but throws in adaptor
+    EXPECT_THROW((seqan3::detail::take_exactly_or_throw(vec, 4)),
+                 std::invalid_argument); // no parsing, but throws in adaptor
 
     std::list l{'f', 'o', 'o'};
-    EXPECT_THROW(( seqan3::detail::view_take_exactly<std::views::all_t<std::list<char> &>, true>(l, 4) ),
-                   std::invalid_argument); // no parsing, but throws on construction
+    EXPECT_THROW((seqan3::detail::view_take_exactly<std::views::all_t<std::list<char> &>, true>(l, 4)),
+                 std::invalid_argument); // no parsing, but throws on construction
 
-    EXPECT_THROW(std::ranges::for_each(vec | seqan3::views::single_pass_input
-                                           | seqan3::detail::take_exactly_or_throw(4), [](auto &&){}),
-                 seqan3::unexpected_end_of_input); // full parsing on conversion, throw on conversion
+    EXPECT_THROW(
+        std::ranges::for_each(vec | seqan3::views::single_pass_input | seqan3::detail::take_exactly_or_throw(4),
+                              [](auto &&) {}),
+        seqan3::unexpected_end_of_input); // full parsing on conversion, throw on conversion
 }

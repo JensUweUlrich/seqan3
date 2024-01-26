@@ -1,19 +1,19 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #pragma once
 
-#include <seqan3/alignment/pairwise/alignment_result.hpp>
 #include <seqan3/alignment/pairwise/align_result_selector.hpp>
+#include <seqan3/alignment/pairwise/alignment_result.hpp>
 #include <seqan3/alignment/pairwise/edit_distance_unbanded.hpp>
 #include <seqan3/test/seqan2.hpp>
 
 #ifdef SEQAN3_HAS_SEQAN2
-#include <seqan/find.h>
+#    include <seqan/find.h>
 #endif
 
 namespace seqan3::test
@@ -26,11 +26,10 @@ namespace seqan3::test
 struct edit_distance_algorithm
 {
     template <typename sequence1_t, typename sequence2_t, typename edit_distance_cfg_t>
-    using alignment_result_type = seqan3::alignment_result<
-        typename seqan3::detail::align_result_selector<
-            sequence1_t const &,
-            sequence2_t const &,
-            edit_distance_cfg_t>::type>;
+    using alignment_result_type =
+        seqan3::alignment_result<typename seqan3::detail::align_result_selector<sequence1_t const &,
+                                                                                sequence2_t const &,
+                                                                                edit_distance_cfg_t>::type>;
 
     template <typename sequence1_t, typename sequence2_t, typename edit_distance_cfg_t>
     static auto select(edit_distance_cfg_t edit_distance_cfg)
@@ -53,26 +52,24 @@ struct edit_distance_algorithm
                {
                    return algorithm_impl<std::false_type>::execute(sequence1, sequence2, edit_distance_cfg);
                };
-
     }
 
     template <typename is_semi_global_t>
     struct algorithm_impl
     {
         template <typename sequence1_t, typename sequence2_t, typename edit_distance_cfg_t>
-        static auto execute(sequence1_t const & sequence1,
-                            sequence2_t const & sequence2,
-                            edit_distance_cfg_t edit_distance_cfg)
+        static auto
+        execute(sequence1_t const & sequence1, sequence2_t const & sequence2, edit_distance_cfg_t edit_distance_cfg)
         {
             using alignment_result_t = alignment_result_type<sequence1_t, sequence2_t, edit_distance_cfg_t>;
-            auto edit_distance_cfg_with_result_type = edit_distance_cfg |
-                                                      seqan3::align_cfg::detail::result_type<alignment_result_t>{};
+            auto edit_distance_cfg_with_result_type =
+                edit_distance_cfg | seqan3::align_cfg::detail::result_type<alignment_result_t>{};
 
-            using edit_traits_t = seqan3::detail::default_edit_distance_trait_type<
-                sequence1_t const &,
-                sequence2_t const &,
-                decltype(edit_distance_cfg_with_result_type),
-                is_semi_global_t>;
+            using edit_traits_t =
+                seqan3::detail::default_edit_distance_trait_type<sequence1_t const &,
+                                                                 sequence2_t const &,
+                                                                 decltype(edit_distance_cfg_with_result_type),
+                                                                 is_semi_global_t>;
 
             seqan3::detail::edit_distance_unbanded edit_distance{sequence1,
                                                                  sequence2,
@@ -80,10 +77,11 @@ struct edit_distance_algorithm
                                                                  edit_traits_t{}};
 
             alignment_result_t align_result;
-            edit_distance(0u, [&align_result] (auto && result)
-            {
-                align_result = std::forward<decltype(result)>(result);
-            });
+            edit_distance(0u,
+                          [&align_result](auto && result)
+                          {
+                              align_result = std::forward<decltype(result)>(result);
+                          });
             return align_result;
         }
     };
@@ -127,12 +125,13 @@ struct edit_distance_algorithm_seqan2
         static int execute(sequence1_t & sequence1, sequence2_t & sequence2)
         {
             constexpr bool is_semi_global = is_semi_global_t{};
-            using method_t = std::conditional_t<is_semi_global, seqan::MyersUkkonen, seqan::MyersUkkonenGlobal>;
-            using pattern_t = seqan::Pattern<sequence2_t, method_t>;
+            using method_t = std::conditional_t<is_semi_global, seqan2::MyersUkkonen, seqan2::MyersUkkonenGlobal>;
+            using pattern_t = seqan2::Pattern<sequence2_t, method_t>;
 
             pattern_t pattern(sequence2, std::numeric_limits<int>::max());
-            seqan::Finder<sequence1_t> finder(sequence1);
-            while (seqan::find(finder, pattern));
+            seqan2::Finder<sequence1_t> finder(sequence1);
+            while (seqan2::find(finder, pattern))
+                ;
 
             return -static_cast<int>(pattern.errors);
         }

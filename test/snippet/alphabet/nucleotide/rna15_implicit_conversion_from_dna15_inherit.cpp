@@ -1,8 +1,8 @@
 // generated from test/snippet/alphabet/nucleotide/@target_alphabet@_implicit_conversion_from_@source_alphabet@_inherit.cpp.in
 
 //![main]
-#include <seqan3/alphabet/nucleotide/rna15.hpp>
 #include <seqan3/alphabet/nucleotide/dna15.hpp>
+#include <seqan3/alphabet/nucleotide/rna15.hpp>
 
 struct my_rna15 : public seqan3::rna15
 {
@@ -21,7 +21,7 @@ int main()
 }
 //![main]
 
-#include <seqan3/utility/concept/exposition_only/core_language.hpp>
+#include <seqan3/utility/concept.hpp>
 
 static_assert(seqan3::implicitly_convertible_to<seqan3::dna15, seqan3::rna15>);
 static_assert(!seqan3::implicitly_convertible_to<seqan3::dna15, my_rna15>);

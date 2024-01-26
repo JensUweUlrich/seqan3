@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <seqan3/std/ranges>
+#include <ranges>
 
 #include <seqan3/alphabet/hash.hpp>
 #include <seqan3/core/range/type_traits.hpp>
@@ -26,10 +26,8 @@ namespace std
  * \details
  * \experimentalapi{Experimental since version 3.1.}
  */
-template <ranges::input_range urng_t>
-//!\cond
+template <std::ranges::input_range urng_t>
     requires seqan3::semialphabet<std::ranges::range_reference_t<urng_t>>
-//!\endcond
 struct hash<urng_t>
 {
     /*!\brief Compute the hash for a range of characters.
@@ -40,10 +38,8 @@ struct hash<urng_t>
      * \details
      * \experimentalapi{Experimental since version 3.1.}
      */
-    template <ranges::input_range urng2_t>
-    //!\cond
+    template <std::ranges::input_range urng2_t>
         requires seqan3::semialphabet<std::ranges::range_reference_t<urng2_t>>
-    //!\endcond
     size_t operator()(urng2_t && range) const noexcept
     {
         using alphabet_t = std::ranges::range_reference_t<urng_t>;

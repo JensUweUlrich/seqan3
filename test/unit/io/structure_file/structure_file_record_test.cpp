@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -26,15 +26,10 @@ using seqan3::operator""_wuss51;
 
 struct structure_record : public ::testing::Test
 {
-    using types = seqan3::type_list<std::string,
-                                    seqan3::rna5_vector,
-                                    std::vector<seqan3::wuss51>,
-                                    double>;
-    using types_as_ids = seqan3::fields<seqan3::field::id,
-                                        seqan3::field::seq,
-                                        seqan3::field::structure,
-                                        seqan3::field::energy>;
-    using record_type  = seqan3::structure_record<types, types_as_ids>;
+    using types = seqan3::type_list<std::string, seqan3::rna5_vector, std::vector<seqan3::wuss51>, double>;
+    using types_as_ids =
+        seqan3::fields<seqan3::field::id, seqan3::field::seq, seqan3::field::structure, seqan3::field::energy>;
+    using record_type = seqan3::structure_record<types, types_as_ids>;
 };
 
 TEST_F(structure_record, concept)

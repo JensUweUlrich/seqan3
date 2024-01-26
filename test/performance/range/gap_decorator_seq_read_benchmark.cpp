@@ -1,18 +1,18 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
+
+#include <benchmark/benchmark.h>
 
 #include <chrono>
 #include <cmath>
 #include <cstring>
 #include <random>
-#include <seqan3/std/ranges>
+#include <ranges>
 #include <utility>
-
-#include <benchmark/benchmark.h>
 
 #include <seqan3/alignment/aligned_sequence/aligned_sequence_concept.hpp>
 #include <seqan3/alignment/decorator/gap_decorator.hpp>
@@ -39,28 +39,29 @@ void read_left2right(benchmark::State & state)
     std::vector<size_type> gaps(seq_len, 0);
 
     // determine sum of gaps and non-gap symbols for not exceeding targeted sequence length
-    if constexpr(gapped_flag)
+    if constexpr (gapped_flag)
     {
-        sample<size_type>(gaps, seq_len, state.range(1)/100.0);
+        sample<size_type>(gaps, seq_len, state.range(1) / 100.0);
         resize<size_type, sequence_type>(gaps, seq, seq_len);
     }
     // initialize with (truncated) sequence and insert gaps from left to right
     gap_decorator_t gap_decorator;
     assign_unaligned(gap_decorator, seq);
     // insert gaps before starting benchmark
-    if constexpr(gapped_flag)
+    if constexpr (gapped_flag)
         insert_gaps<gap_decorator_t>(gaps, gap_decorator, seq_len);
 
     auto it = std::ranges::begin(gap_decorator);
     for (auto _ : state)
     {
-        benchmark::DoNotOptimize(*it++);
+        auto deref_postincrement = *it++;
+        benchmark::DoNotOptimize(deref_postincrement);
         if (it == std::ranges::end(gap_decorator))
             it = std::ranges::begin(gap_decorator);
     }
 }
 
-using gap_sequence_gap_decorator = seqan3::gap_decorator<const std::vector<seqan3::dna4> &>;
+using gap_sequence_gap_decorator = seqan3::gap_decorator<std::vector<seqan3::dna4> const &>;
 using gap_sequence_vector = std::vector<seqan3::gapped<seqan3::dna4>>;
 
 // Read from left to right in UNGAPPED sequence

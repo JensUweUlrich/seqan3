@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -13,12 +13,11 @@
 #include <seqan3/core/concept/cereal.hpp>
 
 #if SEQAN3_WITH_CEREAL
-#include <cereal/archives/xml.hpp>
-#include <cereal/archives/json.hpp>
-#include <cereal/archives/binary.hpp>
-#include <cereal/archives/portable_binary.hpp>
-
-#include <cereal/types/array.hpp>
+#    include <cereal/archives/binary.hpp>
+#    include <cereal/archives/json.hpp>
+#    include <cereal/archives/portable_binary.hpp>
+#    include <cereal/archives/xml.hpp>
+#    include <cereal/types/array.hpp>
 #endif
 
 #if SEQAN3_WITH_CEREAL
@@ -71,7 +70,8 @@ TEST(cereal, cereal_text_archive)
     EXPECT_FALSE((seqan3::cereal_text_archive<cereal::PortableBinaryInputArchive>));
 }
 
-struct my_struct{};
+struct my_struct
+{};
 
 TEST(cereal, cerealisable)
 {

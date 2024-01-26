@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -88,9 +88,7 @@ public:
      * alignment result.
      */
     template <indexed_sequence_pair_range indexed_sequence_pairs_t, typename callback_t>
-    //!\cond
         requires std::invocable<callback_t, alignment_result_type>
-    //!\endcond
     constexpr void operator()(indexed_sequence_pairs_t && indexed_sequence_pairs, callback_t && callback)
     {
         using std::get;
@@ -101,8 +99,8 @@ public:
                                 get<1>(sequence_pair),
                                 std::forward<callback_t>(callback));
     }
-private:
 
+private:
     /*!\brief Invokes the actual alignment computation for a single pair of sequences.
      * \tparam    first_range_t  The type of the first sequence (or packed sequences); must model
      *                           std::ranges::forward_range.

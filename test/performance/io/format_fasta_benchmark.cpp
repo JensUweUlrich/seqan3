@@ -1,40 +1,39 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #if __has_include(<seqan/seq_io.h>)
-    #include <seqan/seq_io.h>
+#    include <seqan/seq_io.h>
 #endif
+
+#include <benchmark/benchmark.h>
 
 #include <algorithm>
 #include <cctype>
 #include <cstring>
 #include <sstream>
 
-#include <benchmark/benchmark.h>
-
 #include <seqan3/alphabet/quality/all.hpp>
+#include <seqan3/io/sequence_file/format_fasta.hpp>
 #include <seqan3/io/sequence_file/input.hpp>
 #include <seqan3/io/sequence_file/input_format_concept.hpp>
 #include <seqan3/io/sequence_file/output.hpp>
 #include <seqan3/io/sequence_file/output_format_concept.hpp>
-#include <seqan3/io/sequence_file/format_fasta.hpp>
 #include <seqan3/test/performance/units.hpp>
 #include <seqan3/utility/views/convert.hpp>
 
 inline constexpr size_t iterations_per_run = 1024;
 
 inline std::string const fasta_hdr{"seq foobar blobber"};
-inline std::string const fasta_seq{
-    "ACTAGACTAGCTACGATCAGCTACGATCAGCTACGAACTAGACTAGCTACGATACTAGACTAGCTACGATCAGCTACGA"
-    "ACTAGACTAGCTACGATCAGCTACGATCAGCTACGAACTAGACTAGCTACGATACTAGACTAGCTACGATCAGCTACGA"
-    "ACTAGACTAGCTACGATCAGCTACGATCAGCTACGAACTAGACTAGCTACGATACTAGACTAGCTACGATCAGCTACGA"
-    "ACTAGACTAGCTACGATCAGCTACGATCAGCTACGAACTAGACTAGCTACGATACTAGACTAGCTACGATCAGCTACGA"
-    "ACTAGACTAGCTACGATCAGCTACGATCAGCTACGAACTAGACTAGCTACGATACTAGACTAGCTACGATCAGCTACGA"
-    "ACTAGACTAGCTACGATCAGCTACGATCAGCTACGAACTAGACTAGCTACGATACTAGACTAGCTACGATCAGCTACGA"};
+inline std::string const fasta_seq{"ACTAGACTAGCTACGATCAGCTACGATCAGCTACGAACTAGACTAGCTACGATACTAGACTAGCTACGATCAGCTACGA"
+                                   "ACTAGACTAGCTACGATCAGCTACGATCAGCTACGAACTAGACTAGCTACGATACTAGACTAGCTACGATCAGCTACGA"
+                                   "ACTAGACTAGCTACGATCAGCTACGATCAGCTACGAACTAGACTAGCTACGATACTAGACTAGCTACGATCAGCTACGA"
+                                   "ACTAGACTAGCTACGATCAGCTACGATCAGCTACGAACTAGACTAGCTACGATACTAGACTAGCTACGATCAGCTACGA"
+                                   "ACTAGACTAGCTACGATCAGCTACGATCAGCTACGAACTAGACTAGCTACGATACTAGACTAGCTACGATCAGCTACGA"
+                                   "ACTAGACTAGCTACGATCAGCTACGATCAGCTACGAACTAGACTAGCTACGATACTAGACTAGCTACGATCAGCTACGA"};
 //TODO: benchmark with spaces/newlines
 
 static std::string fasta_file = []()
@@ -48,8 +47,9 @@ static std::string fasta_file = []()
 void seqan3_dna5_ostringstream_write(benchmark::State & state)
 {
     std::ostringstream ostream;
-    seqan3::sequence_file_output fout{ostream, seqan3::format_fasta{}, seqan3::fields<seqan3::field::id,
-                                                                                      seqan3::field::seq>{}};
+    seqan3::sequence_file_output fout{ostream,
+                                      seqan3::format_fasta{},
+                                      seqan3::fields<seqan3::field::id, seqan3::field::seq>{}};
 
     for (auto _ : state)
     {
@@ -72,17 +72,17 @@ BENCHMARK(seqan3_dna5_ostringstream_write);
 void seqan2_dna5_ostringstream_write(benchmark::State & state)
 {
     std::ostringstream ostream;
-    seqan::CharString id = fasta_hdr;
-    seqan::Dna5String seq = fasta_seq;
+    seqan2::CharString id = fasta_hdr;
+    seqan2::Dna5String seq = fasta_seq;
 
     for (auto _ : state)
     {
         for (size_t i = 0; i < iterations_per_run; ++i)
-            seqan::writeRecord(ostream, id, seq, seqan::Fasta());
+            seqan2::writeRecord(ostream, id, seq, seqan2::Fasta());
     }
 
     ostream = std::ostringstream{};
-    seqan::writeRecord(ostream, id, seq, seqan::Fasta());
+    seqan2::writeRecord(ostream, id, seq, seqan2::Fasta());
     size_t bytes_per_run = ostream.str().size() * iterations_per_run;
     state.counters["iterations_per_run"] = iterations_per_run;
     state.counters["bytes_per_run"] = bytes_per_run;
@@ -116,12 +116,12 @@ BENCHMARK(seqan3_dna5_istringstream_read);
 
 #if __has_include(<seqan/seq_io.h>)
 
-#include <fstream>
+#    include <fstream>
 
 void seqan2_dna5_istringstream_read(benchmark::State & state)
 {
-    seqan::CharString id;
-    seqan::Dna5String seq;
+    seqan2::CharString id;
+    seqan2::Dna5String seq;
 
     std::istringstream istream{fasta_file};
 
@@ -129,11 +129,11 @@ void seqan2_dna5_istringstream_read(benchmark::State & state)
     {
         istream.clear();
         istream.seekg(0, std::ios::beg);
-        auto it = seqan::Iter<std::istringstream, seqan::StreamIterator<seqan::Input> >(istream);
+        auto it = seqan2::Iter<std::istringstream, seqan2::StreamIterator<seqan2::Input>>(istream);
 
         for (size_t i = 0; i < iterations_per_run; ++i)
         {
-            readRecord(id, seq, it, seqan::Fasta{});
+            readRecord(id, seq, it, seqan2::Fasta{});
             clear(id);
             clear(seq);
         }

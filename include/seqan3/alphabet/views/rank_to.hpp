@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <seqan3/std/ranges>
+#include <ranges>
 
 #include <seqan3/alphabet/concept.hpp>
 #include <seqan3/utility/views/deep.hpp>
@@ -62,12 +62,11 @@ namespace seqan3::views
  * \stableapi{Since version 3.1.}
  */
 template <typename alphabet_type>
-//!\cond
     requires writable_semialphabet<alphabet_type>
-//!\endcond
-inline auto const rank_to = deep{std::views::transform([] (alphabet_rank_t<alphabet_type> const in) -> alphabet_type
-{
-    return assign_rank_to(in, alphabet_type{});
-})};
+inline auto const rank_to = deep{std::views::transform(
+    [](alphabet_rank_t<alphabet_type> const in) -> alphabet_type
+    {
+        return assign_rank_to(in, alphabet_type{});
+    })};
 
 } // namespace seqan3::views

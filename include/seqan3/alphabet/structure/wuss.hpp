@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -13,6 +13,7 @@
 #pragma once
 
 #include <cmath>
+#include <limits>
 #include <vector>
 
 #include <seqan3/alphabet/alphabet_base.hpp>
@@ -69,23 +70,23 @@ private:
     friend base_t;
 
 protected:
-    using typename base_t::rank_type;
     using typename base_t::char_type;
+    using typename base_t::rank_type;
 
 public:
     using base_t::alphabet_size;
-    using base_t::to_rank;
     using base_t::to_char;
+    using base_t::to_rank;
 
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr wuss()                         noexcept = default; //!< Defaulted.
-    constexpr wuss(wuss const &)             noexcept = default; //!< Defaulted.
-    constexpr wuss(wuss &&)                  noexcept = default; //!< Defaulted.
+    constexpr wuss() noexcept = default;                         //!< Defaulted.
+    constexpr wuss(wuss const &) noexcept = default;             //!< Defaulted.
+    constexpr wuss(wuss &&) noexcept = default;                  //!< Defaulted.
     constexpr wuss & operator=(wuss const &) noexcept = default; //!< Defaulted.
-    constexpr wuss & operator=(wuss &&)      noexcept = default; //!< Defaulted.
-    ~wuss()                                  noexcept = default; //!< Defaulted.
+    constexpr wuss & operator=(wuss &&) noexcept = default;      //!< Defaulted.
+    ~wuss() noexcept = default;                                  //!< Defaulted.
 
     //!\}
 
@@ -148,46 +149,6 @@ public:
     //!\}
 
 private:
-    //!\copydoc seqan3::dna4::rank_to_char_table
-    static constexpr std::array<char_type, alphabet_size> rank_to_char_table
-    {
-        [] () constexpr
-        {
-            std::array<char_type, alphabet_size> chars
-            {
-                '.', ':', ',', '-', '_', '~', ';', '<', '(', '[', '{', '>', ')', ']', '}'
-            };
-
-            // pseudoknot letters
-            for (rank_type rnk = 15u; rnk + 1u < alphabet_size; rnk += 2u)
-            {
-                char_type const off = static_cast<char_type>((rnk - 15u) / 2u);
-                chars[rnk] = 'A' + off;
-                chars[rnk + 1u] = 'a' + off;
-            }
-
-            return chars;
-        } ()
-    };
-
-    //!\copydoc seqan3::dna4::char_to_rank_table
-    static constexpr std::array<rank_type, 256> char_to_rank_table
-    {
-        [] () constexpr
-        {
-            std::array<rank_type, 256> rank_table{};
-
-            // initialize with unpaired (std::array::fill unfortunately not constexpr)
-            for (rank_type & rnk : rank_table)
-                rnk = 6u;
-
-            // set alphabet values
-            for (rank_type rnk = 0u; rnk < alphabet_size; ++rnk)
-                rank_table[rank_to_char_table[rnk]] = rnk;
-            return rank_table;
-        } ()
-    };
-
     //!\copydoc seqan3::dna4::rank_to_char
     static constexpr char_type rank_to_char(rank_type const rank)
     {
@@ -201,42 +162,75 @@ private:
         return char_to_rank_table[static_cast<index_t>(chr)];
     }
 
+    // clang-format off
+    //!\copydoc seqan3::dna4::rank_to_char_table
+    static constexpr std::array<char_type, alphabet_size> rank_to_char_table
+    {
+        []() constexpr {
+            std::array<char_type, alphabet_size> chars{'.', ':', ',', '-', '_', '~', ';', '<', '(', '[', '{', '>', ')',
+                                                       ']', '}'};
+
+            // pseudoknot letters
+            for (rank_type rnk = 15u; rnk + 1u < alphabet_size; rnk += 2u)
+            {
+                char_type const off = static_cast<char_type>((rnk - 15u) / 2u);
+                chars[rnk] = 'A' + off;
+                chars[rnk + 1u] = 'a' + off;
+            }
+
+            return chars;
+        }()
+    };
+
+    //!\copydoc seqan3::dna4::char_to_rank_table
+    static constexpr std::array<rank_type, 256> char_to_rank_table
+    {
+        []() constexpr {
+            std::array<rank_type, 256> rank_table{};
+
+            rank_table.fill(6u);
+
+            // set alphabet values
+            for (rank_type rnk = 0u; rnk < alphabet_size; ++rnk)
+                rank_table[rank_to_char_table[rnk]] = rnk;
+
+            return rank_table;
+        }()
+    };
+
     /*!\brief Lookup table for interactions: unpaired (0), pair-open (< 0), pair-close (> 0).
      * Paired brackets have the same absolute value.
      */
-    static std::array<int8_t, SIZE> const interaction_tab;
+    static constexpr std::array<int8_t, SIZE> interaction_tab
+    {
+        []() constexpr {
+            static_assert(static_cast<int16_t>(std::numeric_limits<int8_t>::max()) >= SIZE);
+            static_assert(- static_cast<int16_t>(std::numeric_limits<int8_t>::min()) >= SIZE);
+
+            std::array<int8_t, alphabet_size> interaction_table{};
+            int8_t cnt_open = 0;
+            int8_t cnt_close = 0;
+
+            for (rank_type rnk = 0u; rnk <= 6u; ++rnk)
+                interaction_table[rnk] = 0;
+
+            for (rank_type rnk = 7u; rnk <= 10u; ++rnk)
+                interaction_table[rnk] = --cnt_open;
+
+            for (rank_type rnk = 11u; rnk <= 14u; ++rnk)
+                interaction_table[rnk] = ++cnt_close;
+
+            for (rank_type rnk = 15u; rnk + 1u < alphabet_size; rnk += 2u)
+            {
+                interaction_table[rnk] = --cnt_open;
+                interaction_table[rnk + 1u] = ++cnt_close;
+            }
+
+            return interaction_table;
+        }()
+    };
 };
-
-template <uint8_t SIZE>
-constexpr std::array<int8_t, SIZE> wuss<SIZE>::interaction_tab = [] () constexpr
-{
-    std::array<int8_t, alphabet_size> interaction_table{};
-    int cnt_open = 0;
-    int cnt_close = 0;
-
-    for (rank_type rnk = 0u; rnk <= 6u; ++rnk)
-    {
-        interaction_table[rnk] = 0;
-    }
-
-    for (rank_type rnk = 7u; rnk <= 10u; ++rnk)
-    {
-        interaction_table[rnk] = --cnt_open;
-    }
-
-    for (rank_type rnk = 11u; rnk <= 14u; ++rnk)
-    {
-        interaction_table[rnk] = ++cnt_close;
-    }
-
-    for (rank_type rnk = 15u; rnk + 1u < alphabet_size; rnk += 2u)
-    {
-        interaction_table[rnk]      = --cnt_open;
-        interaction_table[rnk + 1u] = ++cnt_close;
-    }
-
-    return interaction_table;
-} ();
+// clang-format on
 
 /*!\brief Alias for the default type wuss51.
  * \relates seqan3::wuss
@@ -275,7 +269,7 @@ constexpr wuss51 operator""_wuss51(char const ch) noexcept
  *
  * \experimentalapi{Experimental since version 3.1.}
  */
-inline std::vector<wuss51> operator""_wuss51(const char * str, std::size_t len)
+SEQAN3_WORKAROUND_LITERAL std::vector<wuss51> operator""_wuss51(char const * str, std::size_t len)
 {
     std::vector<wuss51> vec;
     vec.resize(len);
@@ -287,6 +281,6 @@ inline std::vector<wuss51> operator""_wuss51(const char * str, std::size_t len)
 }
 //!\}
 
-} // inline namespace literals
+} // namespace literals
 
 } // namespace seqan3

@@ -1,14 +1,15 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #include <gtest/gtest.h>
 
+#include <ranges>
+
 #include <seqan3/alignment/configuration/align_config_band.hpp>
-#include <seqan3/std/ranges>
 
 template <typename t>
 struct alignment_matrix_base_test : public ::testing::Test
@@ -135,5 +136,10 @@ TYPED_TEST_P(alignment_matrix_base_test, empty_col_row)
     }
 }
 
-REGISTER_TYPED_TEST_SUITE_P(alignment_matrix_base_test, range_concepts, begin_end, basic_construction, empty_row,
-                            empty_col, empty_col_row);
+REGISTER_TYPED_TEST_SUITE_P(alignment_matrix_base_test,
+                            range_concepts,
+                            begin_end,
+                            basic_construction,
+                            empty_row,
+                            empty_col,
+                            empty_col_row);

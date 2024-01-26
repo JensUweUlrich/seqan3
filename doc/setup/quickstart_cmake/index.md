@@ -12,33 +12,33 @@ works.
 
 # Software
 Requirements:
-  - gcc >= 7
-  - cmake >= 3.4
+  - gcc >= 11
+  - cmake >= 3.5
   - git
 
 ## Installing GCC
 
-SeqAn requires a compiler with full C++20 support *or* GCC >= 7. Current versions of LLVM/Clang and VisualStudio/MSVC
-are **not yet supported**.
-We will briefly explain how to install GCC-10 (or the latest GCC if such an option is available) on some popular
+SeqAn requires GCC >= 11. Current versions of LLVM/Clang and VisualStudio/MSVC are **not yet supported**.
+We will briefly explain how to install GCC-11 (or the latest GCC if such an option is available) on some popular
 operating systems. We recommend using the latest version of GCC available. For more information, refer to your
 operating system's documentation.
 
-\startcollapsible{Linux-based}
-
-#### Ubuntu >= 18.04
+### Linux
+<div class="tabbed">
+- <b class="tab-title">Ubuntu >= 22.04</b>
 ```bash
+# Installs default compiler version (gcc-11 for Ubuntu 22.04).
 sudo apt install g++
+# To install gcc-12, follow instructions for Ubuntu < 22.04.
 ```
-
-#### Ubuntu < 18.04
+- <b class="tab-title">Ubuntu < 22.04</b>
 ```bash
-sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-sudo apt update
-sudo apt install g++-10
+sudo add-apt-repository --no-update --yes ppa:ubuntu-toolchain-r/ppa
+sudo add-apt-repository --no-update --yes ppa:ubuntu-toolchain-r/test
+sudo apt-get update
+sudo apt install g++-11
 ```
-
-#### Using [conda](https://conda.io)
+- <b class="tab-title">Using conda</b>
 To avoid interference with system packages, we recommend creating a new environment when using conda.
 ```bash
 conda create -n conda_gcc_env -c conda-forge gcc_linux-64
@@ -47,48 +47,41 @@ conda activate conda_gcc_env
 This will put GCC in a separate environment `conda_gcc_env` which can be activated via `conda activate conda_gcc_env`
 and deactivated via `conda deactivate`.
 
-\endcollapsible
+</div>
 
-\startcollapsible{macOS}
-
-#### Using [Homebrew](https://brew.sh/)
+### macOS
+<div class="tabbed">
+- <b class="tab-title">Using Homebrew</b>
 ```bash
-brew install gcc
+brew install gcc@11
+```
+- <b class="tab-title">Using Macports</b>
+```bash
+sudo port install gcc11
 ```
 
-#### Using [MacPorts](https://www.macports.org/)
-```bash
-sudo port install gcc10
-```
+</div>
 
-\endcollapsible
-
-\startcollapsible{Windows}
-
-#### Using [WSL](https://docs.microsoft.com/en-us/windows/wsl/about)
+### Windows
 The Windows Subsystem for Linux offers an easy way to run a Linux distribution under Windows.
 Follow [Microsoft's setup guide](https://docs.microsoft.com/en-us/windows/wsl/about) to install WSL and then follow
 the steps listed for Linux-based systems.
 
-\endcollapsible
-
-\startcollapsible{Browser-based}
-
-#### Using [gitpod.io](https://gitpod.io/#https://github.com/seqan/seqan3/)
+### Browser
+<div class="tabbed">
+- <b class="tab-title">Using gitpod.io</b>
 [gitpod.io](https://gitpod.io) allows you to edit, compile and run code from within your browser. The free version includes 50
 hours of use per month, which is plenty for our tutorials. A GitHub account is required.
 [Click here](https://gitpod.io/#https://github.com/seqan/seqan3/) to open SeqAn3 in gitpod.
-
-#### Using [GitHub codespaces](https://github.com/codespaces)
-GitHub offers a service similar to gitpod. Codespaces are currently in **public beta** and may not be available to
-everyone. [Click here](https://github.com/codespaces) to check for availability.
-
+- <b class="tab-title">Using GitHub Codespaces</b>
+[GitHub Codespaces](https://github.com/codespaces) offer a service similar to gitpod, including a free monthly quota.
+[Click here](https://codespaces.new/seqan/seqan3) to open SeqAn3 in Codespaces.
 Please note that you may have to manually clone the submodules by running `git submodule update --init`.
 
-\endcollapsible
-
-\attention After installing, `g++ --version` should print the desired version.
-           If not, you may have to use, for example, `g++-10 --version` or even specify the full path to your compiler.
+</div>
+<br>
+\attention After installing, `g++ --version` should print the desired GCC version.
+           If not, you may have to use, for example, `g++-11 --version` or even specify the full path to your compiler.
 
 Similarly, you may need to install CMake and git, e.g. `apt install cmake git`.
 
@@ -120,8 +113,8 @@ The output of the command `tree -L 2` should now look like this:
 .
 ├── build
 ├── seqan3
-│   ├── build_system
 │   ├── CHANGELOG.md
+│   ├── CMakeLists.txt
 │   ├── ...
 │   └── test
 └── source
@@ -151,8 +144,8 @@ The directories should now look like this:
 .
 ├── build
 ├── seqan3
-│   ├── build_system
 │   ├── CHANGELOG.md
+│   ├── CMakeLists.txt
 │   ├── ...
 │   └── test
 └── source
@@ -174,10 +167,11 @@ suitable for the end user. Programs built using `-DCMAKE_BUILD_TYPE=Debug` will 
 of errors easier. `Debug` is suitable for contributors, and we recommend using it while working with our
 [Tutorials](usergroup1.html).
 
+\anchor remark_cmake_cxx_compiler
 \remark Depending on the standard C++ compiler on your system, you may need to specify the compiler via
 `-DCMAKE_CXX_COMPILER=`, for example:
 ```bash
-cmake -DCMAKE_CXX_COMPILER=/path/to/executable/g++-10 ../source
+cmake -DCMAKE_CXX_COMPILER=/path/to/executable/g++-11 ../source
 ```
 
 # Adding a new source file to your project
@@ -186,6 +180,33 @@ If you create a new `cpp` file and want to compile it, you need to add another `
 `target_link_libraries` directive to you `CMakeLists.txt`.
 For example, after adding `another_program.cpp` your `CMakeLists.txt` may look like this:
 \snippet test/external_project/seqan3_setup_tutorial/CMakeLists.txt adding_files
+
+# Including SeqAn3 as external project
+
+```cmake
+cmake_minimum_required (VERSION 3.14)
+
+project (my_app LANGUAGES CXX VERSION 1.0.0)
+
+set (seqan3_git_tag "#.#.#") # adapt as needed, e.g. "3.2.0" or "master"
+
+message (STATUS "Fetching SeqAn3 ${seqan3_git_tag}:")
+
+include (FetchContent)
+FetchContent_Declare (
+    seqan3_fetch_content
+    GIT_REPOSITORY "https://github.com/seqan/seqan3.git"
+    GIT_TAG "${seqan3_git_tag}"
+)
+
+# Download and make SeqAn3 available.
+FetchContent_MakeAvailable (seqan3_fetch_content)
+
+add_executable (my_app my_app.cpp)
+
+# Set up everything needed to use SeqAn3 with my_app:
+target_link_libraries (my_app PUBLIC seqan3::seqan3)
+```
 
 # Encountered issues
 
@@ -203,3 +224,12 @@ For example, after adding `another_program.cpp` your `CMakeLists.txt` may look l
   export PATH=/usr/bin:$PATH
   ```
   and run `cmake` again.
+
+* **SDSL library not found**: `The SDSL library is required, but wasn't found.`<br>
+  The repository was not cloned correctly. This can be verified by checking whether
+  `submodules/sdsl-lite/include/version.hpp` exists.
+  If it does not, try running `git submodule update --init` within the seqan3 directory.
+
+* **Incorrect compiler**: `Your compiler is not supported.` or `Only GCC is supported.`<br>
+  The incorrect compiler is used (e.g., Apple Clang instead of GCC). Be sure to set `-DCMAKE_CXX_COMPILER=`. For an
+  example, see \ref remark_cmake_cxx_compiler "this remark".

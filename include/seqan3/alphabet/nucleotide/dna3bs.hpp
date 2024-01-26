@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -65,7 +65,8 @@ private:
 
     //!\brief Befriend seqan3::nucleotide_base.
     friend base_t;
-    //!\cond \brief Befriend seqan3::alphabet_base.
+    //!\cond
+    //!\brief Befriend seqan3::alphabet_base.
     friend base_t::base_t;
     //!\endcond
 
@@ -73,62 +74,22 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr dna3bs()                            noexcept = default; //!< Defaulted.
-    constexpr dna3bs(dna3bs const &)              noexcept = default; //!< Defaulted.
-    constexpr dna3bs(dna3bs &&)                   noexcept = default; //!< Defaulted.
-    constexpr dna3bs & operator=(dna3bs const &)  noexcept = default; //!< Defaulted.
-    constexpr dna3bs & operator=(dna3bs &&)       noexcept = default; //!< Defaulted.
-    ~dna3bs()                                     noexcept = default; //!< Defaulted.
+    constexpr dna3bs() noexcept = default;                           //!< Defaulted.
+    constexpr dna3bs(dna3bs const &) noexcept = default;             //!< Defaulted.
+    constexpr dna3bs(dna3bs &&) noexcept = default;                  //!< Defaulted.
+    constexpr dna3bs & operator=(dna3bs const &) noexcept = default; //!< Defaulted.
+    constexpr dna3bs & operator=(dna3bs &&) noexcept = default;      //!< Defaulted.
+    ~dna3bs() noexcept = default;                                    //!< Defaulted.
 
     using base_t::base_t;
     //!\}
 
 private:
     //!\copydoc seqan3::dna4::rank_to_char_table
-    static constexpr char_type rank_to_char_table[alphabet_size]
-    {
-        'A',
-        'G',
-        'T'
-    };
-
-    //!\copydoc seqan3::dna4::char_to_rank_table
-    static constexpr std::array<rank_type, 256> char_to_rank_table
-    {
-        [] () constexpr
-        {
-            std::array<rank_type, 256> ret{};
-
-            // reverse mapping for characters and their lowercase
-            for (size_t rnk = 0u; rnk < alphabet_size; ++rnk)
-            {
-                ret[rank_to_char_table[rnk]] = rnk;
-                ret[to_lower(rank_to_char_table[rnk])] = rnk;
-            }
-
-            // set C and U equal to T
-            ret['C'] = ret['T']; ret['c'] = ret['t'];
-            ret['U'] = ret['T']; ret['u'] = ret['t'];
-
-            // iupac characters get special treatment, because there is no N
-            ret['R'] = ret['A']; ret['r'] = ret['A']; // A or G becomes A
-            ret['Y'] = ret['T']; ret['y'] = ret['T']; // C or T becomes T
-            ret['S'] = ret['T']; ret['s'] = ret['T']; // C or G becomes T
-            ret['W'] = ret['A']; ret['w'] = ret['A']; // A or T becomes A
-            ret['K'] = ret['G']; ret['k'] = ret['G']; // G or T becomes G
-            ret['M'] = ret['A']; ret['m'] = ret['A']; // A or C becomes A
-            ret['B'] = ret['T']; ret['b'] = ret['T']; // C or G or T becomes T
-            ret['D'] = ret['A']; ret['d'] = ret['A']; // A or G or T becomes A
-            ret['H'] = ret['A']; ret['h'] = ret['A']; // A or C or T becomes A
-            ret['V'] = ret['A']; ret['v'] = ret['A']; // A or C or G  becomes A
-
-            return ret;
-        }()
-    };
+    static constexpr char_type rank_to_char_table[alphabet_size]{'A', 'G', 'T'};
 
     //!\copydoc seqan3::dna4::rank_complement_table
-    static constexpr rank_type rank_complement_table[alphabet_size]
-    {
+    static constexpr rank_type rank_complement_table[alphabet_size]{
         2, // T is complement of 'A'_dna3bs
         2, // T is complement of 'G'_dna3bs
         0  // A is complement of 'T'_dna3bs
@@ -152,7 +113,54 @@ private:
         using index_t = std::make_unsigned_t<char_type>;
         return char_to_rank_table[static_cast<index_t>(chr)];
     }
+
+    // clang-format off
+    //!\copydoc seqan3::dna4::char_to_rank_table
+    static constexpr std::array<rank_type, 256> char_to_rank_table
+    {
+        []() constexpr {
+            std::array<rank_type, 256> ret{};
+
+            // reverse mapping for characters and their lowercase
+            for (size_t rnk = 0u; rnk < alphabet_size; ++rnk)
+            {
+                ret[rank_to_char_table[rnk]] = rnk;
+                ret[to_lower(rank_to_char_table[rnk])] = rnk;
+            }
+
+            // set C and U equal to T
+            ret['C'] = ret['T'];
+            ret['c'] = ret['t'];
+            ret['U'] = ret['T'];
+            ret['u'] = ret['t'];
+
+            // iupac characters get special treatment, because there is no N
+            ret['R'] = ret['A'];
+            ret['r'] = ret['A']; // A or G becomes A
+            ret['Y'] = ret['T'];
+            ret['y'] = ret['T']; // C or T becomes T
+            ret['S'] = ret['T'];
+            ret['s'] = ret['T']; // C or G becomes T
+            ret['W'] = ret['A'];
+            ret['w'] = ret['A']; // A or T becomes A
+            ret['K'] = ret['G'];
+            ret['k'] = ret['G']; // G or T becomes G
+            ret['M'] = ret['A'];
+            ret['m'] = ret['A']; // A or C becomes A
+            ret['B'] = ret['T'];
+            ret['b'] = ret['T']; // C or G or T becomes T
+            ret['D'] = ret['A'];
+            ret['d'] = ret['A']; // A or G or T becomes A
+            ret['H'] = ret['A'];
+            ret['h'] = ret['A']; // A or C or T becomes A
+            ret['V'] = ret['A'];
+            ret['v'] = ret['A']; // A or C or G  becomes A
+
+            return ret;
+        }()
+    };
 };
+// clang-format on
 
 // ------------------------------------------------------------------
 // containers
@@ -199,7 +207,7 @@ constexpr dna3bs operator""_dna3bs(char const c) noexcept
  *
  * \stableapi{Since version 3.1.}
  */
-inline dna3bs_vector operator""_dna3bs(char const * s, std::size_t n)
+SEQAN3_WORKAROUND_LITERAL dna3bs_vector operator""_dna3bs(char const * s, std::size_t n)
 {
     dna3bs_vector r;
     r.resize(n);
@@ -211,6 +219,6 @@ inline dna3bs_vector operator""_dna3bs(char const * s, std::size_t n)
 }
 //!\}
 
-} // inline namespace literals
+} // namespace literals
 
 } // namespace seqan3

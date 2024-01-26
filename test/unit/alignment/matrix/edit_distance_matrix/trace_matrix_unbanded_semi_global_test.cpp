@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -71,18 +71,15 @@ TEST(semi_global, single_word)
 
     // row-wise matrix
     std::vector<std::vector<seqan3::detail::trace_directions>> result = as_row_wise_vector(matrix);
-    std::vector<std::vector<seqan3::detail::trace_directions>> expect
-    {
-        {N  ,N  ,N  ,N  ,N  ,N  ,N  ,N  ,N  ,N  },
-        {u  ,D  ,D  ,Dul,Du ,Du ,Du ,Du ,Du ,D  },
-        {u  ,u  ,Du ,D  ,Dl ,Dul,Du ,Du ,Du ,u  },
-        {u  ,u  ,Du ,u  ,D  ,D  ,Dl ,Dul,Du ,u  },
-        {u  ,u  ,Du ,u  ,Du ,Du ,D  ,D  ,Dl ,u  },
-        {u  ,Du ,D  ,u  ,Du ,Du ,Du ,Du ,D  ,D  },
-        {u  ,u  ,u  ,D  ,D  ,Dul,Du ,Du ,Du ,Du },
-        {u  ,u  ,u  ,u  ,Du ,D  ,Dl ,Dul,Du ,Du },
-        {u  ,u  ,u  ,u  ,Du ,u  ,D  ,D  ,Dl ,Dul}
-    };
+    std::vector<std::vector<seqan3::detail::trace_directions>> expect{{N, N, N, N, N, N, N, N, N, N},
+                                                                      {u, D, D, Dul, Du, Du, Du, Du, Du, D},
+                                                                      {u, u, Du, D, Dl, Dul, Du, Du, Du, u},
+                                                                      {u, u, Du, u, D, D, Dl, Dul, Du, u},
+                                                                      {u, u, Du, u, Du, Du, D, D, Dl, u},
+                                                                      {u, Du, D, u, Du, Du, Du, Du, D, D},
+                                                                      {u, u, u, D, D, Dul, Du, Du, Du, Du},
+                                                                      {u, u, u, u, Du, D, Dl, Dul, Du, Du},
+                                                                      {u, u, u, u, Du, u, D, D, Dl, Dul}};
 
     EXPECT_EQ(result, expect);
 }
@@ -125,27 +122,24 @@ TEST(semi_global, multiple_words)
 
     // row-wise matrix
     std::vector<std::vector<seqan3::detail::trace_directions>> result = as_row_wise_vector(matrix);
-    std::vector<std::vector<seqan3::detail::trace_directions>> expect
-    {
-        {N  ,N  ,N  ,N  ,N  ,N  ,N  ,N  ,N  ,N  },
-        {u  ,D  ,Dul,Du ,Du ,D  ,Dul,Du ,Du ,D  },
-        {u  ,Du ,D  ,Dul,Du ,Du ,D  ,Dl ,Dul,Du },
-        {u  ,u  ,D  ,Dl ,Dul,u  ,Du ,D  ,Dl ,u  },
-        {u  ,u  ,Du ,D  ,Dl ,u  ,Du ,D  ,Dl ,ul },
-        {u  ,u  ,u  ,D  ,Dl ,Dul,u  ,Du ,D  ,D  },
-        {u  ,u  ,u  ,Du ,D  ,Dl ,u  ,Du ,D  ,D  },
-        {u  ,u  ,u  ,u  ,D  ,Dl ,Dul,u  ,Du ,Du },
-        {u  ,u  ,u  ,u  ,Du ,D  ,Dl ,u  ,Du ,D  },
-        {u  ,Du ,u  ,u  ,u  ,D  ,Dl ,Dul,u  ,Du },
-        {u  ,Du ,u  ,u  ,u  ,Du ,D  ,Dl ,u  ,Du },
-        {u  ,u  ,Du ,u  ,u  ,u  ,D  ,Dl ,Dul,u  },
-        {u  ,u  ,Du ,u  ,u  ,u  ,Du ,D  ,Dl ,u  },
-        {u  ,u  ,u  ,Du ,u  ,u  ,u  ,D  ,Dl ,Dul},
-        {u  ,u  ,u  ,Du ,u  ,u  ,u  ,Du ,D  ,Dl },
-        {u  ,u  ,u  ,u  ,Du ,u  ,u  ,u  ,D  ,Dl },
-        {u  ,u  ,u  ,u  ,Du ,u  ,u  ,u  ,Du ,D  },
-        {u  ,u  ,u  ,u  ,Du ,u  ,u  ,u  ,Du ,D  }
-    };
+    std::vector<std::vector<seqan3::detail::trace_directions>> expect{{N, N, N, N, N, N, N, N, N, N},
+                                                                      {u, D, Dul, Du, Du, D, Dul, Du, Du, D},
+                                                                      {u, Du, D, Dul, Du, Du, D, Dl, Dul, Du},
+                                                                      {u, u, D, Dl, Dul, u, Du, D, Dl, u},
+                                                                      {u, u, Du, D, Dl, u, Du, D, Dl, ul},
+                                                                      {u, u, u, D, Dl, Dul, u, Du, D, D},
+                                                                      {u, u, u, Du, D, Dl, u, Du, D, D},
+                                                                      {u, u, u, u, D, Dl, Dul, u, Du, Du},
+                                                                      {u, u, u, u, Du, D, Dl, u, Du, D},
+                                                                      {u, Du, u, u, u, D, Dl, Dul, u, Du},
+                                                                      {u, Du, u, u, u, Du, D, Dl, u, Du},
+                                                                      {u, u, Du, u, u, u, D, Dl, Dul, u},
+                                                                      {u, u, Du, u, u, u, Du, D, Dl, u},
+                                                                      {u, u, u, Du, u, u, u, D, Dl, Dul},
+                                                                      {u, u, u, Du, u, u, u, Du, D, Dl},
+                                                                      {u, u, u, u, Du, u, u, u, D, Dl},
+                                                                      {u, u, u, u, Du, u, u, u, Du, D},
+                                                                      {u, u, u, u, Du, u, u, u, Du, D}};
 
     EXPECT_EQ(result, expect);
 }

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -20,17 +20,16 @@ struct create_temporary_snippet_file
 {
     std::filesystem::path file_path;
 
-    create_temporary_snippet_file(std::filesystem::path const & file_name, std::string const & file_raw)
-        : file_path{}
+    create_temporary_snippet_file(std::filesystem::path const & file_name, std::string const & file_raw) : file_path{}
     {
         // create single folder instance (across multiple seqan3::test::create_temporary_snippet_file instances) that is
         // valid during the complete program. std::filesystem::current_path will point to that location.
         static seqan3::test::tmp_directory const tmp_folder{[]()
-        {
-            seqan3::test::tmp_directory tmp{};
-            std::filesystem::current_path(tmp.path());
-            return tmp;
-        }()};
+                                                            {
+                                                                seqan3::test::tmp_directory tmp{};
+                                                                std::filesystem::current_path(tmp.path());
+                                                                return tmp;
+                                                            }()};
 
         file_path = tmp_folder.path();
         file_path /= file_name;

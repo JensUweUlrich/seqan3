@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -32,7 +32,7 @@ namespace seqan3::align_cfg
  *
  * ### Performance
  *
- * Under the hood SeqAn uses a [fast bit-vector algorithm](https://dx.doi.org/10.1145/316542.316550) to compute the
+ * Under the hood SeqAn uses a [fast bit-vector algorithm](https://doi.org/10.1145/316542.316550) to compute the
  * edit distance whenever possible. This depends on the final alignment configuration. Currently, the fast
  * edit distance algorithm is only triggered for \ref seqan3::align_cfg::method_global "global alignments" with the
  * with free ends in the first sequence. So make sure to configure the seqan3::align_cfg::method_global configuration
@@ -48,7 +48,7 @@ namespace seqan3::align_cfg
  * trigger the slower algorithm which can handle the case if the ends are free in the second sequence instead of the
  * first sequence.
  */
-inline constexpr configuration edit_scheme = scoring_scheme{nucleotide_scoring_scheme{}} |
-                                             gap_cost_affine{open_score{0}, extension_score{-1}};
+inline constexpr configuration edit_scheme =
+    scoring_scheme{nucleotide_scoring_scheme{}} | gap_cost_affine{open_score{0}, extension_score{-1}};
 
-} // namespace seqan3
+} // namespace seqan3::align_cfg

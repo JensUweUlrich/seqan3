@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -18,7 +18,6 @@
 #include <vector>
 
 #include <seqan3/alphabet/cigar/cigar.hpp>
-#include <seqan3/alphabet/gap/gapped.hpp>
 #include <seqan3/alphabet/nucleotide/dna5.hpp>
 #include <seqan3/alphabet/quality/aliases.hpp>
 #include <seqan3/alphabet/quality/phred42.hpp>
@@ -31,15 +30,15 @@
 namespace seqan3::detail
 {
 
-/*!\brief Internal class used to expose the actual format interface to write alignment records into the file.
+/*!\brief Internal class used to expose the actual format interface to write SAM/BAM records into the file.
  * \ingroup io_sam_file
  *
  * \tparam format_type The type of the format to be exposed.
  *
  * \details
  *
- * Exposes the protected member function `write_alignment_record` from the given `format_type`, such that the file can
- * call the proper function for the selected format.
+ * Exposes the protected member function `write_alignment_record` and `write_header` from the given `format_type`, such
+ * that the file can call the proper function for the selected format.
  *
  * \remark For a complete overview, take a look at \ref io_sam_file
  */
@@ -50,10 +49,17 @@ public:
     // Can't use `using format_type::write_alignment_record` as it produces a hard failure in the format concept check
     // for types that do not model the format concept, i.e. don't offer the proper write_alignment_record interface.
     //!\brief Forwards to the seqan3::sam_file_output_format::write_alignment_record interface.
-    template <typename ...ts>
-    void write_alignment_record(ts && ...args)
+    template <typename... ts>
+    void write_alignment_record(ts &&... args)
     {
         format_type::write_alignment_record(std::forward<ts>(args)...);
+    }
+
+    //!\brief Forwards to `format_type::write_header`.
+    template <typename stream_t, typename header_type>
+    void write_header(stream_t & stream, sam_file_output_options const & options, header_type & header)
+    {
+        format_type::write_header(stream, options, header);
     }
 };
 
@@ -75,50 +81,52 @@ namespace seqan3
  */
 //!\cond
 template <typename t>
-concept sam_file_output_format =
-    requires (detail::sam_file_output_format_exposer<t>                            & v,
-              std::ofstream                                                        & stream,
-              sam_file_output_options                                              & options,
-              sam_file_header<>                                                    & header,
-              dna5_vector                                                          & seq,
-              std::vector<phred42>                                                 & qual,
-              std::string                                                          & id,
-              int32_t                                                              & offset,
-              dna5_vector                                                          & ref_seq,
-              std::optional<int32_t>                                               & ref_id,
-              std::optional<int32_t>                                               & ref_offset,
-              std::pair<std::vector<gapped<dna4>>, std::vector<gapped<dna4>>>      & align,
-              std::vector<cigar>                                                   & cigar,
-              sam_flag                                                             & flag,
-              uint8_t                                                              & mapq,
-              std::tuple<std::optional<int32_t>, std::optional<int32_t>, int32_t>  & mate,
-              sam_tag_dictionary                                                   & tag_dict,
-              double                                                               & e_value,
-              double                                                               & bit_score)
-{
-    t::file_extensions;
+concept sam_file_output_format = requires (detail::sam_file_output_format_exposer<t> & v,
+                                           std::ofstream & stream,
+                                           sam_file_output_options & options,
+                                           sam_file_header<> & header,
+                                           dna5_vector & seq,
+                                           std::vector<phred42> & qual,
+                                           std::string & id,
+                                           dna5_vector & ref_seq,
+                                           std::optional<int32_t> & ref_id,
+                                           std::optional<int32_t> & ref_offset,
+                                           std::vector<cigar> & cigar,
+                                           sam_flag & flag,
+                                           uint8_t & mapq,
+                                           std::tuple<std::optional<int32_t>, std::optional<int32_t>, int32_t> & mate,
+                                           sam_tag_dictionary & tag_dict,
+                                           double & e_value,
+                                           double & bit_score) {
+                                     t::file_extensions;
 
-    SEQAN3_RETURN_TYPE_CONSTRAINT(v.write_alignment_record(stream,
-                                                           options,
-                                                           header,
-                                                           seq,
-                                                           qual,
-                                                           id,
-                                                           offset,
-                                                           ref_seq,
-                                                           ref_id,
-                                                           ref_offset,
-                                                           align,
-                                                           cigar,
-                                                           flag,
-                                                           mapq,
-                                                           mate,
-                                                           tag_dict,
-                                                           e_value,
-                                                           bit_score),
-                                  std::same_as, void);
-};
+                                     {
+                                         v.write_alignment_record(stream,
+                                                                  options,
+                                                                  header,
+                                                                  seq,
+                                                                  qual,
+                                                                  id,
+                                                                  ref_seq,
+                                                                  ref_id,
+                                                                  ref_offset,
+                                                                  cigar,
+                                                                  flag,
+                                                                  mapq,
+                                                                  mate,
+                                                                  tag_dict,
+                                                                  e_value,
+                                                                  bit_score)
+                                         } -> std::same_as<void>;
+                                 };
 //!\endcond
+
+// Workaround for https://github.com/doxygen/doxygen/issues/9379
+#if SEQAN3_DOXYGEN_ONLY(1) 0
+template <typename t>
+class sam_file_output_format
+{};
+#endif
 
 /*!\name Requirements for seqan3::sam_file_output_format
  * \brief You can expect these **members** on all types that implement seqan3::sam_file_output_format.
@@ -132,11 +140,9 @@ concept sam_file_output_format =
                                    seq_type                               && seq,
                                    qual_type                              && qual,
                                    id_type                                && id,
-                                   offset_type                            && offset,
                                    ref_seq_type                           && ref_seq,
                                    ref_id_type                            && ref_id,
                                    ref_offset_type                        && ref_offset,
-                                   align_type                             && align,
                                    std::vector<cigar>                     &  cigar_vector,
                                    flag_type                              && flag,
                                    mapq_type                              && mapq,
@@ -148,11 +154,9 @@ concept sam_file_output_format =
  * \tparam stream_type      Output stream, must model seqan3::output_stream_over with `char`.
  * \tparam seq_type         Type of the seqan3
  * \tparam id_type          Type of the seqan3
- * \tparam offset_type      Type of the seqan3
  * \tparam ref_seq_type     Type of the seqan3
  * \tparam ref_id_type      Type of the seqan3
  * \tparam ref_offset_type  Type of the seqan3
- * \tparam align_type       Type of the seqan3
  * \tparam flag_type        Type of the seqan3
  * \tparam mapq_type        Type of the seqan3
  * \tparam qual_type        Type of the seqan3
@@ -167,11 +171,9 @@ concept sam_file_output_format =
  * \param[in] seq The data for seqan3::field::seq, i.e. the query sequence.
  * \param[in] qual The data for seqan3::field::qual, e.g. the query quality sequence.
  * \param[in] id The data for seqan3::field::id, e.g. the read id.
- * \param[in] offset The data for seqan3::field::offset, i.e. the start position of the alignment in \p seq.
  * \param[in] ref_seq The data for seqan3::field::ref_offset, i.e. the reference sequence.
  * \param[in] ref_id The data for seqan3::field::ref_id, e.g. the reference id..
  * \param[in] ref_offset The data for seqan3::field::ref_offset, i.e. the start position of the alignment in \p ref_seq.
- * \param[in] align The data for seqan3::field::align, e.g. the alignment between query and ref.
  * \param[in] cigar_vector The data for seqan3::field::cigar, e.g. representing the alignment between query and ref.
  * \param[in] flag The data for seqan3::field::flag, e.g. the SAM mapping flag value.
  * \param[in] mapq The data for seqan3::field::mapq, e.g. the mapping quality value.
@@ -205,7 +207,7 @@ constexpr bool is_type_list_of_sam_file_output_formats_v = false;
  * \ingroup io_sam_file
  * \see seqan3::type_list_of_sam_file_output_formats
  */
-template <typename ...ts>
+template <typename... ts>
 constexpr bool is_type_list_of_sam_file_output_formats_v<type_list<ts...>> = (sam_file_output_format<ts> && ...);
 
 /*!\brief Auxiliary concept that checks whether a type is a seqan3::type_list and all types meet

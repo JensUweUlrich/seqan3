@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -34,7 +34,6 @@ TEST(sandboxed_path_init, init)
     EXPECT_EQ(sandboxed_path("/dir", "../dir/anotherdir"), "/dir/anotherdir");
     EXPECT_EQ(sandboxed_path("/dir", "anotherdir/../../dir/someotherdir"), "/dir/someotherdir");
 
-
     // Valid paths with suffix "/"
     EXPECT_NO_THROW(sandboxed_path("/dir/"));
     EXPECT_NO_THROW(sandboxed_path("/dir/", "/dir"));
@@ -58,7 +57,6 @@ TEST(sandboxed_path_init, init)
     // Misc
     EXPECT_THROW(sandboxed_path("", ""), fs::filesystem_error);
 }
-
 
 // constructors
 TEST(sandboxed_path_copy_constructor, operator_copy_constructor)
@@ -170,7 +168,6 @@ TEST(sandboxed_path_operator_concat, operator_concat)
     EXPECT_THROW(path += "/../..", fs::filesystem_error);
 }
 
-
 TEST(sandboxed_path_concat, concat1)
 {
     sandboxed_path path{"/dir"};
@@ -270,7 +267,6 @@ TEST(sandboxed_path_swap, swap)
     sandboxed_path path3{"/dir/dir2", "/dir/dir2/hallo"};
     EXPECT_THROW(path1.swap(path3), fs::filesystem_error);
 }
-
 
 // operator/
 TEST(sandboxed_path_free_operator_append, free_operator_append)

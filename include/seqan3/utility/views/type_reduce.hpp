@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,9 +12,9 @@
 
 #pragma once
 
-#include <seqan3/std/concepts>
-#include <seqan3/std/ranges>
-#include <seqan3/std/span>
+#include <concepts>
+#include <ranges>
+#include <span>
 #include <string_view>
 
 #include <seqan3/core/detail/template_inspection.hpp>
@@ -49,40 +49,37 @@ private:
     template <std::ranges::range urng_t>
     static constexpr auto impl(urng_t && urange)
     {
-        static_assert(std::ranges::viewable_range<urng_t>,
-                      "The views::type_reduce adaptor can only be passed viewable_ranges, i.e. Views or &-to-non-View.");
+        static_assert(
+            std::ranges::viewable_range<urng_t>,
+            "The views::type_reduce adaptor can only be passed viewable_ranges, i.e. Views or &-to-non-View.");
 
-        // views are always passed as-is
-        if constexpr (std::ranges::view<std::remove_cvref_t<urng_t>>)
+        // string_view
+        if constexpr (is_type_specialisation_of_v<std::remove_cvref_t<urng_t>, std::basic_string_view>)
         {
             return std::views::all(std::forward<urng_t>(urange));
         }
         // string const &
-        else if constexpr (is_type_specialisation_of_v<std::remove_cvref_t<urng_t>, std::basic_string> &&
-                           std::is_const_v<std::remove_reference_t<urng_t>>)
+        else if constexpr (is_type_specialisation_of_v<std::remove_cvref_t<urng_t>, std::basic_string>
+                           && std::is_const_v<std::remove_reference_t<urng_t>>)
         {
             return std::basic_string_view{std::ranges::data(urange), std::ranges::size(urange)};
         }
         // contiguous
-        else if constexpr (std::ranges::borrowed_range<urng_t> &&
-                           std::ranges::contiguous_range<urng_t> &&
-                           std::ranges::sized_range<urng_t>)
+        else if constexpr (std::ranges::borrowed_range<urng_t> && std::ranges::contiguous_range<urng_t>
+                           && std::ranges::sized_range<urng_t>)
         {
             return std::span{std::ranges::data(urange), std::ranges::size(urange)};
         }
         // random_access
-        else if constexpr (std::ranges::borrowed_range<urng_t> &&
-                           std::ranges::random_access_range<urng_t> &&
-                           std::ranges::sized_range<urng_t>)
+        else if constexpr (std::ranges::borrowed_range<urng_t> && std::ranges::random_access_range<urng_t>
+                           && std::ranges::sized_range<urng_t>)
         {
-            return std::ranges::subrange<std::ranges::iterator_t<urng_t>, std::ranges::iterator_t<urng_t>>
-            {
+            return std::ranges::subrange<std::ranges::iterator_t<urng_t>, std::ranges::iterator_t<urng_t>>{
                 std::ranges::begin(urange),
                 std::ranges::begin(urange) + std::ranges::size(urange),
-                std::ranges::size(urange)
-            };
+                std::ranges::size(urange)};
         }
-        // pass to std::views::all (will return ref-view)
+        // pass to std::views::all (will return a view or ref-view)
         else
         {
             return std::views::all(std::forward<urng_t>(urange));
@@ -163,4 +160,4 @@ namespace seqan3
  */
 template <typename t>
 using type_reduce_t = decltype(views::type_reduce(std::declval<t>()));
-}
+} // namespace seqan3

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,8 +12,8 @@
 
 #pragma once
 
-#include <seqan3/std/concepts>
-#include <seqan3/std/type_traits>
+#include <concepts>
+#include <type_traits>
 #include <utility>
 
 #include <seqan3/utility/type_list/type_list.hpp>
@@ -47,7 +47,7 @@ struct type_list_expander;
  * This is a technical trick to make a type representable as a value. Instantiating a type might not always work
  * because not every type provides a default constructor. In addition it is possible to use incomplete types as well.
  */
-template <template <typename ...> typename type_list_t, typename ...args_t>
+template <template <typename...> typename type_list_t, typename... args_t>
 struct type_list_expander<type_list_t<args_t...>>
 {
     /*!\brief Invokes the actual function by passing the types as instances of std::type_identity to the target
@@ -61,9 +61,7 @@ struct type_list_expander<type_list_t<args_t...>>
      * Invokes `fn` by passing the expanded types wrapped in std::type_identity.
      */
     template <typename fn_t>
-    //!\cond
         requires std::invocable<fn_t, std::type_identity<args_t>...>
-    //!\endcond
     static constexpr std::invoke_result_t<fn_t, std::type_identity<args_t>...> invoke_on_type_identities(fn_t && fn)
     {
         return fn(std::type_identity<args_t>{}...);
@@ -110,14 +108,13 @@ struct type_list_expander<type_list_t<args_t...>>
  */
 template <typename type_list_t, typename unary_predicate_t>
 [[nodiscard]] constexpr bool all_of(unary_predicate_t && fn)
-//!\cond
     requires template_specialisation_of<type_list_t, seqan3::type_list>
-//!\endcond
 {
-    return type_list_expander<type_list_t>::invoke_on_type_identities([&] (auto && ...type_identities)
-    {
-        return all_of(fn, std::forward<decltype(type_identities)>(type_identities)...);
-    });
+    return type_list_expander<type_list_t>::invoke_on_type_identities(
+        [&](auto &&... type_identities)
+        {
+            return all_of(fn, std::forward<decltype(type_identities)>(type_identities)...);
+        });
 }
 
 //-----------------------------------------------------------------------------
@@ -159,15 +156,14 @@ template <typename type_list_t, typename unary_predicate_t>
  * \sa seqan3::detail::for_each
  */
 template <typename type_list_t, typename unary_function_t>
-//!\cond
     requires template_specialisation_of<type_list_t, seqan3::type_list>
-//!\endcond
 constexpr void for_each(unary_function_t && fn)
 {
-    type_list_expander<type_list_t>::invoke_on_type_identities([&] (auto && ...type_identities)
-    {
-        for_each(fn, std::forward<decltype(type_identities)>(type_identities)...);
-    });
+    type_list_expander<type_list_t>::invoke_on_type_identities(
+        [&](auto &&... type_identities)
+        {
+            for_each(fn, std::forward<decltype(type_identities)>(type_identities)...);
+        });
 }
 
-}  // namespace seqan3::detail
+} // namespace seqan3::detail

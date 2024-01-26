@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2021-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2021-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -30,8 +30,10 @@ TEST(tmp_directory, unique)
     EXPECT_TRUE(t2.empty());
 
     // checking they are inside of /tmp
-    EXPECT_TRUE(std::filesystem::equivalent(std::filesystem::temp_directory_path(), std::filesystem::path{t1.path()}.parent_path()));
-    EXPECT_TRUE(std::filesystem::equivalent(std::filesystem::temp_directory_path(), std::filesystem::path{t2.path()}.parent_path()));
+    EXPECT_TRUE(std::filesystem::equivalent(std::filesystem::temp_directory_path(),
+                                            std::filesystem::path{t1.path()}.parent_path()));
+    EXPECT_TRUE(std::filesystem::equivalent(std::filesystem::temp_directory_path(),
+                                            std::filesystem::path{t2.path()}.parent_path()));
 }
 
 // move construction
@@ -80,7 +82,6 @@ TEST(tmp_directory, move_assignable)
     EXPECT_FALSE(std::filesystem::exists(p1));
     EXPECT_FALSE(std::filesystem::exists(p2));
     EXPECT_FALSE(std::filesystem::exists(p3));
-
 }
 
 // check destructor does all its cleanups
@@ -116,26 +117,20 @@ TEST(tmp_directory, cleanup_on_destruction)
         EXPECT_TRUE(std::filesystem::exists(path / "file1"));
         EXPECT_TRUE(std::filesystem::exists(path / "somefolder/file2"));
 
-        // Should warn about unclean temporary directory
+        // Should not warn about unclean temporary directory
         testing::internal::CaptureStderr();
     }
 
     std::string output = testing::internal::GetCapturedStderr();
-    EXPECT_FALSE(output.empty());
-
-    std::regex re{"temporary directory \"[^ ]*\" has some files that should be deleted\n"
-                  "- \"[^ ]*\"\n"
-                  "- \"[^ ]*\"\n"
-                  "- \"[^ ]*\"\n"};
-    EXPECT_TRUE(std::regex_match(output, re)) << "Actual output: " << output;
+    EXPECT_TRUE(output.empty());
 
     EXPECT_FALSE(std::filesystem::exists(path));
     EXPECT_FALSE(std::filesystem::exists(path / "file1"));
     EXPECT_FALSE(std::filesystem::exists(path / "somefolder/file2"));
 }
 
-// check destructor warns if someone else deletes the temp directory
-TEST(tmp_directory, warn_about_missing_managed_tmp_directory_on_destruction)
+// check destructor doesnt warn if someone else deletes the temp directory
+TEST(tmp_directory, dont_warn_about_missing_managed_tmp_directory_on_destruction)
 {
     std::filesystem::path path;
     {
@@ -148,14 +143,13 @@ TEST(tmp_directory, warn_about_missing_managed_tmp_directory_on_destruction)
 
         std::filesystem::remove_all(t1.path());
 
-        // Should warn about unclean temporary directory
+        // Should not warn about unclean temporary directory
         testing::internal::CaptureStderr();
     }
 
     std::string output = testing::internal::GetCapturedStderr();
 
-    std::regex re{"temporary directory \"[^ ]*\" was deleted externally. This is discouraged program behaviour\n"};
-    EXPECT_TRUE(std::regex_match(output, re)) << "Actual output: " << output;
+    EXPECT_TRUE(output.empty());
 }
 
 // check a unwritable tmp file fails
@@ -180,5 +174,4 @@ TEST(tmp_directory_throw, directory_not_writeable)
     std::filesystem::permissions(temporary_tmp_folder.path(),
                                  std::filesystem::perms::owner_write,
                                  std::filesystem::perm_options::add);
-
 }

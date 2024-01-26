@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,8 +12,8 @@
 
 #pragma once
 
-#include <seqan3/alphabet/mask/mask.hpp>
 #include <seqan3/alphabet/composite/alphabet_tuple_base.hpp>
+#include <seqan3/alphabet/mask/mask.hpp>
 #include <seqan3/utility/char_operations/predicate.hpp>
 #include <seqan3/utility/char_operations/transform.hpp>
 
@@ -40,9 +40,7 @@ namespace seqan3
  * \stableapi{Since version 3.1.}
  */
 template <writable_alphabet sequence_alphabet_t>
-//!\cond
     requires std::regular<sequence_alphabet_t>
-//!\endcond
 class masked : public alphabet_tuple_base<masked<sequence_alphabet_t>, sequence_alphabet_t, mask>
 {
 private:
@@ -68,12 +66,12 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr masked() = default;                            //!< Defaulted.
-    constexpr masked(masked const &) = default;              //!< Defaulted.
-    constexpr masked(masked &&) = default;                   //!< Defaulted.
-    constexpr masked & operator =(masked const &) = default; //!< Defaulted.
-    constexpr masked & operator =(masked &&) = default;      //!< Defaulted.
-    ~masked() = default;                                     //!< Defaulted.
+    constexpr masked() = default;                           //!< Defaulted.
+    constexpr masked(masked const &) = default;             //!< Defaulted.
+    constexpr masked(masked &&) = default;                  //!< Defaulted.
+    constexpr masked & operator=(masked const &) = default; //!< Defaulted.
+    constexpr masked & operator=(masked &&) = default;      //!< Defaulted.
+    ~masked() = default;                                    //!< Defaulted.
 
     using base_t::base_t; // Inherit non-default constructors
     //!\}
@@ -110,48 +108,47 @@ public:
     //!\}
 
 protected:
+    // clang-format off
     //!\brief Rank to char conversion table.
     static constexpr std::array<char_type, alphabet_size> rank_to_char
     {
-        [] ()
-        {
+        []() constexpr {
             std::array<char_type, alphabet_size> ret{};
 
             for (size_t i = 0; i < alphabet_size; ++i)
             {
                 ret[i] = (i < alphabet_size / 2)
-                       ? seqan3::to_char(seqan3::assign_rank_to(i, sequence_alphabet_type{}))
-                       : to_lower(seqan3::to_char(seqan3::assign_rank_to(i / 2, sequence_alphabet_type{})));
+                           ? seqan3::to_char(seqan3::assign_rank_to(i, sequence_alphabet_type{}))
+                           : to_lower(seqan3::to_char(seqan3::assign_rank_to(i / 2, sequence_alphabet_type{})));
             }
 
             return ret;
-        } ()
+        }()
     };
 
     //!\brief Char to rank conversion table.
     static constexpr std::array<rank_type, detail::size_in_values_v<char_type>> char_to_rank
     {
-        [] ()
-        {
+        []() constexpr {
             std::array<rank_type, detail::size_in_values_v<char_type>> ret{};
 
             for (size_t i = 0; i < 256; ++i)
             {
-                char_type c = static_cast<char_type>(i);
+                char_type const c = static_cast<char_type>(i);
 
-                ret[i] = is_lower(c)
-                       ? seqan3::to_rank(seqan3::assign_char_to(c, sequence_alphabet_type{})) * 2
-                       : seqan3::to_rank(seqan3::assign_char_to(c, sequence_alphabet_type{}));
+                ret[i] = is_lower(c) ? seqan3::to_rank(seqan3::assign_char_to(c, sequence_alphabet_type{})) * 2
+                                     : seqan3::to_rank(seqan3::assign_char_to(c, sequence_alphabet_type{}));
             }
 
             return ret;
-        } ()
+        }()
     };
 };
+// clang-format on
 
 //!\brief Type deduction guide enables usage of masked without specifying template args.
 //!\relates masked
 template <typename sequence_alphabet_type>
-masked(sequence_alphabet_type &&, mask const &)
-    -> masked<std::decay_t<sequence_alphabet_type>>;
+masked(sequence_alphabet_type &&, mask const &) -> masked<std::decay_t<sequence_alphabet_type>>;
+
 } //namespace seqan3

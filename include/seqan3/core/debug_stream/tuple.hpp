@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,8 +12,8 @@
 
 #pragma once
 
-#include <seqan3/std/concepts>
-#include <seqan3/std/ranges>
+#include <concepts>
+#include <ranges>
 
 #include <seqan3/alphabet/concept.hpp>
 #include <seqan3/core/debug_stream/debug_stream_type.hpp>
@@ -30,7 +30,7 @@ namespace seqan3::detail
 {
 
 //!\brief Helper function to print elements of a tuple separately.
-template <typename char_t, typename tuple_t, std::size_t ...I>
+template <typename char_t, typename tuple_t, std::size_t... I>
 void print_tuple(debug_stream_type<char_t> & s, tuple_t && t, std::index_sequence<I...> const &)
 {
     using std::get;
@@ -51,9 +51,9 @@ void print_tuple(debug_stream_type<char_t> & s, tuple_t && t, std::index_sequenc
  */
 //!\cond
 template <typename tuple_t>
-concept debug_streamable_tuple = !std::ranges::input_range<tuple_t> &&
-                                        !alphabet<tuple_t> &&  // exclude alphabet_tuple_base
-                                        tuple_like<std::remove_cvref_t<tuple_t>>;
+concept debug_streamable_tuple = !
+std::ranges::input_range<tuple_t> && !alphabet<tuple_t> && // exclude alphabet_tuple_base
+    tuple_like<std::remove_cvref_t<tuple_t>>;
 //!\endcond
 } // namespace seqan3::detail
 
@@ -67,12 +67,11 @@ namespace seqan3
  * \relates seqan3::debug_stream_type
  */
 template <typename char_t, typename tuple_t>
-//!\cond
     requires (detail::debug_streamable_tuple<tuple_t>)
-//!\endcond
 inline debug_stream_type<char_t> & operator<<(debug_stream_type<char_t> & s, tuple_t && t)
 {
-    detail::print_tuple(s, std::forward<tuple_t>(t),
+    detail::print_tuple(s,
+                        std::forward<tuple_t>(t),
                         std::make_index_sequence<std::tuple_size_v<std::remove_cvref_t<tuple_t>>>{});
     return s;
 }

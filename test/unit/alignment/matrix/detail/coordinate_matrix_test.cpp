@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -25,7 +25,7 @@ struct iterator_fixture<matrix_iterator_t> : public ::testing::Test
     using column_index_t = seqan3::detail::column_index_type<size_t>;
 
     using iterator_tag = std::forward_iterator_tag;
-    static constexpr bool const_iterable = true;
+    static constexpr bool const_iterable = false; // value_type is a view
 
     // Single column with 5 entries as the seq2 has size 4 (need one more for the initialisation row).
     coordinate_column_t column1 = coordinate_column_t{{row_index_t{0u}, column_index_t{0u}},

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -57,12 +57,14 @@ namespace seqan3
 template <writable_alphabet sequence_alphabet_t, writable_quality_alphabet quality_alphabet_t>
 class qualified :
     public alphabet_tuple_base<qualified<sequence_alphabet_t, quality_alphabet_t>,
-                                 sequence_alphabet_t, quality_alphabet_t>
+                               sequence_alphabet_t,
+                               quality_alphabet_t>
 {
 private:
     //!\brief The base type.
     using base_type = alphabet_tuple_base<qualified<sequence_alphabet_t, quality_alphabet_t>,
-                                            sequence_alphabet_t, quality_alphabet_t>;
+                                          sequence_alphabet_t,
+                                          quality_alphabet_t>;
 
 public:
     /*!\brief First template parameter as member type.
@@ -90,27 +92,27 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr qualified()                               noexcept = default; //!< Defaulted.
-    constexpr qualified(qualified const &)              noexcept = default; //!< Defaulted.
-    constexpr qualified(qualified &&)                   noexcept = default; //!< Defaulted.
-    constexpr qualified & operator =(qualified const &) noexcept = default; //!< Defaulted.
-    constexpr qualified & operator =(qualified &&)      noexcept = default; //!< Defaulted.
-    ~qualified()                                        noexcept = default; //!< Defaulted.
+    constexpr qualified() noexcept = default;                              //!< Defaulted.
+    constexpr qualified(qualified const &) noexcept = default;             //!< Defaulted.
+    constexpr qualified(qualified &&) noexcept = default;                  //!< Defaulted.
+    constexpr qualified & operator=(qualified const &) noexcept = default; //!< Defaulted.
+    constexpr qualified & operator=(qualified &&) noexcept = default;      //!< Defaulted.
+    ~qualified() noexcept = default;                                       //!< Defaulted.
 
     // Inherit from base:
-    using base_type::base_type;         // non-default constructors
     using base_type::alphabet_size;
+    using base_type::base_type; // non-default constructors
     using base_type::to_rank;
     using base_type::operator=;
 
     //!\copydoc alphabet_tuple_base::alphabet_tuple_base(component_type const alph)
-    SEQAN3_DOXYGEN_ONLY(( constexpr qualified(component_type const alph) noexcept {} ))
+    SEQAN3_DOXYGEN_ONLY((constexpr qualified(component_type const alph) noexcept {}))
     //!\copydoc alphabet_tuple_base::alphabet_tuple_base(indirect_component_type const alph)
-    SEQAN3_DOXYGEN_ONLY(( constexpr qualified(indirect_component_type const alph) noexcept {} ))
+    SEQAN3_DOXYGEN_ONLY((constexpr qualified(indirect_component_type const alph) noexcept {}))
     //!\copydoc alphabet_tuple_base::operator=(component_type const alph)
-    SEQAN3_DOXYGEN_ONLY(( constexpr qualified & operator=(component_type const alph) noexcept {} ))
+    SEQAN3_DOXYGEN_ONLY((constexpr qualified & operator=(component_type const alph) noexcept {}))
     //!\copydoc alphabet_tuple_base::operator=(indirect_component_type const alph)
-    SEQAN3_DOXYGEN_ONLY(( constexpr qualified & operator=(indirect_component_type const alph) noexcept {} ))
+    SEQAN3_DOXYGEN_ONLY((constexpr qualified & operator=(indirect_component_type const alph) noexcept {}))
     //!\}
 
     /*!\name Write functions
@@ -122,10 +124,9 @@ public:
      */
     constexpr qualified & assign_char(char_type const c) noexcept
     {
-        base_type::assign_rank(
-            (seqan3::to_rank(seqan3::assign_char_to(c, sequence_alphabet_type{})) *
-             base_type::cummulative_alph_sizes[0]) +
-            (base_type::template to_component_rank<1>() * base_type::cummulative_alph_sizes[1]));
+        base_type::assign_rank((seqan3::to_rank(seqan3::assign_char_to(c, sequence_alphabet_type{}))
+                                * base_type::cummulative_alph_sizes[0])
+                               + (base_type::template to_component_rank<1>() * base_type::cummulative_alph_sizes[1]));
 
         // The above is noticeably faster than (no subtraction and no division):
         // base_type::template assign_component_rank<0>(
@@ -172,9 +173,7 @@ public:
      * \stableapi{Since version 3.1.}
      */
     constexpr qualified complement() const noexcept
-    //!\cond
         requires nucleotide_alphabet<sequence_alphabet_t>
-    //!\endcond
     {
         return qualified{seqan3::complement(get<0>(*this)), get<1>(*this)};
     }
@@ -190,17 +189,23 @@ public:
     }
 
 private:
-    //!\copydoc seqan3::dna4::rank_to_char_table
-    static std::array<char_type, alphabet_size> constexpr rank_to_char_table
+    //!\copydoc seqan3::dna4::rank_to_char
+    static constexpr char_type rank_to_char(typename base_type::rank_type const rank)
     {
-        [] () constexpr
-        {
+        return rank_to_char_table[rank];
+    }
+
+    // clang-format off
+    //!\copydoc seqan3::dna4::rank_to_char_table
+    static constexpr std::array<char_type, alphabet_size> rank_to_char_table
+    {
+        []() constexpr {
             std::array<char_type, alphabet_size> ret{};
 
             for (size_t i = 0; i < alphabet_size; ++i)
             {
-                size_t seq_rank = (i / base_type::cummulative_alph_sizes[0]) %
-                                  seqan3::alphabet_size<quality_alphabet_type>;
+                size_t const seq_rank = (i / base_type::cummulative_alph_sizes[0]) %
+                                        seqan3::alphabet_size<quality_alphabet_type>;
 
                 ret[i] = seqan3::to_char(seqan3::assign_rank_to(seq_rank, sequence_alphabet_type{}));
             }
@@ -210,16 +215,15 @@ private:
     };
 
     //!\brief Rank to Phred conversion table.
-    static std::array<char_type, alphabet_size> constexpr rank_to_phred
+    static constexpr std::array<char_type, alphabet_size> rank_to_phred
     {
-        [] () constexpr
-        {
+        []() constexpr {
             std::array<char_type, alphabet_size> ret{};
 
             for (size_t i = 0; i < alphabet_size; ++i)
             {
                 size_t qual_rank = (i / base_type::cummulative_alph_sizes[1]) %
-                                    seqan3::alphabet_size<quality_alphabet_type>;
+                                seqan3::alphabet_size<quality_alphabet_type>;
 
                 ret[i] = seqan3::to_phred(seqan3::assign_rank_to(qual_rank, quality_alphabet_type{}));
             }
@@ -227,13 +231,8 @@ private:
             return ret;
         }()
     };
-
-    //!\copydoc seqan3::dna4::rank_to_char
-    static constexpr char_type rank_to_char(typename base_type::rank_type const rank)
-    {
-        return rank_to_char_table[rank];
-    }
 };
+// clang-format on
 
 /*!\brief Type deduction guide enables usage of qualified without specifying template args.
  * \relates qualified

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -15,9 +15,6 @@
 #include <tuple>
 
 #include <seqan3/alignment/aligned_sequence/aligned_sequence_concept.hpp>
-#if SEQAN3_WORKAROUND_ISSUE_286
-#include <seqan3/core/detail/transfer_type_modifier_onto.hpp>
-#endif // SEQAN3_WORKAROUND_ISSUE_286
 #include <seqan3/utility/tuple/concept.hpp>
 
 namespace seqan3::detail
@@ -34,28 +31,9 @@ namespace seqan3::detail
  */
 //!\cond
 template <typename pairwise_alignment_t>
-concept pairwise_alignment =
-    pair_like<pairwise_alignment_t> &&
-#if SEQAN3_WORKAROUND_ISSUE_286
-    aligned_sequence<
-        // simulate that tuple_element transfers const over to it's inner members.
-        transfer_type_modifier_onto_t<
-            std::remove_reference_t<pairwise_alignment_t>,
-            std::tuple_element_t<0, std::remove_cvref_t<pairwise_alignment_t>>
-        >
-    > &&
-    aligned_sequence<
-        // simulate that tuple_element transfers const over to it's inner members.
-        transfer_type_modifier_onto_t<
-            std::remove_reference_t<pairwise_alignment_t>,
-            std::tuple_element_t<1, std::remove_cvref_t<pairwise_alignment_t>>
-        >
-    >;
-#else // ^^^ workaround / no workaround vvv
-    aligned_sequence<std::tuple_element_t<0, std::remove_reference_t<pairwise_alignment_t>>> &&
-    aligned_sequence<std::tuple_element_t<1, std::remove_reference_t<pairwise_alignment_t>>>;
-#endif // SEQAN3_WORKAROUND_ISSUE_286
-
+concept pairwise_alignment = pair_like<pairwise_alignment_t>
+                          && aligned_sequence<std::tuple_element_t<0, std::remove_reference_t<pairwise_alignment_t>>>
+                          && aligned_sequence<std::tuple_element_t<1, std::remove_reference_t<pairwise_alignment_t>>>;
 //!\endcond
 
 /*!\interface seqan3::detail::writable_pairwise_alignment < >
@@ -70,26 +48,9 @@ concept pairwise_alignment =
 //!\cond
 template <typename pairwise_alignment_t>
 concept writable_pairwise_alignment =
-    pairwise_alignment<pairwise_alignment_t> &&
-#if SEQAN3_WORKAROUND_ISSUE_286
-    writable_aligned_sequence<
-        // simulate that tuple_element transfers const over to it's inner members.
-        transfer_type_modifier_onto_t<
-            std::remove_reference_t<pairwise_alignment_t>,
-            std::tuple_element_t<0, std::remove_cvref_t<pairwise_alignment_t>>
-        >
-    > &&
-    writable_aligned_sequence<
-        // simulate that tuple_element transfers const over to it's inner members.
-        transfer_type_modifier_onto_t<
-            std::remove_reference_t<pairwise_alignment_t>,
-            std::tuple_element_t<1, std::remove_cvref_t<pairwise_alignment_t>>
-        >
-    >;
-#else // ^^^ workaround / no workaround vvv
-    writable_aligned_sequence<std::tuple_element_t<0, std::remove_reference_t<pairwise_alignment_t>>> &&
-    writable_aligned_sequence<std::tuple_element_t<1, std::remove_reference_t<pairwise_alignment_t>>>;
-#endif // SEQAN3_WORKAROUND_ISSUE_286
+    pairwise_alignment<pairwise_alignment_t>
+    && writable_aligned_sequence<std::tuple_element_t<0, std::remove_reference_t<pairwise_alignment_t>>>
+    && writable_aligned_sequence<std::tuple_element_t<1, std::remove_reference_t<pairwise_alignment_t>>>;
 //!\endcond
 
 } // namespace seqan3::detail

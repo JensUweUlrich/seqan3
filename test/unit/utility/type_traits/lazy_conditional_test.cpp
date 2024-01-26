@@ -1,13 +1,13 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #include <gtest/gtest.h>
 
-#include <seqan3/std/concepts>
+#include <concepts>
 #include <list>
 #include <vector>
 
@@ -15,11 +15,10 @@
 
 TEST(lazy, instantiate)
 {
-    EXPECT_TRUE((std::is_same_v<seqan3::detail::instantiate_t<std::vector<int>>,
-                                std::vector<int>>));
+    EXPECT_TRUE((std::is_same_v<seqan3::detail::instantiate_t<std::vector<int>>, std::vector<int>>));
 
-    EXPECT_TRUE((std::is_same_v<seqan3::detail::instantiate_t<seqan3::detail::lazy<std::vector, int>>,
-                                std::vector<int>>));
+    EXPECT_TRUE(
+        (std::is_same_v<seqan3::detail::instantiate_t<seqan3::detail::lazy<std::vector, int>>, std::vector<int>>));
 }
 
 template <typename t>
@@ -29,14 +28,10 @@ using integral_identity_t = t;
 TEST(lazy, lazy_conditional)
 {
     // regular conditional behaviour
-    EXPECT_TRUE((std::is_same_v<seqan3::detail::lazy_conditional_t<true,
-                                                                   std::true_type,
-                                                                   std::false_type>,
-                                std::true_type>));
-    EXPECT_TRUE((std::is_same_v<seqan3::detail::lazy_conditional_t<false,
-                                                                   std::true_type,
-                                                                   std::false_type>,
-                                std::false_type>));
+    EXPECT_TRUE(
+        (std::is_same_v<seqan3::detail::lazy_conditional_t<true, std::true_type, std::false_type>, std::true_type>));
+    EXPECT_TRUE(
+        (std::is_same_v<seqan3::detail::lazy_conditional_t<false, std::true_type, std::false_type>, std::false_type>));
 
     // lazy behaviour, safe
     EXPECT_TRUE((std::is_same_v<seqan3::detail::lazy_conditional_t<true,
@@ -49,12 +44,10 @@ TEST(lazy, lazy_conditional)
                                 std::list<int>>));
 
     // lazy behaviour, important
-    EXPECT_TRUE((std::is_same_v<seqan3::detail::lazy_conditional_t<true,
-                                                                   seqan3::detail::lazy<integral_identity_t, int>,
-                                                                   void>,
-                                int>));
-    EXPECT_TRUE((std::is_same_v<seqan3::detail::lazy_conditional_t<false,
-                                                                   void,
-                                                                   seqan3::detail::lazy<integral_identity_t, int>>,
-                                int>));
+    EXPECT_TRUE(
+        (std::is_same_v<seqan3::detail::lazy_conditional_t<true, seqan3::detail::lazy<integral_identity_t, int>, void>,
+                        int>));
+    EXPECT_TRUE(
+        (std::is_same_v<seqan3::detail::lazy_conditional_t<false, void, seqan3::detail::lazy<integral_identity_t, int>>,
+                        int>));
 }

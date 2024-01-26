@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -70,12 +70,12 @@ public:
     /*!\name Constructor, destructor and assignment
      * \{
      */
-    constexpr band_fixed_size() = default; //!< Defaulted.
-    constexpr band_fixed_size(band_fixed_size const &) = default; //!< Defaulted.
-    constexpr band_fixed_size(band_fixed_size &&) = default; //!< Defaulted.
+    constexpr band_fixed_size() = default;                                    //!< Defaulted.
+    constexpr band_fixed_size(band_fixed_size const &) = default;             //!< Defaulted.
+    constexpr band_fixed_size(band_fixed_size &&) = default;                  //!< Defaulted.
     constexpr band_fixed_size & operator=(band_fixed_size const &) = default; //!< Defaulted.
-    constexpr band_fixed_size & operator=(band_fixed_size &&) = default; //!< Defaulted.
-    ~band_fixed_size() = default; //!< Defaulted.
+    constexpr band_fixed_size & operator=(band_fixed_size &&) = default;      //!< Defaulted.
+    ~band_fixed_size() = default;                                             //!< Defaulted.
 
     /*!\brief Initialises the fixed size band by setting the lower and the upper matrix diagonal.
      *

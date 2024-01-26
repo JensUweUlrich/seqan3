@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -68,7 +68,8 @@ private:
 
     //!\brief Befriend seqan3::aminoacid_base.
     friend base_t;
-    //!\cond \brief Befriend seqan3::alphabet_base.
+    //!\cond
+    //!\brief Befriend seqan3::alphabet_base.
     friend base_t::base_t;
     //!\endcond
 
@@ -76,70 +77,20 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr aa20()                         noexcept = default; //!< Defaulted.
-    constexpr aa20(aa20 const &)             noexcept = default; //!< Defaulted.
-    constexpr aa20(aa20 &&)                  noexcept = default; //!< Defaulted.
+    constexpr aa20() noexcept = default;                         //!< Defaulted.
+    constexpr aa20(aa20 const &) noexcept = default;             //!< Defaulted.
+    constexpr aa20(aa20 &&) noexcept = default;                  //!< Defaulted.
     constexpr aa20 & operator=(aa20 const &) noexcept = default; //!< Defaulted.
-    constexpr aa20 & operator=(aa20 &&)      noexcept = default; //!< Defaulted.
-    ~aa20()                                  noexcept = default; //!< Defaulted.
+    constexpr aa20 & operator=(aa20 &&) noexcept = default;      //!< Defaulted.
+    ~aa20() noexcept = default;                                  //!< Defaulted.
 
     using base_t::base_t;
     //!\}
 
 private:
     //!\copydoc seqan3::aa27::rank_to_char_table
-    static constexpr char_type rank_to_char_table[alphabet_size]
-    {
-        'A',
-        'C',
-        'D',
-        'E',
-        'F',
-        'G',
-        'H',
-        'I',
-        'K',
-        'L',
-        'M',
-        'N',
-        'P',
-        'Q',
-        'R',
-        'S',
-        'T',
-        'V',
-        'W',
-        'Y'
-    };
-
-    //!\copydoc seqan3::aa27::char_to_rank_table
-    static constexpr std::array<rank_type, 256> char_to_rank_table
-    {
-        [] () constexpr
-        {
-            std::array<rank_type, 256> ret{};
-
-            // initialize with UNKNOWN (std::array::fill unfortunately not constexpr)
-            for (auto & c : ret)
-                c = 15; // value of 'S', because that appears most frequently
-
-            // reverse mapping for characters and their lowercase
-            for (rank_type rnk = 0u; rnk < alphabet_size; ++rnk)
-            {
-                ret[static_cast<rank_type>(rank_to_char_table[rnk])] = rnk;
-                ret[static_cast<rank_type>(to_lower(rank_to_char_table[rnk]))] = rnk;
-            }
-
-            ret['B'] = ret['D']; ret['b'] = ret['D']; // Convert b (either D/N) to D, since D occurs more frequently.
-            ret['J'] = ret['L']; ret['j'] = ret['L']; // Convert j (either I/L) to L, since L occurs more frequently.
-            ret['O'] = ret['L']; ret['o'] = ret['L']; // Convert Pyrrolysine to lysine.
-            ret['U'] = ret['C']; ret['u'] = ret['C']; // Convert Selenocysteine to cysteine.
-            ret['X'] = ret['S']; ret['x'] = ret['S']; // Convert unknown amino acids to serine.
-            ret['Z'] = ret['E']; ret['z'] = ret['E']; // Convert z (either E/Q) to E, since E occurs more frequently.
-            ret['*'] = ret['W']; // The most common stop codon is UGA. This is most similar to a Tryptophan.
-            return ret;
-        }()
-    };
+    static constexpr char_type rank_to_char_table[alphabet_size]{'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L',
+                                                                 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y'};
 
     //!\copydoc seqan3::aa27::rank_to_char
     static constexpr char_type rank_to_char(rank_type const rank)
@@ -153,7 +104,42 @@ private:
         using index_t = std::make_unsigned_t<char_type>;
         return char_to_rank_table[static_cast<index_t>(chr)];
     }
+
+    // clang-format off
+    //!\copydoc seqan3::aa27::char_to_rank_table
+    static constexpr std::array<rank_type, 256> char_to_rank_table
+    {
+        []() constexpr {
+            std::array<rank_type, 256> ret{};
+
+            // initialize with 'S' because that appears most frequently
+            ret.fill(15u);
+
+            // reverse mapping for characters and their lowercase
+            for (rank_type rnk = 0u; rnk < alphabet_size; ++rnk)
+            {
+                ret[static_cast<rank_type>(rank_to_char_table[rnk])] = rnk;
+                ret[static_cast<rank_type>(to_lower(rank_to_char_table[rnk]))] = rnk;
+            }
+
+            ret['B'] = ret['D'];
+            ret['b'] = ret['D']; // Convert b (either D/N) to D, since D occurs more frequently.
+            ret['J'] = ret['L'];
+            ret['j'] = ret['L']; // Convert j (either I/L) to L, since L occurs more frequently.
+            ret['O'] = ret['L'];
+            ret['o'] = ret['L']; // Convert Pyrrolysine to lysine.
+            ret['U'] = ret['C'];
+            ret['u'] = ret['C']; // Convert Selenocysteine to cysteine.
+            ret['X'] = ret['S'];
+            ret['x'] = ret['S']; // Convert unknown amino acids to serine.
+            ret['Z'] = ret['E'];
+            ret['z'] = ret['E']; // Convert z (either E/Q) to E, since E occurs more frequently.
+            ret['*'] = ret['W']; // The most common stop codon is UGA. This is most similar to a Tryptophan.
+            return ret;
+        }()
+    };
 };
+// clang-format on
 
 // ------------------------------------------------------------------
 // containers
@@ -201,7 +187,7 @@ constexpr aa20 operator""_aa20(char const c) noexcept
  *
  * \stableapi{Since version 3.1.}
  */
-inline aa20_vector operator""_aa20(char const * const s, size_t const n)
+SEQAN3_WORKAROUND_LITERAL aa20_vector operator""_aa20(char const * const s, size_t const n)
 {
     aa20_vector r;
     r.resize(n);
@@ -213,6 +199,6 @@ inline aa20_vector operator""_aa20(char const * const s, size_t const n)
 }
 //!\}
 
-} // inline namespace literals
+} // namespace literals
 
 } // namespace seqan3

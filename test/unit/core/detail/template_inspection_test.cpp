@@ -1,18 +1,18 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
-#include <type_traits>
-
 #include <gtest/gtest.h>
+
+#include <type_traits>
 
 #include <seqan3/core/detail/template_inspection.hpp>
 #include <seqan3/utility/type_traits/concept.hpp>
 
-template <typename ...args_t>
+template <typename... args_t>
 struct my_list;
 
 template <std::integral t>
@@ -95,7 +95,8 @@ TEST(template_inspect, is_type_specialisation_with_constraint)
 }
 
 template <int i, char c>
-struct t1 {};
+struct t1
+{};
 
 template <int _i, char _c>
 struct t2
@@ -147,7 +148,7 @@ TEST(template_inspect, transfer_template_vargs_onto_enum)
 TEST(template_inspect, transfer_template_vargs_onto_t)
 {
     using ta = seqan3::detail::transfer_template_vargs_onto<t1<1, 'a'>, t2>::type;
-    EXPECT_EQ(1,   ta::i);
+    EXPECT_EQ(1, ta::i);
     EXPECT_EQ('a', ta::c);
 
     // ensures that transfer_template_vargs_onto uses internally only type declarations and not type instantiations
@@ -159,7 +160,7 @@ TEST(template_inspect, transfer_template_vargs_onto_t)
 
     // shortcut
     using ta2 = seqan3::detail::transfer_template_vargs_onto_t<t1<2, 'a'>, t2>;
-    EXPECT_EQ(2,   ta2::i);
+    EXPECT_EQ(2, ta2::i);
     EXPECT_EQ('a', ta2::c);
 }
 
@@ -184,7 +185,7 @@ template <int varg>
 struct constraint_vbar
 {};
 
-template <auto ...vargs>
+template <auto... vargs>
 struct vargs_foo
 {};
 

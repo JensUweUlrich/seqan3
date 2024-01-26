@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -16,7 +16,7 @@
 #include <type_traits>
 
 #if SEQAN3_WITH_CEREAL
-#include <cereal/types/array.hpp>
+#    include <cereal/types/array.hpp>
 #endif // SEQAN3_WITH_CEREAL
 
 #include <seqan3/core/concept/cereal.hpp>
@@ -69,7 +69,7 @@ public:
      * \details
      * \experimentalapi{Experimental since version 3.1.}
      */
-    using const_reference = const value_type &;
+    using const_reference = value_type const &;
 
     /*!\brief The iterator type.
      * \details
@@ -97,20 +97,15 @@ public:
 
     //!\}
 
-    //!\cond
-    // this signals to range-v3 that something is a container :|
-    using allocator_type = void;
-    //!\endcond
-
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr small_vector()                                 noexcept = default; //!< Defaulted.
-    constexpr small_vector(small_vector const &)             noexcept = default; //!< Defaulted.
-    constexpr small_vector(small_vector &&)                  noexcept = default; //!< Defaulted.
+    constexpr small_vector() noexcept = default;                                 //!< Defaulted.
+    constexpr small_vector(small_vector const &) noexcept = default;             //!< Defaulted.
+    constexpr small_vector(small_vector &&) noexcept = default;                  //!< Defaulted.
     constexpr small_vector & operator=(small_vector const &) noexcept = default; //!< Defaulted.
-    constexpr small_vector & operator=(small_vector &&)      noexcept = default; //!< Defaulted.
-    ~small_vector()                                          noexcept = default; //!< Defaulted.
+    constexpr small_vector & operator=(small_vector &&) noexcept = default;      //!< Defaulted.
+    ~small_vector() noexcept = default;                                          //!< Defaulted.
 
     /*!\brief Construct from an (smaller or equally sized) array over the same value type.
      * \param[in] array The array to copy the data_ from.
@@ -126,7 +121,8 @@ public:
      * \experimentalapi{Experimental since version 3.1.}
      */
     explicit constexpr small_vector(std::array<value_type, capacity_> const & array) noexcept(is_noexcept) :
-        data_{array}, sz{capacity_}
+        data_{array},
+        sz{capacity_}
     {}
 
     //!\cond
@@ -153,8 +149,7 @@ public:
      * \experimentalapi{Experimental since version 3.1.}
      */
     template <size_t capacity2>
-    explicit constexpr small_vector(value_type const (&array)[capacity2]) noexcept(is_noexcept) :
-        sz{capacity2}
+    explicit constexpr small_vector(value_type const (&array)[capacity2]) noexcept(is_noexcept) : sz{capacity2}
     {
         static_assert(capacity2 <= capacity_, "You can only initialize from array that has smaller or equal capacity.");
         std::ranges::copy(array, data_.begin());
@@ -173,12 +168,11 @@ public:
      *
      * \experimentalapi{Experimental since version 3.1.}
      */
-    template <typename ...other_value_type>
-    //!\cond
+    template <typename... other_value_type>
         requires (std::same_as<value_type, other_value_type> && ...)
-    //!\endcond
     constexpr small_vector(other_value_type... args) noexcept(is_noexcept) :
-        data_{args...}, sz{sizeof...(other_value_type)}
+        data_{args...},
+        sz{sizeof...(other_value_type)}
     {
         static_assert(sizeof...(other_value_type) <= capacity_, "Value list must not exceed the capacity.");
     }
@@ -201,12 +195,9 @@ public:
      * \experimentalapi{Experimental since version 3.1.}
      */
     template <std::forward_iterator begin_it_type, typename end_it_type>
-    //!\cond
-        requires std::sentinel_for<end_it_type, begin_it_type> &&
-                 std::constructible_from<value_type, std::iter_reference_t<begin_it_type>>
-    //!\endcond
-    constexpr small_vector(begin_it_type begin_it, end_it_type end_it) noexcept(is_noexcept) :
-        small_vector{}
+        requires std::sentinel_for<end_it_type, begin_it_type>
+              && std::constructible_from<value_type, std::iter_reference_t<begin_it_type>>
+    constexpr small_vector(begin_it_type begin_it, end_it_type end_it) noexcept(is_noexcept) : small_vector{}
     {
         assign(begin_it, end_it);
     }
@@ -227,10 +218,8 @@ public:
      * \experimentalapi{Experimental since version 3.1. This is a non-standard C++ extension.}
      */
     template <std::ranges::input_range other_range_t>
-    //!\cond
         requires (!std::is_same_v<std::remove_cvref_t<other_range_t>, small_vector>)
-                 /*ICE: && std::constructible_from<value_type, std::ranges::range_reference_t<other_range_t>>*/
-    //!\endcond
+              && std::constructible_from<value_type, std::ranges::range_reference_t<other_range_t>>
     explicit constexpr small_vector(other_range_t && range) noexcept(is_noexcept) :
         small_vector{std::ranges::begin(range), std::ranges::end(range)}
     {}
@@ -249,8 +238,7 @@ public:
      *
      * \experimentalapi{Experimental since version 3.1.}
      */
-    constexpr small_vector(size_type n, value_type value) noexcept(is_noexcept) :
-        small_vector{}
+    constexpr small_vector(size_type n, value_type value) noexcept(is_noexcept) : small_vector{}
     {
         assign(n, value);
     }
@@ -329,9 +317,7 @@ public:
      * \experimentalapi{Experimental since version 3.1. This is a non-standard C++ extension.}
      */
     template <std::ranges::input_range other_range_t>
-    //!\cond
         requires std::constructible_from<value_type, std::ranges::range_reference_t<other_range_t>>
-    //!\endcond
     constexpr void assign(other_range_t && range) noexcept(is_noexcept)
     {
         assign(std::ranges::begin(range), std::ranges::end(range));
@@ -355,10 +341,8 @@ public:
      * \experimentalapi{Experimental since version 3.1.}
      */
     template <std::forward_iterator begin_it_type, typename end_it_type>
-    //!\cond
-        requires std::sentinel_for<end_it_type, begin_it_type> &&
-                 std::constructible_from<value_type, std::iter_reference_t<begin_it_type>>
-    //!\endcond
+        requires std::sentinel_for<end_it_type, begin_it_type>
+              && std::constructible_from<value_type, std::iter_reference_t<begin_it_type>>
     constexpr void assign(begin_it_type begin_it, end_it_type end_it) noexcept(is_noexcept)
     {
         clear();
@@ -441,7 +425,7 @@ public:
         return (*this)[i];
     }
 
-    //!\copydoc at()
+    //!\copydoc seqan3::small_vector::at()
     const_reference at(size_type const i) const
     {
         if (i >= size()) // [[unlikely]]
@@ -474,7 +458,7 @@ public:
         return data_[i];
     }
 
-    //!\copydoc operator[]()
+    //!\copydoc seqan3::small_vector::operator[]()
     constexpr const_reference operator[](size_type const i) const noexcept
     {
         assert(i < size());
@@ -502,7 +486,7 @@ public:
         return (*this)[0];
     }
 
-    //!\copydoc front()
+    //!\copydoc seqan3::small_vector::front()
     constexpr const_reference front() const noexcept
     {
         assert(size() > 0);
@@ -527,14 +511,14 @@ public:
     constexpr reference back() noexcept
     {
         assert(size() > 0);
-        return (*this)[size()-1];
+        return (*this)[size() - 1];
     }
 
-    //!\copydoc back()
+    //!\copydoc seqan3::small_vector::back()
     constexpr const_reference back() const noexcept
     {
         assert(size() > 0);
-        return (*this)[size()-1];
+        return (*this)[size() - 1];
     }
 
     /*!\brief Direct access to the underlying array.
@@ -546,7 +530,7 @@ public:
         return data_.data();
     }
 
-    //!\copydoc data()
+    //!\copydoc seqan3::small_vector::data()
     constexpr value_type const * data() const noexcept
     {
         return data_.data();
@@ -739,10 +723,8 @@ public:
      * \experimentalapi{Experimental since version 3.1.}
      */
     template <std::forward_iterator begin_it_type, typename end_it_type>
-    //!\cond
-        requires std::sentinel_for<end_it_type, begin_it_type> &&
-                 std::constructible_from<value_type, std::iter_reference_t<begin_it_type>>
-    //!\endcond
+        requires std::sentinel_for<end_it_type, begin_it_type>
+              && std::constructible_from<value_type, std::iter_reference_t<begin_it_type>>
     constexpr iterator insert(const_iterator pos, begin_it_type begin_it, end_it_type end_it) noexcept(is_noexcept)
     {
         auto const pos_as_num = std::ranges::distance(cbegin(), pos);
@@ -756,7 +738,14 @@ public:
         for (size_type i = sz + length - 1; i > pos_as_num + length - 1; --i)
             data_[i] = data_[i - length];
 
+#if SEQAN3_WORKAROUND_GCC_BOGUS_MEMCPY
+#    pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wstringop-overflow"
+#endif // SEQAN3_WORKAROUND_GCC_BOGUS_MEMCPY
         std::ranges::copy(begin_it, end_it, &data_[pos_as_num]);
+#if SEQAN3_WORKAROUND_GCC_BOGUS_MEMCPY
+#    pragma GCC diagnostic pop
+#endif // SEQAN3_WORKAROUND_GCC_BOGUS_MEMCPY
         sz += length;
         return begin() + pos_as_num;
     }
@@ -840,7 +829,7 @@ public:
      */
     constexpr iterator erase(const_iterator pos) noexcept
     {
-       return erase(pos, pos + 1);
+        return erase(pos, pos + 1);
     }
 
     /*!\brief Appends the given element value to the end of the container.
@@ -908,9 +897,9 @@ public:
         sz = count;
     }
 
-    /*!\copybrief resize()
+    /*!\copybrief seqan3::small_vector::resize()
      * \param value Append copies of value when resizing.
-     * \copydetails resize()
+     * \copydetails seqan3::small_vector::resize()
      */
     constexpr void resize(size_type const count, value_type const value) noexcept
     {

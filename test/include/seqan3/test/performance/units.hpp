@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -14,7 +14,7 @@
 
 #include <benchmark/benchmark.h>
 
-#include <seqan3/std/ranges>
+#include <ranges>
 
 #include <seqan3/alignment/configuration/align_config_band.hpp>
 #include <seqan3/core/platform.hpp>
@@ -31,21 +31,21 @@ namespace seqan3::test
  */
 inline benchmark::Counter bytes_per_second(size_t bytes)
 {
-    return benchmark::Counter(bytes,
-                              benchmark::Counter::kIsIterationInvariantRate,
-                              benchmark::Counter::OneK::kIs1024);
+    return benchmark::Counter(bytes, benchmark::Counter::kIsIterationInvariantRate, benchmark::Counter::OneK::kIs1024);
 }
 
 //!\brief Calculates the number of cell updates for given sequences for a specific alignment config.
 template <typename sequences_range_t>
 inline size_t pairwise_cell_updates(sequences_range_t const & sequences_range, [[maybe_unused]] auto && align_cfg)
 {
-    auto count_cells = [&] (auto && seq1, auto && seq2)
+    using config_t = std::remove_cvref_t<decltype(align_cfg)>;
+
+    auto count_cells = [&](auto && seq1, auto && seq2)
     {
         size_t const columns = std::ranges::size(seq1) + 1;
         size_t const rows = std::ranges::size(seq2) + 1;
 
-        if constexpr (align_cfg.template exists<seqan3::align_cfg::band_fixed_size>())
+        if constexpr (config_t::template exists<seqan3::align_cfg::band_fixed_size>())
         {
             using std::get;
             auto const band_cfg = get<seqan3::align_cfg::band_fixed_size>(align_cfg);
@@ -71,7 +71,7 @@ inline size_t pairwise_cell_updates(sequences_range_t const & sequences_range, [
     };
 
     size_t matrix_cells = 0u;
-    for (auto && [seq1, seq2]: sequences_range)
+    for (auto && [seq1, seq2] : sequences_range)
         matrix_cells += count_cells(seq1, seq2);
 
     return matrix_cells;
@@ -84,9 +84,7 @@ inline size_t pairwise_cell_updates(sequences_range_t const & sequences_range, [
  */
 inline benchmark::Counter cell_updates_per_second(size_t cells)
 {
-    return benchmark::Counter(cells,
-                              benchmark::Counter::kIsIterationInvariantRate,
-                              benchmark::Counter::OneK::kIs1000);
+    return benchmark::Counter(cells, benchmark::Counter::kIsIterationInvariantRate, benchmark::Counter::OneK::kIs1000);
 }
 
 } // namespace seqan3::test

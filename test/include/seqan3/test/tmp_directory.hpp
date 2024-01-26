@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2021-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2021-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -15,12 +15,12 @@
  */
 
 #if defined(__APPLE__)
-#include <unistd.h>
+#    include <unistd.h>
 #elif defined(_WIN32)
-#include <cstring>
-#include <io.h>
-#else  // other unix systems
-#include <cstdlib>
+#    include <cstring>
+#    include <io.h>
+#else // other unix systems
+#    include <cstdlib>
 #endif
 
 #include <cassert>
@@ -56,7 +56,7 @@ char * mkdtemp(char * template_name)
 
     return nullptr;
 }
-}
+} // namespace
 #endif
 
 //!\cond
@@ -90,10 +90,8 @@ public:
      * \{
      */
     tmp_directory(tmp_directory const &) = delete; //!< Deleted.
-    tmp_directory(tmp_directory && other)
-        : directory_path {std::exchange(other.directory_path, std::nullopt)}
-    {
-    }
+    tmp_directory(tmp_directory && other) : directory_path{std::exchange(other.directory_path, std::nullopt)}
+    {}
 
     tmp_directory & operator=(tmp_directory const &) = delete; //!< Deleted.
     tmp_directory & operator=(tmp_directory && other)
@@ -101,7 +99,7 @@ public:
         /* The current hold directory is cleaned. A simple std::swap is not
          * performed to avoid prolonging the life of the temporary directory.
          */
-        warn_and_clean();
+        clean();
         directory_path = std::exchange(other.directory_path, std::nullopt);
         return *this;
     }
@@ -118,9 +116,9 @@ public:
         auto tmp_base_dir = std::filesystem::temp_directory_path();
         tmp_base_dir /= std::filesystem::path{"seqan_test_XXXXXXXX"};
 
-        auto path_str = tmp_base_dir.string();  // Copy the underlying path to get access to the raw char *.
+        auto path_str = tmp_base_dir.string(); // Copy the underlying path to get access to the raw char *.
 
-        if (char * f = mkdtemp(path_str.data()); f == nullptr)  // mkdtemp replaces XXXXXXXX in a safe and unique way.
+        if (char * f = mkdtemp(path_str.data()); f == nullptr) // mkdtemp replaces XXXXXXXX in a safe and unique way.
         {
             throw std::filesystem::filesystem_error("Could not create temporary directory with mkdtemp!",
                                                     tmp_base_dir,
@@ -135,7 +133,7 @@ public:
      */
     ~tmp_directory()
     {
-        warn_and_clean();
+        clean();
     }
     //!\}
 
@@ -159,45 +157,21 @@ public:
         return exists(directory_path.value()) && is_empty(directory_path.value());
     }
 
-    /*!\brief Removes all files from the temporary directory
-     */
-    void clean()
-    {
-        assert(directory_path);
-
-        // Deletes all directories recursivly without following symlinks.
-        // Function will throw on error.
-        std::filesystem::remove_all(directory_path.value());
-        directory_path = std::nullopt;
-    }
 private:
     /*!\brief Warns and cleans if directory is not empty
      */
-    void warn_and_clean()
+    void clean()
     {
         if (!directory_path)
         {
             return;
         }
 
-        if (!exists(directory_path.value()))
-        {
-            std::cerr << "temporary directory "
-                      << directory_path.value()
-                      << " was deleted externally. This is discouraged program behaviour\n";
-            return;
-        }
-        if (!empty())
-        {
-            std::cerr << "temporary directory " << directory_path.value() << " has some files that should be deleted\n";
-            for (auto & p: std::filesystem::recursive_directory_iterator(directory_path.value()))
-            {
-                std::cerr << "- " << p << "\n";
-            }
-        }
-        clean();
+        // Deletes all directories recursivly without following symlinks.
+        // Function will throw on error.
+        std::filesystem::remove_all(directory_path.value());
+        directory_path = std::nullopt;
     }
-
 
 private:
     std::optional<sandboxed_path> directory_path;

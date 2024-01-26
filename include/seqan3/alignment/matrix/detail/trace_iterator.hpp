@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -42,12 +42,12 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr trace_iterator() = default; //!< Defaulted.
-    constexpr trace_iterator(trace_iterator const &) = default; //!< Defaulted.
-    constexpr trace_iterator(trace_iterator &&) = default; //!< Defaulted.
+    constexpr trace_iterator() = default;                                   //!< Defaulted.
+    constexpr trace_iterator(trace_iterator const &) = default;             //!< Defaulted.
+    constexpr trace_iterator(trace_iterator &&) = default;                  //!< Defaulted.
     constexpr trace_iterator & operator=(trace_iterator const &) = default; //!< Defaulted.
-    constexpr trace_iterator & operator=(trace_iterator &&) = default; //!< Defaulted.
-    ~trace_iterator() = default; //!< Defaulted.
+    constexpr trace_iterator & operator=(trace_iterator &&) = default;      //!< Defaulted.
+    ~trace_iterator() = default;                                            //!< Defaulted.
 
     /*!\brief Constructs from the underlying trace matrix iterator indicating the start of the trace path.
      * \param[in] matrix_iter The underlying matrix iterator.
@@ -65,9 +65,7 @@ public:
      * Allows the conversion of non-const to const iterator.
      */
     template <two_dimensional_matrix_iterator other_matrix_iter_t>
-    //!\cond
         requires std::constructible_from<matrix_iter_t, other_matrix_iter_t>
-    //!\endcond
     constexpr trace_iterator(trace_iterator<other_matrix_iter_t> const other) noexcept : base_t{other}
     {}
     //!\}

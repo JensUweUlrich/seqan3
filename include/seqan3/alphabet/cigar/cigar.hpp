@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -67,7 +67,6 @@ private:
     //!\endcond
 
 public:
-
     /*!\brief The (extended) cigar operation alphabet of M,D,I,H,N,P,S,X,=.
      *
      * \details
@@ -85,12 +84,10 @@ public:
      * Example usage:
      * \include test/snippet/alphabet/cigar/cigar_operation.cpp
      *
-     * \if DEV
      * \note Usually you do not want to manipulate cigar elements and vectors on
      *       your own but convert an alignment to a cigar and back. See
-     *       seqan3::detail::get_cigar_vector for how to convert two aligned sequences into
+     *       seqan3::cigar_from_alignment for how to convert two aligned sequences into
      *       a cigar_vector.
-     * \endif
      *
      * \sa https://samtools.github.io/hts-specs/SAMv1.pdf#page=8
      *
@@ -101,12 +98,12 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr cigar() noexcept = default; //!< Defaulted.
-    constexpr cigar(cigar const &) noexcept = default; //!< Defaulted.
-    constexpr cigar(cigar &&) noexcept = default; //!< Defaulted.
+    constexpr cigar() noexcept = default;                          //!< Defaulted.
+    constexpr cigar(cigar const &) noexcept = default;             //!< Defaulted.
+    constexpr cigar(cigar &&) noexcept = default;                  //!< Defaulted.
     constexpr cigar & operator=(cigar const &) noexcept = default; //!< Defaulted.
-    constexpr cigar & operator=(cigar &&) noexcept = default; //!< Defaulted.
-    ~cigar() noexcept = default; //!< Defaulted.
+    constexpr cigar & operator=(cigar &&) noexcept = default;      //!< Defaulted.
+    ~cigar() noexcept = default;                                   //!< Defaulted.
 
     // Inherit constructors from base
     using base_t::base_t;
@@ -119,7 +116,7 @@ public:
      *
      * \stableapi{Since version 3.1.}
      */
-    SEQAN3_DOXYGEN_ONLY(( constexpr cigar(component_type const alph) noexcept {} ))
+    SEQAN3_DOXYGEN_ONLY((constexpr cigar(component_type const alph) noexcept {}))
 
     /*!\brief Assignment via a value of one of the components.
      * \tparam component_type One of the component types; must be uniquely contained in the type list of the composite.
@@ -129,7 +126,7 @@ public:
      *
      * \stableapi{Since version 3.1.}
      */
-    SEQAN3_DOXYGEN_ONLY(( constexpr cigar & operator=(component_type const alph) noexcept {} ))
+    SEQAN3_DOXYGEN_ONLY((constexpr cigar & operator=(component_type const alph) noexcept {}))
 
     // Inherit operators from base
     using base_t::operator=;
@@ -147,7 +144,7 @@ public:
         small_string<11> ret{}; // maximum number of digits for uint32_t + 1 char for the cigar operation
         ret.resize(11);
 
-        auto [ ptr, errc ] = std::to_chars(ret.data(), ret.data() + 10, get<0>(*this));
+        auto [ptr, errc] = std::to_chars(ret.data(), ret.data() + 10, get<0>(*this));
 
         *ptr = seqan3::to_char(get<1>(*this));
         (void)errc;
@@ -160,16 +157,22 @@ public:
     /*!\name Write functions
      * \{
      */
-    /*!\brief Assign from the string representation.
+    /*!\brief Assign from a std::string_view.
      * \details
-     * \experimentalapi{Experimental since version 3.1.}
+     *
+     * In order to avoid unnecessary copies, you can initialise a seqan3::cigar from a std::string_view that contains
+     * the cigar string.
+     *
+     * \include test/snippet/alphabet/cigar/cigar_assign_string.cpp
+     *
+     * \experimentalapi{Experimental since version 3.2.}
      */
-    cigar & assign_string(small_string<11> const s) noexcept
+    cigar & assign_string(std::string_view const input) noexcept
     {
         uint32_t num{};
-        auto [ ptr, errc ] = std::from_chars(s.data(), s.data() + 10, num);
+        auto [ptr, errc] = std::from_chars(input.data(), input.data() + input.size(), num);
 
-        if ((errc != std::errc{}) || (!char_is_valid_for<operation>(*ptr)) || (*(ptr + 1) != 0))
+        if ((errc != std::errc{}) || (!char_is_valid_for<operation>(*ptr)))
         {
             get<0>(*this) = 0;
             assign_char_to('P', get<1>(*this));
@@ -193,7 +196,7 @@ public:
      *
      * \stableapi{Since version 3.1.}
      */
-    SEQAN3_DOXYGEN_ONLY(( friend template <size_t index> constexpr auto get(cigar & l) noexcept {} ))
+    SEQAN3_DOXYGEN_ONLY((friend template <size_t index> constexpr auto get(cigar & l) noexcept {}))
 
     /*!\copybrief get
      * \tparam type Return the element of specified type; only available if the type is unique in the set of components.
@@ -203,7 +206,7 @@ public:
      *
      * \stableapi{Since version 3.1.}
      */
-    SEQAN3_DOXYGEN_ONLY(( friend template <typename type> constexpr auto get(cigar & l) noexcept {} ))
+    SEQAN3_DOXYGEN_ONLY((friend template <typename type> constexpr auto get(cigar & l) noexcept {}))
     //!\}
 };
 
@@ -241,6 +244,6 @@ constexpr cigar::operation operator""_cigar_operation(char const c) noexcept
 }
 //!\}
 
-} // inline namespace literals
+} // namespace literals
 
 } // namespace seqan3

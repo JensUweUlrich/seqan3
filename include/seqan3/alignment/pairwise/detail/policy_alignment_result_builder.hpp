@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -32,11 +32,7 @@ namespace seqan3::detail
  * Implements the interfaces to build the alignment result based on the previously selected output configurations.
  */
 template <typename alignment_configuration_t>
-#if !SEQAN3_WORKAROUND_GCC_93467
-//!\cond
-    requires is_type_specialisation_of_v<alignment_configuration_t, configuration>
-//!\endcond
-#endif // !SEQAN3_WORKAROUND_GCC_93467
+    requires seqan3::detail::is_type_specialisation_of_v<alignment_configuration_t, configuration>
 class policy_alignment_result_builder
 {
 protected:
@@ -50,12 +46,12 @@ protected:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    policy_alignment_result_builder() = default; //!< Defaulted.
-    policy_alignment_result_builder(policy_alignment_result_builder const &) = default; //!< Defaulted.
-    policy_alignment_result_builder(policy_alignment_result_builder &&) = default; //!< Defaulted.
+    policy_alignment_result_builder() = default;                                                    //!< Defaulted.
+    policy_alignment_result_builder(policy_alignment_result_builder const &) = default;             //!< Defaulted.
+    policy_alignment_result_builder(policy_alignment_result_builder &&) = default;                  //!< Defaulted.
     policy_alignment_result_builder & operator=(policy_alignment_result_builder const &) = default; //!< Defaulted.
-    policy_alignment_result_builder & operator=(policy_alignment_result_builder &&) = default; //!< Defaulted.
-    ~policy_alignment_result_builder() = default; //!< Defaulted.
+    policy_alignment_result_builder & operator=(policy_alignment_result_builder &&) = default;      //!< Defaulted.
+    ~policy_alignment_result_builder() = default;                                                   //!< Defaulted.
 
     /*!\brief Construction and initialisation using the alignment configuration.
      * \param[in] config The alignment configuration [not used in this context].
@@ -94,9 +90,7 @@ protected:
               typename matrix_coordinate_t,
               typename alignment_matrix_t,
               typename callback_t>
-    //!\cond
         requires std::invocable<callback_t, result_type>
-    //!\endcond
     void make_result_and_invoke([[maybe_unused]] sequence_pair_t && sequence_pair,
                                 [[maybe_unused]] index_t && id,
                                 [[maybe_unused]] score_t score,

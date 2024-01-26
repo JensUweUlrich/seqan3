@@ -1,7 +1,7 @@
 #include <seqan3/core/platform.hpp>
 
 //![snippet]
-#include <seqan3/std/ranges>
+#include <ranges>
 #include <sstream>
 
 #include <seqan3/io/sam_file/all.hpp>
@@ -18,6 +18,6 @@ int main()
 {
     auto input_file = seqan3::sam_file_input{std::istringstream{sam_file_raw}, seqan3::format_sam{}};
     input_file | std::views::take(3) // take only the first 3 records
-               | seqan3::sam_file_output{std::ostringstream{}, seqan3::format_sam{}};
+        | seqan3::sam_file_output{std::ostringstream{}, seqan3::format_sam{}};
 }
 //![snippet]

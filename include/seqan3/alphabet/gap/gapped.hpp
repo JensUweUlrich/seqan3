@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -13,12 +13,11 @@
 
 #pragma once
 
-#include <seqan3/alphabet/gap/gap.hpp>
 #include <seqan3/alphabet/composite/alphabet_variant.hpp>
+#include <seqan3/alphabet/gap/gap.hpp>
 
 namespace seqan3
 {
-
 
 /*!\brief Extends a given alphabet with a gap character.
  * \ingroup alphabet_gap
@@ -38,9 +37,7 @@ namespace seqan3
  * \stableapi{Since version 3.1.}
  */
 template <typename alphabet_t>
-//!\cond
     requires writable_alphabet<alphabet_t>
-//!\endcond
 using gapped = alphabet_variant<alphabet_t, gap>;
 
 } // namespace seqan3

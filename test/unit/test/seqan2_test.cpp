@@ -1,13 +1,13 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #include <gtest/gtest.h>
 
-#include <seqan3/std/ranges>
+#include <ranges>
 
 #include <seqan3/test/expect_same_type.hpp>
 #include <seqan3/test/seqan2.hpp>
@@ -15,13 +15,13 @@
 // Note: this file will only test regressions encountered with seqan2 compatibility and has no claim to be complete
 
 #ifdef SEQAN3_HAS_SEQAN2
-#include <seqan/sequence.h>
+#    include <seqan/sequence.h>
 
 template <typename T>
 class seqan2_container : public ::testing::Test
 {};
 
-using seqan2_container_types = ::testing::Types<seqan::String<int>, seqan::StringSet<int>>;
+using seqan2_container_types = ::testing::Types<seqan2::String<int>, seqan2::StringSet<int>>;
 TYPED_TEST_SUITE(seqan2_container, seqan2_container_types, );
 
 template <typename container_t>
@@ -30,7 +30,7 @@ container_t construct_iota(int n)
     container_t container{};
 
     for (int i = 0; i < n; ++i)
-        seqan::appendValue(container, i);
+        seqan2::appendValue(container, i);
 
     return container;
 }
@@ -51,8 +51,8 @@ TYPED_TEST(seqan2_container, std_ranges_begin_end)
     auto it = std::ranges::begin(container);
     auto it_end = std::ranges::end(container);
 
-    EXPECT_SAME_TYPE(decltype(it), decltype(seqan::begin(container)));
-    EXPECT_SAME_TYPE(decltype(it_end), decltype(seqan::end(container)));
+    EXPECT_SAME_TYPE(decltype(it), decltype(seqan2::begin(container)));
+    EXPECT_SAME_TYPE(decltype(it_end), decltype(seqan2::end(container)));
 
     for (int i = 0; it != it_end; ++it, ++i)
     {
@@ -89,11 +89,14 @@ TYPED_TEST(seqan2_container, std_iterator)
 }
 
 template <typename range_t>
-concept SeqAn2Range = requires(range_t range)
-{
-    SEQAN3_RETURN_TYPE_CONSTRAINT(seqan::begin(range), std::same_as, std::ranges::iterator_t<range_t>);
-    SEQAN3_RETURN_TYPE_CONSTRAINT(seqan::end(range), std::same_as, std::ranges::iterator_t<range_t>);
-};
+concept SeqAn2Range = requires (range_t range) {
+                          {
+                              seqan2::begin(range)
+                              } -> std::same_as<std::ranges::iterator_t<range_t>>;
+                          {
+                              seqan2::end(range)
+                              } -> std::same_as<std::ranges::iterator_t<range_t>>;
+                      };
 
 TYPED_TEST(seqan2_container, seqan_range_concept)
 {

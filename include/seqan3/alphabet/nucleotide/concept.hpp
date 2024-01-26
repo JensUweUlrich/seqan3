@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -13,8 +13,9 @@
 
 #pragma once
 
+#include <concepts>
+
 #include <seqan3/alphabet/concept.hpp>
-#include <seqan3/std/concepts>
 
 // ============================================================================
 // complement()
@@ -24,8 +25,8 @@ namespace seqan3::detail::adl_only
 {
 
 //!\brief Poison-pill overload to prevent non-ADL forms of unqualified lookup.
-template <typename ...args_t>
-void complement(args_t ...) = delete;
+template <typename... args_t>
+void complement(args_t...) = delete;
 
 //!\brief seqan3::detail::customisation_point_object (CPO) definition for seqan3::complement.
 //!\ingroup alphabet_nucleotide
@@ -41,8 +42,7 @@ struct complement_cpo : public detail::customisation_point_object<complement_cpo
      * \param alphabet The alphabet the complement is returned from.
      */
     template <typename alphabet_t>
-    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<2>, alphabet_t && alphabet)
-    (
+    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<2>, alphabet_t && alphabet)(
         /*return*/ seqan3::custom::alphabet<alphabet_t>::complement(std::forward<alphabet_t>(alphabet)) /*;*/
     );
 
@@ -51,8 +51,7 @@ struct complement_cpo : public detail::customisation_point_object<complement_cpo
      * \param alphabet The alphabet the complement is returned from.
      */
     template <typename alphabet_t>
-    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<1>, alphabet_t && alphabet)
-    (
+    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<1>, alphabet_t && alphabet)(
         /*return*/ complement(std::forward<alphabet_t>(alphabet)) /*;*/
     );
 
@@ -61,8 +60,7 @@ struct complement_cpo : public detail::customisation_point_object<complement_cpo
      * \param alphabet The alphabet the complement is returned from.
      */
     template <typename alphabet_t>
-    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<0>, alphabet_t && alphabet)
-    (
+    static constexpr auto SEQAN3_CPO_OVERLOAD(priority_tag<0>, alphabet_t && alphabet)(
         /*return*/ std::forward<alphabet_t>(alphabet).complement() /*;*/
     );
 };
@@ -146,10 +144,11 @@ inline constexpr auto complement = detail::adl_only::complement_cpo{};
  */
 //!\cond
 template <typename t>
-concept nucleotide_alphabet = alphabet<t> && requires (t val)
-{
-    { seqan3::complement(val) };
-};
+concept nucleotide_alphabet = alphabet<t> && requires (t val) {
+                                                 {
+                                                     seqan3::complement(val)
+                                                 };
+                                             };
 //!\endcond
 
 } // namespace seqan3

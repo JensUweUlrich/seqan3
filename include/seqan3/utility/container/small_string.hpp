@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -49,17 +49,18 @@ private:
     // make data inherited members visible
     using base_t::data_;
     using base_t::sz;
+
 public:
     /*!\name Associated types
      * \{
      */
-    using typename base_t::value_type;
-    using typename base_t::reference;
-    using typename base_t::const_reference;
-    using typename base_t::iterator;
     using typename base_t::const_iterator;
+    using typename base_t::const_reference;
     using typename base_t::difference_type;
+    using typename base_t::iterator;
+    using typename base_t::reference;
     using typename base_t::size_type;
+    using typename base_t::value_type;
     //!\}
 
     /*!\name Constructors, destructor and assignment
@@ -148,7 +149,8 @@ public:
     {
         static_assert(N <= capacity_ + 1, "Length of string literal exceeds capacity of small_string.");
         assert(_lit[N - 1] == '\0');
-        assign(&_lit[0], &_lit[N-1]);
+        base_t::assign(&_lit[0], &_lit[N - 1]);
+        data_[sz] = '\0';
     }
 
     /*!\brief Assign from pair of iterators.
@@ -169,10 +171,8 @@ public:
      * \experimentalapi{Experimental since version 3.1.}
      */
     template <std::forward_iterator begin_it_type, typename end_it_type>
-    //!\cond
-        requires std::sentinel_for<end_it_type, begin_it_type> &&
-                 std::constructible_from<value_type, std::iter_reference_t<begin_it_type>>
-    //!\endcond
+        requires std::sentinel_for<end_it_type, begin_it_type>
+              && std::constructible_from<value_type, std::iter_reference_t<begin_it_type>>
     constexpr void assign(begin_it_type begin_it, end_it_type end_it) noexcept
     {
         base_t::assign(begin_it, end_it);
@@ -212,7 +212,7 @@ public:
         data_[0] = '\0';
     }
 
-    //!\copydoc seqan3::small_vector::push_back(value_type const value)
+    //!\copydoc seqan3::small_vector::push_back
     constexpr void push_back(char const value) noexcept
     {
         assert(sz < capacity_);
@@ -229,18 +229,18 @@ public:
         data_[sz] = '\0';
     }
 
-    //!\copydoc seqan3::small_vector::resize(size_type const)
+    //!\copydoc seqan3::small_vector::resize(seqan3::small_vector::size_type)
     constexpr void resize(size_type const count) noexcept
     {
         resize(count, '\0');
     }
 
-    //!\copydoc seqan3::small_vector::resize(size_type const, value_type const value)
+    //!\copydoc seqan3::small_vector::resize(seqan3::small_vector::size_type,seqan3::small_vector::value_type)
     constexpr void resize(size_type const count, char const value) noexcept
     {
         assert(count <= capacity_);
 
-        for (size_t i = sz; i < count; ++i)  // sz < count; add `value` in [sz, count)
+        for (size_t i = sz; i < count; ++i) // sz < count; add `value` in [sz, count)
             data_[i] = value;
 
         sz = count;
@@ -363,6 +363,26 @@ public:
     {
         return str();
     }
+
+    /*!\brief Implicit conversion to std::string_view.
+     *
+     * It is the programmer's responsibility to ensure that the resulting string view does not outlive the string.
+     *
+     * ### Exceptions
+     *
+     * Strong exception guarantee. No data is modified.
+     *
+     * ### Complexity
+     *
+     * Constant.
+     *
+     * \experimentalapi{Experimental since version 3.1.}
+     * \sa https://en.cppreference.com/w/cpp/string/basic_string/operator_basic_string_view
+     */
+    constexpr operator std::string_view() const noexcept
+    {
+        return std::string_view{data_.data(), this->size()};
+    }
     //!\}
 
     /*!\name Input/output
@@ -406,9 +426,8 @@ public:
         if (s)
         {
             str.erase(); // clear the string
-            std::streamsize num_char = (is.width() > 0)
-                ? std::min<std::streamsize>(is.width(), str.max_size())
-                : str.max_size();
+            std::streamsize num_char =
+                (is.width() > 0) ? std::min<std::streamsize>(is.width(), str.max_size()) : str.max_size();
             assert(num_char > 0);
             for (std::streamsize n = num_char; n > 0 && !std::isspace(static_cast<char>(is.peek()), is.getloc()); --n)
             {
@@ -453,7 +472,7 @@ small_string(std::array<char, N> const &) -> small_string<N>;
   * \details
   * \experimentalapi{Experimental since version 3.1.}
   */
-small_string(char const) -> small_string<1>;
+small_string(char const)->small_string<1>;
 //!\}
 
 } // namespace seqan3

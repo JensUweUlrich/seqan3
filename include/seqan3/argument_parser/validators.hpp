@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,11 +12,11 @@
 
 #pragma once
 
-#include <seqan3/std/algorithm>
-#include <seqan3/std/concepts>
+#include <algorithm>
+#include <concepts>
 #include <filesystem>
 #include <fstream>
-#include <seqan3/std/ranges>
+#include <ranges>
 #include <regex>
 #include <sstream>
 
@@ -25,7 +25,7 @@
 #include <seqan3/core/debug_stream/range.hpp>
 #include <seqan3/io/detail/misc.hpp>
 #include <seqan3/io/detail/safe_filesystem_entry.hpp>
-#include <seqan3/utility/concept/exposition_only/core_language.hpp>
+#include <seqan3/utility/concept.hpp>
 #include <seqan3/utility/type_list/traits.hpp>
 #include <seqan3/utility/type_pack/traits.hpp>
 #include <seqan3/utility/type_traits/basic.hpp>
@@ -48,7 +48,7 @@ namespace seqan3
  *
  * \include test/snippet/argument_parser/validators_2.cpp
  *
- * You can learn more about SeqAn validators in our tutorial \ref section_validation.
+ * You can learn more about SeqAn validators in our tutorial.
  *
  * To implement your own validator please refer to the detailed concept description below.
  *
@@ -94,15 +94,18 @@ namespace seqan3
 //!\}
 //!\cond
 template <typename validator_type>
-concept validator = std::copyable<std::remove_cvref_t<validator_type>> &&
-                    requires(validator_type validator,
-                             typename std::remove_reference_t<validator_type>::option_value_type value)
-{
-    typename std::remove_reference_t<validator_type>::option_value_type;
+concept validator =
+    std::copyable<std::remove_cvref_t<validator_type>>
+    && requires (validator_type validator, typename std::remove_reference_t<validator_type>::option_value_type value) {
+           typename std::remove_reference_t<validator_type>::option_value_type;
 
-    SEQAN3_RETURN_TYPE_CONSTRAINT(validator(value), std::same_as, void);
-    SEQAN3_RETURN_TYPE_CONSTRAINT(validator.get_help_page_message(), std::same_as, std::string);
-};
+           {
+               validator(value)
+               } -> std::same_as<void>;
+           {
+               validator.get_help_page_message()
+               } -> std::same_as<std::string>;
+       };
 //!\endcond
 
 /*!\brief A validator that checks whether a number is inside a given range.
@@ -131,8 +134,7 @@ public:
      * \param[in] min_ Minimum set for the range to test.
      * \param[in] max_ Maximum set for the range to test.
      */
-    arithmetic_range_validator(option_value_type const min_, option_value_type const max_) :
-        min{min_}, max{max_}
+    arithmetic_range_validator(option_value_type const min_, option_value_type const max_) : min{min_}, max{max_}
     {}
 
     /*!\brief Tests whether cmp lies inside [`min`, `max`].
@@ -152,12 +154,15 @@ public:
      * \throws seqan3::validation_error
      */
     template <std::ranges::forward_range range_type>
-    //!\cond
         requires arithmetic<std::ranges::range_value_t<range_type>>
-    //!\endcond
     void operator()(range_type const & range) const
     {
-        std::for_each(range.begin(), range.end(), [&] (auto cmp) { (*this)(cmp); });
+        std::for_each(range.begin(),
+                      range.end(),
+                      [&](auto cmp)
+                      {
+                          (*this)(cmp);
+                      });
     }
 
     //!\brief Returns a message that can be appended to the (positional) options help page info.
@@ -216,13 +221,11 @@ public:
      * \param[in] rng The range of valid values to test.
      */
     template <std::ranges::forward_range range_type>
-    //!\cond
         requires std::constructible_from<option_value_type, std::ranges::range_rvalue_reference_t<range_type>>
-    //!\endcond
     value_list_validator(range_type rng)
     {
         values.clear();
-        std::ranges::move(std::move(rng), std::cpp20::back_inserter(values));
+        std::ranges::move(std::move(rng), std::back_inserter(values));
     }
 
     /*!\brief Constructing from a parameter pack.
@@ -230,11 +233,9 @@ public:
      *                      be constructible from each type in the parameter pack.
      * \param[in] opts The parameter pack values.
      */
-    template <typename ...option_types>
-    //!\cond
+    template <typename... option_types>
         requires ((std::constructible_from<option_value_type, option_types> && ...))
-    //!\endcond
-    value_list_validator(option_types && ...opts)
+    value_list_validator(option_types &&... opts)
     {
         (values.emplace_back(std::forward<option_types>(opts)), ...);
     }
@@ -256,12 +257,15 @@ public:
      * \throws seqan3::validation_error
      */
     template <std::ranges::forward_range range_type>
-    //!\cond
         requires std::convertible_to<std::ranges::range_value_t<range_type>, option_value_type>
-    //!\endcond
     void operator()(range_type const & range) const
     {
-        std::for_each(std::ranges::begin(range), std::ranges::end(range), [&] (auto cmp) { (*this)(cmp); });
+        std::for_each(std::ranges::begin(range),
+                      std::ranges::end(range),
+                      [&](auto cmp)
+                      {
+                          (*this)(cmp);
+                      });
     }
 
     //!\brief Returns a message that can be appended to the (positional) options help page info.
@@ -271,7 +275,6 @@ public:
     }
 
 private:
-
     //!\brief Minimum of the range to test.
     std::vector<option_value_type> values{};
 };
@@ -281,30 +284,24 @@ private:
  * \{
  */
 //!\brief Given a parameter pack of types that are convertible to std::string, delegate to value type std::string.
-template <typename option_type, typename ...option_types>
-//!\cond
-    requires (std::constructible_from<std::string, std::decay_t<option_types>> && ... &&
-              std::constructible_from<std::string, std::decay_t<option_type>>)
-//!\endcond
+template <typename option_type, typename... option_types>
+    requires (std::constructible_from<std::string, std::decay_t<option_types>> && ...
+              && std::constructible_from<std::string, std::decay_t<option_type>>)
 value_list_validator(option_type, option_types...) -> value_list_validator<std::string>;
 
 //!\brief Deduction guide for ranges over a value type convertible to std::string.
 template <typename range_type>
-//!\cond
-    requires (std::ranges::forward_range<std::decay_t<range_type>> &&
-              std::constructible_from<std::string, std::ranges::range_value_t<range_type>>)
-//!\endcond
+    requires (std::ranges::forward_range<std::decay_t<range_type>>
+              && std::constructible_from<std::string, std::ranges::range_value_t<range_type>>)
 value_list_validator(range_type && rng) -> value_list_validator<std::string>;
 
 //!\brief Deduction guide for a parameter pack.
-template <typename option_type, typename ...option_types>
-value_list_validator(option_type, option_types ...) -> value_list_validator<option_type>;
+template <typename option_type, typename... option_types>
+value_list_validator(option_type, option_types...) -> value_list_validator<option_type>;
 
 //!\brief Deduction guide for ranges.
 template <typename range_type>
-//!\cond
     requires (std::ranges::forward_range<std::decay_t<range_type>>)
-//!\endcond
 value_list_validator(range_type && rng) -> value_list_validator<std::ranges::range_value_t<range_type>>;
 //!\}
 
@@ -325,7 +322,6 @@ value_list_validator(range_type && rng) -> value_list_validator<std::ranges::ran
 class file_validator_base
 {
 public:
-
     //!\brief Type of values that are tested by validator.
     using option_value_type = std::string;
 
@@ -357,13 +353,16 @@ public:
      * \throws seqan3::validation_error
      */
     template <std::ranges::forward_range range_type>
-    //!\cond
         requires (std::convertible_to<std::ranges::range_value_t<range_type>, std::filesystem::path const &>
-                 && !std::convertible_to<range_type, std::filesystem::path const &>)
-    //!\endcond
+                  && !std::convertible_to<range_type, std::filesystem::path const &>)
     void operator()(range_type const & v) const
     {
-         std::for_each(v.begin(), v.end(), [&] (auto cmp) { this->operator()(cmp); });
+        std::for_each(v.begin(),
+                      v.end(),
+                      [&](auto cmp)
+                      {
+                          this->operator()(cmp);
+                      });
     }
 
 protected:
@@ -380,8 +379,12 @@ protected:
 
         // Check if extension is available.
         if (!path.has_extension())
-            throw validation_error{detail::to_string("The given filename ", path.string(), " has no extension. Expected"
-                                                     " one of the following valid extensions:", extensions, "!")};
+            throw validation_error{detail::to_string("The given filename ",
+                                                     path.string(),
+                                                     " has no extension. Expected"
+                                                     " one of the following valid extensions:",
+                                                     extensions,
+                                                     "!")};
 
         std::string file_path{path.filename().string()};
 
@@ -393,7 +396,7 @@ protected:
         std::string const all_extensions{file_path.substr(file_path.find(".") + 1)};
 
         // Compares the extensions in lower case.
-        auto case_insensitive_ends_with = [&] (std::string const & ext)
+        auto case_insensitive_ends_with = [&](std::string const & ext)
         {
             return case_insensitive_string_ends_with(file_path, ext);
         };
@@ -401,8 +404,11 @@ protected:
         // Check if requested extension is present.
         if (std::ranges::find_if(extensions, case_insensitive_ends_with) == extensions.end())
         {
-            throw validation_error{detail::to_string("Expected one of the following valid extensions: ", extensions,
-                                                     "! Got ", all_extensions, " instead!")};
+            throw validation_error{detail::to_string("Expected one of the following valid extensions: ",
+                                                     extensions,
+                                                     "! Got ",
+                                                     all_extensions,
+                                                     " instead!")};
         }
     }
 
@@ -417,9 +423,9 @@ protected:
         if (std::filesystem::is_directory(path))
         {
             std::error_code ec{};
-            std::filesystem::directory_iterator{path, ec};  // if directory iterator cannot be created, ec will be set.
+            std::filesystem::directory_iterator{path, ec}; // if directory iterator cannot be created, ec will be set.
             if (static_cast<bool>(ec))
-                throw validation_error{detail::to_string("Cannot read the directory ", path ,"!")};
+                throw validation_error{detail::to_string("Cannot read the directory ", path, "!")};
         }
         else
         {
@@ -459,7 +465,9 @@ protected:
         if (extensions.empty())
             return "";
         else
-            return detail::to_string(" Valid file extensions are: [", extensions | views::join_with(std::string{", "}), "].");
+            return detail::to_string(" Valid file extensions are: [",
+                                     extensions | views::join_with(std::string{", "}),
+                                     "].");
     }
 
     /*!\brief Helper function that checks if a string is a suffix of another string. Case insensitive.
@@ -471,12 +479,13 @@ protected:
     {
         size_t const suffix_length{suffix.size()};
         size_t const str_length{str.size()};
-        return suffix_length > str_length ?
-               false :
-               std::ranges::equal(str.substr(str_length - suffix_length), suffix, [] (char const chr1, char const chr2)
-               {
-                   return std::tolower(chr1) == std::tolower(chr2);
-               });
+        return suffix_length > str_length ? false
+                                          : std::ranges::equal(str.substr(str_length - suffix_length),
+                                                               suffix,
+                                                               [](char const chr1, char const chr2)
+                                                               {
+                                                                   return std::tolower(chr1) == std::tolower(chr2);
+                                                               });
     }
 
     //!\brief Stores the extensions.
@@ -511,7 +520,6 @@ template <typename file_t = void>
 class input_file_validator : public file_validator_base
 {
 public:
-
     static_assert(std::same_as<file_t, void> || detail::has_type_valid_formats<file_t>,
                   "Expected either a template type with a static member called valid_formats (a file type) or void.");
 
@@ -551,9 +559,7 @@ public:
      * static member `valid_formats`.
      */
     explicit input_file_validator(std::vector<std::string> extensions)
-    //!\cond
         requires std::same_as<file_t, void>
-    //!\endcond
         : file_validator_base{}
     {
         file_validator_base::extensions = std::move(extensions);
@@ -599,8 +605,7 @@ public:
     //!\brief Returns a message that can be appended to the (positional) options help page info.
     std::string get_help_page_message() const
     {
-        return "The input file must exist and read permissions must be granted." +
-               valid_extensions_help_page_message();
+        return "The input file must exist and read permissions must be granted." + valid_extensions_help_page_message();
     }
 };
 
@@ -646,7 +651,7 @@ class output_file_validator : public file_validator_base
 {
 public:
     static_assert(std::same_as<file_t, void> || detail::has_type_valid_formats<file_t>,
-                "Expected either a template type with a static member called valid_formats (a file type) or void.");
+                  "Expected either a template type with a static member called valid_formats (a file type) or void.");
 
     // Import from base class.
     using typename file_validator_base::option_value_type;
@@ -659,11 +664,11 @@ public:
     output_file_validator() : output_file_validator{output_file_open_options::create_new}
     {}
 
-    output_file_validator(output_file_validator const &) = default; //!< Defaulted.
-    output_file_validator(output_file_validator &&) = default; //!< Defaulted.
+    output_file_validator(output_file_validator const &) = default;             //!< Defaulted.
+    output_file_validator(output_file_validator &&) = default;                  //!< Defaulted.
     output_file_validator & operator=(output_file_validator const &) = default; //!< Defaulted.
-    output_file_validator & operator=(output_file_validator &&) = default; //!< Defaulted.
-    virtual ~output_file_validator() = default; //!< Virtual Destructor.
+    output_file_validator & operator=(output_file_validator &&) = default;      //!< Defaulted.
+    virtual ~output_file_validator() = default;                                 //!< Virtual Destructor.
 
     /*!\brief Constructs from a given overwrite mode and a list of valid extensions.
      * \param[in] mode A seqan3::output_file_open_options indicating whether the validator throws if a file already
@@ -672,8 +677,9 @@ public:
      *                       seqan3::output_file_validator::default_extensions.
      */
     explicit output_file_validator(output_file_open_options const mode,
-                                   std::vector<std::string> extensions = default_extensions())
-        : file_validator_base{}, mode{mode}
+                                   std::vector<std::string> extensions = default_extensions()) :
+        file_validator_base{},
+        mode{mode}
     {
         file_validator_base::extensions = std::move(extensions);
     }
@@ -735,8 +741,8 @@ public:
         if (mode == output_file_open_options::open_or_create)
             return "Write permissions must be granted." + valid_extensions_help_page_message();
         else // mode == create_new
-            return "The output file must not exist already and write permissions must be granted." +
-                   valid_extensions_help_page_message();
+            return "The output file must not exist already and write permissions must be granted."
+                 + valid_extensions_help_page_message();
     }
 
 private:
@@ -934,8 +940,7 @@ public:
     /*!\brief Constructing from a vector.
      * \param[in] pattern_ The pattern to match.
      */
-    regex_validator(std::string const & pattern_) :
-        pattern{pattern_}
+    regex_validator(std::string const & pattern_) : pattern{pattern_}
     {}
 
     /*!\brief Tests whether cmp lies inside values.
@@ -956,9 +961,7 @@ public:
      * \throws seqan3::validation_error
      */
     template <std::ranges::forward_range range_type>
-    //!\cond
         requires std::convertible_to<std::ranges::range_reference_t<range_type>, option_value_type const &>
-    //!\endcond
     void operator()(range_type const & v) const
     {
         for (auto && file_name : v)
@@ -1025,15 +1028,13 @@ struct default_validator
  * \remark For a complete overview, take a look at \ref argument_parser
  */
 template <validator validator1_type, validator validator2_type>
-//!\cond
     requires std::common_with<typename validator1_type::option_value_type, typename validator2_type::option_value_type>
-//!\endcond
 class validator_chain_adaptor
 {
 public:
     //!\brief The underlying type in both validators.
-    using option_value_type = std::common_type_t<typename validator1_type::option_value_type,
-                                                 typename validator2_type::option_value_type>;
+    using option_value_type =
+        std::common_type_t<typename validator1_type::option_value_type, typename validator2_type::option_value_type>;
 
     /*!\name Constructors, destructor and assignment
      * \{
@@ -1049,7 +1050,8 @@ public:
      * \param[in] vali2_ Another validator to be chained to vali1_.
      */
     validator_chain_adaptor(validator1_type vali1_, validator2_type vali2_) :
-        vali1{std::move(vali1_)}, vali2{std::move(vali2_)}
+        vali1{std::move(vali1_)},
+        vali2{std::move(vali2_)}
     {}
 
     //!\brief The destructor.
@@ -1065,9 +1067,7 @@ public:
      * the chained validators which may throw on input error.
      */
     template <typename cmp_type>
-    //!\cond
         requires std::invocable<validator1_type, cmp_type const> && std::invocable<validator2_type, cmp_type const>
-    //!\endcond
     void operator()(cmp_type const & cmp) const
     {
         vali1(cmp);
@@ -1119,14 +1119,11 @@ private:
  * \remark For a complete overview, take a look at \ref argument_parser
  */
 template <validator validator1_type, validator validator2_type>
-//!\cond
     requires std::common_with<typename std::remove_reference_t<validator1_type>::option_value_type,
                               typename std::remove_reference_t<validator2_type>::option_value_type>
-//!\endcond
 auto operator|(validator1_type && vali1, validator2_type && vali2)
 {
-    return detail::validator_chain_adaptor{std::forward<validator1_type>(vali1),
-                                           std::forward<validator2_type>(vali2)};
+    return detail::validator_chain_adaptor{std::forward<validator1_type>(vali1), std::forward<validator2_type>(vali2)};
 }
 
 } // namespace seqan3

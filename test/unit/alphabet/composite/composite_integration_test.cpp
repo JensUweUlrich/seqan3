@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -62,7 +62,7 @@ TEST(composite, custom_constructors)
     qualified_gapped_dna_phred42 t34{seqan3::gap{}};
     qualified_gapped_dna_phred42 t35{seqan3::gapped<seqan3::dna4>('C'_dna4)};
     qualified_gapped_dna_phred42 t36{seqan3::gapped<seqan3::dna4>(seqan3::gap{})};
-    qualified_gapped_dna_phred42 t37{seqan3::gap{}, '$'_phred42};
+    [[maybe_unused]] qualified_gapped_dna_phred42 t37{seqan3::gap{}, '$'_phred42};
 
     gapped_qualified_dna_phred42 t41{'C'_dna4};
     gapped_qualified_dna_phred42 t42{'C'_rna4};
@@ -114,41 +114,43 @@ TEST(composite, custom_constructors)
 
 TEST(composite_constexpr, custom_constructor)
 {
-    constexpr qualified_dna_phred42 t11{'C'_dna4};
-    constexpr qualified_dna_phred42 t12{'C'_rna4};
-    constexpr qualified_dna_phred42 t13{'$'_phred42};
-    constexpr qualified_dna_phred42 t14{'$'_phred63};
+    [[maybe_unused]] constexpr qualified_dna_phred42 t11{'C'_dna4};
+    [[maybe_unused]] constexpr qualified_dna_phred42 t12{'C'_rna4};
+    [[maybe_unused]] constexpr qualified_dna_phred42 t13{'$'_phred42};
+    [[maybe_unused]] constexpr qualified_dna_phred42 t14{'$'_phred63};
 
-    constexpr seqan3::qualified<seqan3::aa27, seqan3::phred63> t21{'K'_aa27};
-    constexpr seqan3::qualified<seqan3::aa27, seqan3::phred63> t22{'$'_phred63};
-    constexpr seqan3::qualified<seqan3::aa27, seqan3::phred63> t23{'$'_phred42};
+    [[maybe_unused]] constexpr seqan3::qualified<seqan3::aa27, seqan3::phred63> t21{'K'_aa27};
+    [[maybe_unused]] constexpr seqan3::qualified<seqan3::aa27, seqan3::phred63> t22{'$'_phred63};
+    [[maybe_unused]] constexpr seqan3::qualified<seqan3::aa27, seqan3::phred63> t23{'$'_phred42};
 
-    constexpr qualified_gapped_dna_phred42 t31{'C'_dna4};
-    constexpr qualified_gapped_dna_phred42 t32{'C'_rna4};
-    constexpr qualified_gapped_dna_phred42 t33{'$'_phred42};
-    constexpr qualified_gapped_dna_phred42 t34{seqan3::gap{}};
-    constexpr qualified_gapped_dna_phred42 t35{seqan3::gapped<seqan3::dna4>('C'_dna4)};
-    constexpr qualified_gapped_dna_phred42 t36{seqan3::gapped<seqan3::dna4>(seqan3::gap{})};
-    constexpr qualified_gapped_dna_phred42 t37{seqan3::gap{}, '$'_phred42};
+    [[maybe_unused]] constexpr qualified_gapped_dna_phred42 t31{'C'_dna4};
+    [[maybe_unused]] constexpr qualified_gapped_dna_phred42 t32{'C'_rna4};
+    [[maybe_unused]] constexpr qualified_gapped_dna_phred42 t33{'$'_phred42};
+    [[maybe_unused]] constexpr qualified_gapped_dna_phred42 t34{seqan3::gap{}};
+    [[maybe_unused]] constexpr qualified_gapped_dna_phred42 t35{seqan3::gapped<seqan3::dna4>('C'_dna4)};
+    [[maybe_unused]] constexpr qualified_gapped_dna_phred42 t36{seqan3::gapped<seqan3::dna4>(seqan3::gap{})};
+    [[maybe_unused]] constexpr qualified_gapped_dna_phred42 t37{seqan3::gap{}, '$'_phred42};
 
-    constexpr gapped_qualified_dna_phred42 t41{'C'_dna4};
-    constexpr gapped_qualified_dna_phred42 t42{'C'_rna4};
-    constexpr gapped_qualified_dna_phred42 t43{'$'_phred42};
-    constexpr gapped_qualified_dna_phred42 t44{seqan3::gap{}};
-    constexpr gapped_qualified_dna_phred42 t45{qualified_dna_phred42{'C'_dna4, '!'_phred42}};
+    [[maybe_unused]] constexpr gapped_qualified_dna_phred42 t41{'C'_dna4};
+    [[maybe_unused]] constexpr gapped_qualified_dna_phred42 t42{'C'_rna4};
+    [[maybe_unused]] constexpr gapped_qualified_dna_phred42 t43{'$'_phred42};
+    [[maybe_unused]] constexpr gapped_qualified_dna_phred42 t44{seqan3::gap{}};
+    [[maybe_unused]] constexpr gapped_qualified_dna_phred42 t45{qualified_dna_phred42{'C'_dna4, '!'_phred42}};
 
-    constexpr qualified_qualified_gapped_dna_phred42_phred42 t51{'C'_dna4};
-    constexpr qualified_qualified_gapped_dna_phred42_phred42 t52{'C'_rna4};
-    constexpr qualified_qualified_gapped_dna_phred42_phred42 t53{'$'_phred42};
-    constexpr qualified_qualified_gapped_dna_phred42_phred42 t54{seqan3::gap{}};
-    constexpr qualified_qualified_gapped_dna_phred42_phred42 t55{seqan3::gapped<seqan3::dna4>('C'_dna4)};
-    constexpr qualified_qualified_gapped_dna_phred42_phred42 t56{seqan3::gapped<seqan3::dna4>(seqan3::gap{})};
+    [[maybe_unused]] constexpr qualified_qualified_gapped_dna_phred42_phred42 t51{'C'_dna4};
+    [[maybe_unused]] constexpr qualified_qualified_gapped_dna_phred42_phred42 t52{'C'_rna4};
+    [[maybe_unused]] constexpr qualified_qualified_gapped_dna_phred42_phred42 t53{'$'_phred42};
+    [[maybe_unused]] constexpr qualified_qualified_gapped_dna_phred42_phred42 t54{seqan3::gap{}};
+    [[maybe_unused]] constexpr qualified_qualified_gapped_dna_phred42_phred42 t55{
+        seqan3::gapped<seqan3::dna4>('C'_dna4)};
+    [[maybe_unused]] constexpr qualified_qualified_gapped_dna_phred42_phred42 t56{
+        seqan3::gapped<seqan3::dna4>(seqan3::gap{})};
 
-    constexpr gapped_alphabet_variant_dna_phred42 t61{'C'_dna4};
-    constexpr gapped_alphabet_variant_dna_phred42 t62{'C'_rna4};
-    constexpr gapped_alphabet_variant_dna_phred42 t63{'$'_phred42};
-    constexpr gapped_alphabet_variant_dna_phred42 t64{seqan3::gap{}};
-    constexpr gapped_alphabet_variant_dna_phred42 t65{qualified_dna_phred42{'C'_dna4, '!'_phred42}};
+    [[maybe_unused]] constexpr gapped_alphabet_variant_dna_phred42 t61{'C'_dna4};
+    [[maybe_unused]] constexpr gapped_alphabet_variant_dna_phred42 t62{'C'_rna4};
+    [[maybe_unused]] constexpr gapped_alphabet_variant_dna_phred42 t63{'$'_phred42};
+    [[maybe_unused]] constexpr gapped_alphabet_variant_dna_phred42 t64{seqan3::gap{}};
+    [[maybe_unused]] constexpr gapped_alphabet_variant_dna_phred42 t65{qualified_dna_phred42{'C'_dna4, '!'_phred42}};
 }
 
 TEST(composite, custom_assignment)
@@ -191,7 +193,7 @@ TEST(composite, custom_assignment)
 
     gapped_qualified_dna_phred42 t41{};
     gapped_qualified_dna_phred42 t42{'C'_dna4};
-    gapped_qualified_dna_phred42 t43{qualified_dna_phred42{'C'_dna4, '$'_phred42}};
+    // gapped_qualified_dna_phred42 t43{qualified_dna_phred42{'C'_dna4, '$'_phred42}};
     gapped_qualified_dna_phred42 t44{seqan3::gap{}};
     gapped_qualified_dna_phred42 t45{qualified_dna_phred42{'C'_dna4, '!'_phred42}};
     t41 = 'C'_dna4;
@@ -239,7 +241,6 @@ TEST(composite, custom_assignment)
     EXPECT_EQ(t61, t64);
     t61 = qualified_dna_phred42{'C'_dna4, '!'_phred42};
     EXPECT_EQ(t61, t65);
-
 }
 
 constexpr bool do_assignment()
@@ -352,10 +353,10 @@ TEST(composite, custom_comparison)
     EXPECT_NE(t41, seqan3::gap{});
     EXPECT_EQ(t41, (qualified_dna_phred42{'C'_dna4, '$'_phred42}));
     EXPECT_EQ(t41, (gapped_qualified_dna_phred42{qualified_dna_phred42{'C'_dna4, '$'_phred42}}));
-//     EXPECT_LT(t41, 'G'_dna4); // not supposed to work
-//     EXPECT_LT(t41, 'G'_rna4); // not supposed to work
-//     EXPECT_LT(t41, '%'_phred42); // would never be LT, because seqan3::dna4 part of tuple defaulted to 'A' on RHS
-    EXPECT_LT(t41, seqan3::gap{}); // *
+    //     EXPECT_LT(t41, 'G'_dna4); // not supposed to work
+    //     EXPECT_LT(t41, 'G'_rna4); // not supposed to work
+    //     EXPECT_LT(t41, '%'_phred42); // would never be LT, because seqan3::dna4 part of tuple defaulted to 'A' on RHS
+    EXPECT_LT(t41, seqan3::gap{});                                  // *
     EXPECT_LT(t41, (qualified_dna_phred42{'G'_dna4, '#'_phred42})); // *
     EXPECT_LT(t41, (gapped_qualified_dna_phred42{qualified_dna_phred42{'G'_dna4, '#'_phred42}}));
 
@@ -364,11 +365,11 @@ TEST(composite, custom_comparison)
     EXPECT_EQ('$'_phred42, t41);
     EXPECT_EQ((qualified_dna_phred42{'C'_dna4, '$'_phred42}), t41);
     EXPECT_NE(seqan3::gap{}, t41);
-//     EXPECT_LT('A'_dna4, t41); // not supposed to work
-//     EXPECT_LT('A'_rna4, t41); // not supposed to work
-//     EXPECT_LT('#'_phred42, t41); // not supposed to work
+    //     EXPECT_LT('A'_dna4, t41); // not supposed to work
+    //     EXPECT_LT('A'_rna4, t41); // not supposed to work
+    //     EXPECT_LT('#'_phred42, t41); // not supposed to work
     EXPECT_LT((qualified_dna_phred42{'A'_dna4, '#'_phred42}), t41); // *
-    EXPECT_GT(seqan3::gap{}, t41); // *
+    EXPECT_GT(seqan3::gap{}, t41);                                  // *
 
     qualified_qualified_gapped_dna_phred42_phred42 t51{qualified_gapped_dna_phred42{'C'_dna4, '$'_phred42}};
     EXPECT_EQ(t51, 'C'_dna4);
@@ -377,10 +378,10 @@ TEST(composite, custom_comparison)
     EXPECT_EQ(t51, seqan3::gapped<seqan3::dna4>('C'_dna4));
     EXPECT_EQ(t51, '!'_phred42); // "outer" Phred score element
     EXPECT_EQ(t51, (qualified_gapped_dna_phred42{'C'_dna4, '$'_phred42}));
-//     EXPECT_LT(t51, 'G'_dna4); // not supposed to work
-//     EXPECT_LT(t51, 'G'_rna4); // not supposed to work
-//     EXPECT_LT(t51, seqan3::gap{}); // not supposed to work
-//     EXPECT_LT(t51, seqan3::gapped<seqan3::dna4>('G'_dna4)); // not supposed to work
+    //     EXPECT_LT(t51, 'G'_dna4); // not supposed to work
+    //     EXPECT_LT(t51, 'G'_rna4); // not supposed to work
+    //     EXPECT_LT(t51, seqan3::gap{}); // not supposed to work
+    //     EXPECT_LT(t51, seqan3::gapped<seqan3::dna4>('G'_dna4)); // not supposed to work
     EXPECT_LT(t51, '"'_phred42);
     EXPECT_LT(t51, (qualified_gapped_dna_phred42{'C'_dna4, '%'_phred42}));
 
@@ -390,10 +391,10 @@ TEST(composite, custom_comparison)
     EXPECT_EQ(seqan3::gapped<seqan3::dna4>('C'_dna4), t51);
     EXPECT_EQ('!'_phred42, t51);
     EXPECT_EQ((qualified_gapped_dna_phred42{'C'_dna4, '$'_phred42}), t51);
-//     EXPECT_LT('A'_dna4, t51); // not supposed to work
-//     EXPECT_LT('A'_rna4, t51); // not supposed to work
-//     EXPECT_GT(seqan3::gap{}, t51); // not supposed to work
-//     EXPECT_LT(seqan3::gapped<seqan3::dna4>('A'_dna4), t51); // not supposed to work
+    //     EXPECT_LT('A'_dna4, t51); // not supposed to work
+    //     EXPECT_LT('A'_rna4, t51); // not supposed to work
+    //     EXPECT_GT(seqan3::gap{}, t51); // not supposed to work
+    //     EXPECT_LT(seqan3::gapped<seqan3::dna4>('A'_dna4), t51); // not supposed to work
     EXPECT_GT('"'_phred42, t51);
     EXPECT_GT((qualified_gapped_dna_phred42{'C'_dna4, '%'_phred42}), t51);
 
@@ -402,19 +403,19 @@ TEST(composite, custom_comparison)
     EXPECT_EQ(t61, 'C'_dna4);
     EXPECT_NE(t61, seqan3::gap{});
     EXPECT_NE(t61, '!'_phred42);
-    EXPECT_LT(t61, 'G'_rna4); // *
-    EXPECT_LT(t61, 'G'_dna4); // *
+    EXPECT_LT(t61, 'G'_rna4);      // *
+    EXPECT_LT(t61, 'G'_dna4);      // *
     EXPECT_LT(t61, seqan3::gap{}); // *
-    EXPECT_LT(t61, '"'_phred42); // *
+    EXPECT_LT(t61, '"'_phred42);   // *
 
     EXPECT_EQ('C'_rna4, t61);
     EXPECT_EQ('C'_dna4, t61);
     EXPECT_NE(seqan3::gap{}, t61);
     EXPECT_NE('!'_phred42, t61);
-    EXPECT_LT('A'_rna4, t61); // *
-    EXPECT_LT('A'_dna4, t61); // *
+    EXPECT_LT('A'_rna4, t61);      // *
+    EXPECT_LT('A'_dna4, t61);      // *
     EXPECT_GT(seqan3::gap{}, t61); // *
-    EXPECT_GT('!'_phred42, t61); // *
+    EXPECT_GT('!'_phred42, t61);   // *
 }
 
 TEST(composite, get)
@@ -422,17 +423,17 @@ TEST(composite, get)
     using seqan3::get;
 
     qualified_qualified_gapped_dna_phred42_phred42 t51{qualified_gapped_dna_phred42{'C'_dna4, '$'_phred42}};
-    EXPECT_EQ(get<0>(t51),            'C'_dna4);
-    EXPECT_EQ(get<0>(get<0>(t51)),    'C'_dna4);
+    EXPECT_EQ(get<0>(t51), 'C'_dna4);
+    EXPECT_EQ(get<0>(get<0>(t51)), 'C'_dna4);
 
-    EXPECT_EQ(get<0>(t51),            'C'_rna4);
-    EXPECT_EQ(get<0>(get<0>(t51)),    'C'_rna4);
+    EXPECT_EQ(get<0>(t51), 'C'_rna4);
+    EXPECT_EQ(get<0>(get<0>(t51)), 'C'_rna4);
 
-    EXPECT_NE(get<0>(t51),            seqan3::gap{});
-    EXPECT_NE(get<0>(get<0>(t51)),    seqan3::gap{});
+    EXPECT_NE(get<0>(t51), seqan3::gap{});
+    EXPECT_NE(get<0>(get<0>(t51)), seqan3::gap{});
 
-    EXPECT_EQ(get<0>(t51),            seqan3::gapped<seqan3::dna4>('C'_dna4));
-    EXPECT_EQ(get<0>(get<0>(t51)),    seqan3::gapped<seqan3::dna4>('C'_dna4));
+    EXPECT_EQ(get<0>(t51), seqan3::gapped<seqan3::dna4>('C'_dna4));
+    EXPECT_EQ(get<0>(get<0>(t51)), seqan3::gapped<seqan3::dna4>('C'_dna4));
 
-    EXPECT_NE(get<0>(t51),            '!'_phred42);
+    EXPECT_NE(get<0>(t51), '!'_phred42);
 }

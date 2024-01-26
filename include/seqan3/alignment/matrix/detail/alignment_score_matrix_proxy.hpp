@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <seqan3/utility/concept/exposition_only/core_language.hpp>
+#include <seqan3/utility/concept.hpp>
 #include <seqan3/utility/simd/concept.hpp>
 
 namespace seqan3::detail
@@ -37,10 +37,10 @@ struct alignment_score_matrix_proxy
     static_assert(arithmetic<score_type> || simd_concept<score_type>,
                   "Value type must either be an arithmetic type or a simd vector type.");
 
-    score_type & current; //!< The current value.
+    score_type & current;  //!< The current value.
     score_type & diagonal; //!< The last diagonal value.
-    score_type & r_left; //!< The last value to the left.
-    score_type & w_left; //!< The next value to the left.
-    score_type & up; //!< The last value above.
+    score_type & r_left;   //!< The last value to the left.
+    score_type & w_left;   //!< The next value to the left.
+    score_type & up;       //!< The last value above.
 };
 } // namespace seqan3::detail

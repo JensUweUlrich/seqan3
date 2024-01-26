@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -13,7 +13,7 @@
 #pragma once
 
 #include <iterator>
-#include <seqan3/std/ranges>
+#include <ranges>
 #include <string>
 #include <vector>
 
@@ -32,9 +32,9 @@
 #include <seqan3/io/views/detail/istreambuf_view.hpp>
 #include <seqan3/io/views/detail/take_until_view.hpp>
 #include <seqan3/utility/detail/type_name_as_string.hpp>
+#include <seqan3/utility/range/to.hpp>
 #include <seqan3/utility/tuple/concept.hpp>
 #include <seqan3/utility/views/slice.hpp>
-#include <seqan3/utility/views/to.hpp>
 
 namespace seqan3
 {
@@ -54,14 +54,14 @@ namespace seqan3
  * [SAM format specifications](https://samtools.github.io/hts-specs/SAMv1.pdf).
  * **SeqAn implements version 1.6 of the SAM specification**.
  *
- * Take a look at our tutorial \ref tutorial_sam_file for a walk through of how to read alignment files.
+ * Take a look at our tutorial \ref tutorial_sam_file for a walk through of how to read SAM/BAM files.
  *
  * ### fields_specialisation
  *
  * The SAM format provides the following fields:
- * seqan3::field::alignment, seqan3::field::seq, seqan3::field::qual,
+ * seqan3::field::seq, seqan3::field::qual,
  * seqan3::field::id, seqan3::field::ref_seq, seqan3::field::ref_id
- * seqan3::field::ref_ossfet, seqan3::field::offset, seqan3::field::flag,
+ * seqan3::field::ref_offset, seqan3::field::offset, seqan3::field::flag,
  * seqan3::field::mapq and seqan3::field::mate.
  * In addition there is the seqan3::field::header_ptr, which is usually only used internally
  * to provide the range-based functionality of the file.
@@ -74,28 +74,19 @@ namespace seqan3
  * Since many users will be accustomed to the columns of the SAM format, here is a
  * mapping of the common SAM format columns to the SeqAn record fields:
  *
- * | #  | SAM Column ID |  FIELD name                                       |
- * |:--:|:--------------|:--------------------------------------------------|
- * | 1  | QNAME         | seqan3::field::id                                 |
- * | 2  | FLAG          | seqan3::field::flag                               |
- * | 3  | RNAME         | seqan3::field::ref_id                             |
- * | 4  | POS           | seqan3::field::ref_offset                         |
- * | 5  | MAPQ          | seqan3::field::mapq                               |
- * | 6  | CIGAR         | implicilty stored in seqan3::field::alignment     |
- * | 7  | RNEXT         | seqan3::field::mate (tuple pos 0)                 |
- * | 8  | PNEXT         | seqan3::field::mate (tuple pos 1)                 |
- * | 9  | TLEN          | seqan3::field::mate (tuple pos 2)                 |
- * | 10 | SEQ           | seqan3::field::seq                                |
- * | 11 | QUAL          | seqan3::field::qual                               |
- *
- * The (read sequence/query) **OFFSET** will be required to store the soft
- * clipping information at the read start (end clipping will be automatically
- * deduced by how much the read sequence length + offset is larger than the
- * alignment length).
- *
- * Note: SeqAn currently does not support hard clipping. When reading SAM,
- * hard-clipping is discarded; but the resulting alignment/sequence combination
- * is still valid.
+ * | #  | SAM Column ID |  FIELD name                       |
+ * |:--:|:--------------|:----------------------------------|
+ * | 1  | QNAME         | seqan3::field::id                 |
+ * | 2  | FLAG          | seqan3::field::flag               |
+ * | 3  | RNAME         | seqan3::field::ref_id             |
+ * | 4  | POS           | seqan3::field::ref_offset         |
+ * | 5  | MAPQ          | seqan3::field::mapq               |
+ * | 6  | CIGAR         | seqan3::field::cigar              |
+ * | 7  | RNEXT         | seqan3::field::mate (tuple pos 0) |
+ * | 8  | PNEXT         | seqan3::field::mate (tuple pos 1) |
+ * | 9  | TLEN          | seqan3::field::mate (tuple pos 2) |
+ * | 10 | SEQ           | seqan3::field::seq                |
+ * | 11 | QUAL          | seqan3::field::qual               |
  *
  * ### Format Check
  *
@@ -113,33 +104,32 @@ namespace seqan3
  *
  * \remark For a complete overview, take a look at \ref io_sam_file
  */
-class format_sam : private detail::format_sam_base
+class format_sam : protected detail::format_sam_base
 {
 public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
     // construction cannot be noexcept because this class has a std::string variable as a quality string buffer.
-    format_sam() = default; //!< Defaulted.
-    format_sam(format_sam const &) = default; //!< Defaulted.
-    format_sam & operator=(format_sam const &) = default; //!< Defaulted.
-    format_sam(format_sam &&) = default; //!< Defaulted.
-    format_sam & operator=(format_sam &&) = default; //!< Defaulted.
-    ~format_sam() = default; //!< Defaulted.
+    format_sam() = default;                              //!< Defaulted.
+    format_sam(format_sam const &) = delete;             //!< Deleted. Header holds a unique_ptr.
+    format_sam & operator=(format_sam const &) = delete; //!< Deleted. Header holds a unique_ptr.
+    format_sam(format_sam &&) = default;                 //!< Defaulted.
+    format_sam & operator=(format_sam &&) = default;     //!< Defaulted.
+    ~format_sam() = default;                             //!< Defaulted.
 
     //!\}
 
     //!\brief The valid file extensions for this format; note that you can modify this value.
-    static inline std::vector<std::string> file_extensions
-    {
-        { "sam" },
+    static inline std::vector<std::string> file_extensions{
+        {"sam"},
     };
 
 protected:
-    template <typename stream_type,     // constraints checked by file
+    template <typename stream_type, // constraints checked by file
               typename seq_legal_alph_type,
               typename stream_pos_type,
-              typename seq_type,        // other constraints checked inside function
+              typename seq_type, // other constraints checked inside function
               typename id_type,
               typename qual_type>
     void read_sequence_record(stream_type & stream,
@@ -149,8 +139,8 @@ protected:
                               id_type & id,
                               qual_type & qualities);
 
-    template <typename stream_type,     // constraints checked by file
-              typename seq_type,        // other constraints checked inside function
+    template <typename stream_type, // constraints checked by file
+              typename seq_type,    // other constraints checked inside function
               typename id_type,
               typename qual_type>
     void write_sequence_record(stream_type & stream,
@@ -159,18 +149,16 @@ protected:
                                id_type && id,
                                qual_type && qualities);
 
-    template <typename stream_type,     // constraints checked by file
+    template <typename stream_type, // constraints checked by file
               typename seq_legal_alph_type,
               typename ref_seqs_type,
               typename ref_ids_type,
               typename stream_pos_type,
               typename seq_type,
               typename id_type,
-              typename offset_type,
               typename ref_seq_type,
               typename ref_id_type,
               typename ref_offset_type,
-              typename align_type,
               typename cigar_type,
               typename flag_type,
               typename mapq_type,
@@ -187,11 +175,9 @@ protected:
                                seq_type & seq,
                                qual_type & qual,
                                id_type & id,
-                               offset_type & offset,
                                ref_seq_type & SEQAN3_DOXYGEN_ONLY(ref_seq),
                                ref_id_type & ref_id,
                                ref_offset_type & ref_offset,
-                               align_type & align,
                                cigar_type & cigar_vector,
                                flag_type & flag,
                                mapq_type & mapq,
@@ -206,7 +192,6 @@ protected:
               typename id_type,
               typename ref_seq_type,
               typename ref_id_type,
-              typename align_type,
               typename qual_type,
               typename mate_type,
               typename tag_dict_type,
@@ -218,11 +203,9 @@ protected:
                                 seq_type && seq,
                                 qual_type && qual,
                                 id_type && id,
-                                int32_t const offset,
                                 ref_seq_type && SEQAN3_DOXYGEN_ONLY(ref_seq),
                                 ref_id_type && ref_id,
                                 std::optional<int32_t> ref_offset,
-                                align_type && align,
                                 std::vector<cigar> const & cigar_vector,
                                 sam_flag const flag,
                                 uint8_t const mapq,
@@ -241,8 +224,8 @@ private:
     //!\brief The default header for the alignment format.
     sam_file_header<> default_header{};
 
-    //!\brief Tracks whether reference information (\@SR tag) were found in the SAM header
-    bool ref_info_present_in_header{false};
+    //!\brief A buffer to store a raw record pointing into the stream buffer of the input.
+    std::array<std::string_view, 11> raw_record{};
 
     //!brief Returns a reference to dummy if passed a std::ignore.
     std::string_view const & default_or(detail::ignore_t) const noexcept
@@ -257,17 +240,12 @@ private:
         return std::forward<t>(v);
     }
 
-    template <typename stream_view_type, arithmetic value_type>
-    void read_sam_dict_vector(seqan3::detail::sam_tag_variant & variant,
-                              stream_view_type && stream_view,
-                              value_type value);
+    template <arithmetic value_type>
+    void read_sam_dict_vector(seqan3::detail::sam_tag_variant & variant, std::string_view const str, value_type value);
 
-    template <typename stream_view_type>
-    void read_sam_byte_vector(seqan3::detail::sam_tag_variant & variant,
-                              stream_view_type && stream_view);
+    void read_sam_byte_vector(seqan3::detail::sam_tag_variant & variant, std::string_view const str);
 
-    template <typename stream_view_type>
-    void read_sam_dict_field(stream_view_type && stream_view, sam_tag_dictionary & target);
+    void read_sam_dict(std::string_view const tag_str, sam_tag_dictionary & target);
 
     template <typename stream_it_t, std::ranges::forward_range field_type>
     void write_range_or_asterisk(stream_it_t & stream_it, field_type && field_value);
@@ -280,10 +258,10 @@ private:
 };
 
 //!\copydoc sequence_file_input_format::read_sequence_record
-template <typename stream_type,     // constraints checked by file
+template <typename stream_type, // constraints checked by file
           typename seq_legal_alph_type,
           typename stream_pos_type,
-          typename seq_type,        // other constraints checked inside function
+          typename seq_type, // other constraints checked inside function
           typename id_type,
           typename qual_type>
 inline void format_sam::read_sequence_record(stream_type & stream,
@@ -296,9 +274,24 @@ inline void format_sam::read_sequence_record(stream_type & stream,
     sam_file_input_options<seq_legal_alph_type> align_options;
 
     {
-        read_alignment_record(stream, align_options, std::ignore, default_header, position_buffer, sequence, qualities,
-                              id, std::ignore, std::ignore, std::ignore, std::ignore, std::ignore, std::ignore,
-                              std::ignore, std::ignore, std::ignore, std::ignore, std::ignore, std::ignore);
+        read_alignment_record(stream,
+                              align_options,
+                              std::ignore,
+                              default_header,
+                              position_buffer,
+                              sequence,
+                              qualities,
+                              id,
+                              std::ignore,
+                              std::ignore,
+                              std::ignore,
+                              std::ignore,
+                              std::ignore,
+                              std::ignore,
+                              std::ignore,
+                              std::ignore,
+                              std::ignore,
+                              std::ignore);
     }
 
     if constexpr (!detail::decays_to_ignore_v<seq_type>)
@@ -309,12 +302,12 @@ inline void format_sam::read_sequence_record(stream_type & stream,
             throw parse_error{"The id information must not be empty."};
 
     if (options.truncate_ids)
-        id = id | detail::take_until_and_consume(is_space) | views::to<id_type>;
+        id = id | detail::take_until_and_consume(is_space) | ranges::to<id_type>();
 }
 
 //!\copydoc sequence_file_output_format::write_sequence_record
-template <typename stream_type,     // constraints checked by file
-          typename seq_type,        // other constraints checked inside function
+template <typename stream_type, // constraints checked by file
+          typename seq_type,    // other constraints checked inside function
           typename id_type,
           typename qual_type>
 inline void format_sam::write_sequence_record(stream_type & stream,
@@ -323,44 +316,39 @@ inline void format_sam::write_sequence_record(stream_type & stream,
                                               id_type && id,
                                               qual_type && qualities)
 {
-    using default_align_t = std::pair<std::span<gapped<char>>, std::span<gapped<char>>>;
-    using default_mate_t  = std::tuple<std::string_view, std::optional<int32_t>, int32_t>;
+    using default_mate_t = std::tuple<std::string_view, std::optional<int32_t>, int32_t>;
 
     sam_file_output_options output_options;
 
     write_alignment_record(stream,
                            output_options,
-        /*header*/         std::ignore,
-        /*seq*/            default_or(sequence),
-        /*qual*/           default_or(qualities),
-        /*id*/             default_or(id),
-        /*offset*/         0,
-        /*ref_seq*/        std::string_view{},
-        /*ref_id*/         std::string_view{},
-        /*ref_offset*/     -1,
-        /*align*/          default_align_t{},
-        /*cigar_vector*/   std::vector<cigar>{},
-        /*flag*/           sam_flag::none,
-        /*mapq*/           0,
-        /*mate*/           default_mate_t{},
-        /*tag_dict*/       sam_tag_dictionary{},
-        /*e_value*/        0,
-        /*bit_score*/      0);
+                           /*header*/ std::ignore,
+                           /*seq*/ default_or(sequence),
+                           /*qual*/ default_or(qualities),
+                           /*id*/ default_or(id),
+                           /*ref_seq*/ std::string_view{},
+                           /*ref_id*/ std::string_view{},
+                           /*ref_offset*/ -1,
+                           /*cigar_vector*/ std::vector<cigar>{},
+                           /*flag*/ sam_flag::none,
+                           /*mapq*/ 0,
+                           /*mate*/ default_mate_t{},
+                           /*tag_dict*/ sam_tag_dictionary{},
+                           /*e_value*/ 0,
+                           /*bit_score*/ 0);
 }
 
 //!\copydoc sam_file_input_format::read_alignment_record
-template <typename stream_type,     // constraints checked by file
+template <typename stream_type, // constraints checked by file
           typename seq_legal_alph_type,
           typename ref_seqs_type,
           typename ref_ids_type,
           typename stream_pos_type,
           typename seq_type,
           typename id_type,
-          typename offset_type,
           typename ref_seq_type,
           typename ref_id_type,
           typename ref_offset_type,
-          typename align_type,
           typename cigar_type,
           typename flag_type,
           typename mapq_type,
@@ -369,45 +357,40 @@ template <typename stream_type,     // constraints checked by file
           typename tag_dict_type,
           typename e_value_type,
           typename bit_score_type>
-inline void format_sam::read_alignment_record(stream_type & stream,
-                                              sam_file_input_options<seq_legal_alph_type> const & SEQAN3_DOXYGEN_ONLY(options),
-                                              ref_seqs_type & ref_seqs,
-                                              sam_file_header<ref_ids_type> & header,
-                                              stream_pos_type & position_buffer,
-                                              seq_type & seq,
-                                              qual_type & qual,
-                                              id_type & id,
-                                              offset_type & offset,
-                                              ref_seq_type & SEQAN3_DOXYGEN_ONLY(ref_seq),
-                                              ref_id_type & ref_id,
-                                              ref_offset_type & ref_offset,
-                                              align_type & align,
-                                              cigar_type & cigar_vector,
-                                              flag_type & flag,
-                                              mapq_type & mapq,
-                                              mate_type & mate,
-                                              tag_dict_type & tag_dict,
-                                              e_value_type & SEQAN3_DOXYGEN_ONLY(e_value),
-                                              bit_score_type & SEQAN3_DOXYGEN_ONLY(bit_score))
+inline void
+format_sam::read_alignment_record(stream_type & stream,
+                                  sam_file_input_options<seq_legal_alph_type> const & SEQAN3_DOXYGEN_ONLY(options),
+                                  ref_seqs_type & ref_seqs,
+                                  sam_file_header<ref_ids_type> & header,
+                                  stream_pos_type & position_buffer,
+                                  seq_type & seq,
+                                  qual_type & qual,
+                                  id_type & id,
+                                  ref_seq_type & SEQAN3_DOXYGEN_ONLY(ref_seq),
+                                  ref_id_type & ref_id,
+                                  ref_offset_type & ref_offset,
+                                  cigar_type & cigar_vector,
+                                  flag_type & flag,
+                                  mapq_type & mapq,
+                                  mate_type & mate,
+                                  tag_dict_type & tag_dict,
+                                  e_value_type & SEQAN3_DOXYGEN_ONLY(e_value),
+                                  bit_score_type & SEQAN3_DOXYGEN_ONLY(bit_score))
 {
-    static_assert(detail::decays_to_ignore_v<ref_offset_type> ||
-                  detail::is_type_specialisation_of_v<ref_offset_type, std::optional>,
+    static_assert(detail::decays_to_ignore_v<ref_offset_type>
+                      || detail::is_type_specialisation_of_v<ref_offset_type, std::optional>,
                   "The ref_offset must be a specialisation of std::optional.");
 
-    auto stream_view = detail::istreambuf(stream);
-    auto field_view = stream_view | detail::take_until_or_throw_and_consume(is_char<'\t'>);
+    auto stream_it = detail::fast_istreambuf_iterator{*stream.rdbuf()};
 
-    // these variables need to be stored to compute the ALIGNMENT
-    int32_t ref_offset_tmp{};
-    std::ranges::range_value_t<decltype(header.ref_ids())> ref_id_tmp{};
-    [[maybe_unused]] int32_t offset_tmp{};
-    [[maybe_unused]] int32_t soft_clipping_end{};
-    [[maybe_unused]] std::vector<cigar> tmp_cigar_vector{};
-    [[maybe_unused]] int32_t ref_length{0}, seq_length{0}; // length of aligned part for ref and query
+    auto stream_view = detail::istreambuf(stream);
+
+    int32_t ref_offset_tmp{}; // needed to read the ref_offset (int) beofre storing it in std::optional<uint32_t>
+    std::ranges::range_value_t<decltype(header.ref_ids())> ref_id_tmp{}; // in case mate is requested but ref_offset not
 
     // Header
     // -------------------------------------------------------------------------------------------------------------
-    if (is_char<'@'>(*std::ranges::begin(stream_view))) // we always read the header if present
+    if (is_char<'@'>(*stream_it)) // we always read the header if present
     {
         read_header(stream_view, header, ref_seqs);
 
@@ -418,21 +401,24 @@ inline void format_sam::read_alignment_record(stream_type & stream,
     // Store the current file position in the buffer.
     position_buffer = stream.tellg();
 
+    // We don't know wether we have 11 or 12 fields, since the tags are optional.
+    // The last field will thus contain either the quality sequence
+    // or the quality sequence AND tags. This will be handled at the respective fields below.
+    stream_it.cache_record_into('\n', '\t', raw_record);
+
     // Fields 1-5: ID FLAG REF_ID REF_OFFSET MAPQ
     // -------------------------------------------------------------------------------------------------------------
     if constexpr (!detail::decays_to_ignore_v<id_type>)
-        read_forward_range_field(field_view, id);
-    else
-        detail::consume(field_view);
+        read_forward_range_field(raw_record[0], id);
 
     uint16_t flag_integral{};
-    read_arithmetic_field(field_view, flag_integral);
+    read_arithmetic_field(raw_record[1], flag_integral);
     flag = sam_flag{flag_integral};
 
-    read_forward_range_field(field_view, ref_id_tmp);
+    read_forward_range_field(raw_record[2], ref_id_tmp);
     check_and_assign_ref_id(ref_id, ref_id_tmp, header, ref_seqs);
 
-    read_arithmetic_field(field_view, ref_offset_tmp);
+    read_arithmetic_field(raw_record[3], ref_offset_tmp);
     --ref_offset_tmp; // SAM format is 1-based but SeqAn operates 0-based
 
     if (ref_offset_tmp == -1)
@@ -443,38 +429,19 @@ inline void format_sam::read_alignment_record(stream_type & stream,
         throw format_error{"No negative values are allowed for field::ref_offset."};
 
     if constexpr (!detail::decays_to_ignore_v<mapq_type>)
-        read_arithmetic_field(field_view, mapq);
-    else
-        detail::consume(field_view);
+        read_arithmetic_field(raw_record[4], mapq);
 
     // Field 6: CIGAR
     // -------------------------------------------------------------------------------------------------------------
-    if constexpr (!detail::decays_to_ignore_v<align_type> || !detail::decays_to_ignore_v<cigar_type>)
-    {
-        if (!is_char<'*'>(*std::ranges::begin(stream_view))) // no cigar information given
-        {
-            std::tie(tmp_cigar_vector, ref_length, seq_length) = detail::parse_cigar(field_view);
-            transfer_soft_clipping_to(tmp_cigar_vector, offset_tmp, soft_clipping_end);
-            // the actual cigar_vector is swapped with tmp_cigar_vector at the end to avoid copying
-        }
-        else
-        {
-            ++std::ranges::begin(field_view); // skip '*'
-        }
-    }
-    else
-    {
-        detail::consume(field_view);
-    }
-
-    offset = offset_tmp;
+    if constexpr (!detail::decays_to_ignore_v<cigar_type>)
+        cigar_vector = detail::parse_cigar(raw_record[5]);
 
     // Field 7-9: (RNEXT PNEXT TLEN) = MATE
     // -------------------------------------------------------------------------------------------------------------
     if constexpr (!detail::decays_to_ignore_v<mate_type>)
     {
         std::ranges::range_value_t<decltype(header.ref_ids())> tmp_mate_ref_id{};
-        read_forward_range_field(field_view, tmp_mate_ref_id); // RNEXT
+        read_forward_range_field(raw_record[6], tmp_mate_ref_id); // RNEXT
 
         if (tmp_mate_ref_id == "=") // indicates "same as ref id"
         {
@@ -489,7 +456,7 @@ inline void format_sam::read_alignment_record(stream_type & stream,
         }
 
         int32_t tmp_pnext{};
-        read_arithmetic_field(field_view, tmp_pnext); // PNEXT
+        read_arithmetic_field(raw_record[7], tmp_pnext); // PNEXT
 
         if (tmp_pnext > 0)
             get<1>(mate) = --tmp_pnext; // SAM format is 1-based but SeqAn operates 0-based.
@@ -497,140 +464,79 @@ inline void format_sam::read_alignment_record(stream_type & stream,
             throw format_error{"No negative values are allowed at the mate mapping position."};
         // tmp_pnext == 0 indicates an unmapped mate -> do not fill std::optional get<1>(mate)
 
-        read_arithmetic_field(field_view, get<2>(mate)); // TLEN
-    }
-    else
-    {
-        for (size_t i = 0; i < 3u; ++i)
-        {
-            detail::consume(field_view);
-        }
+        read_arithmetic_field(raw_record[8], get<2>(mate)); // TLEN
     }
 
     // Field 10: Sequence
     // -------------------------------------------------------------------------------------------------------------
-    if (!is_char<'*'>(*std::ranges::begin(stream_view))) // sequence information is given
+    if constexpr (!detail::decays_to_ignore_v<seq_type>)
     {
-        auto constexpr is_legal_alph = char_is_valid_for<seq_legal_alph_type>;
-        auto seq_stream = field_view | std::views::transform([is_legal_alph] (char const c) // enforce legal alphabet
-                                       {
-                                           if (!is_legal_alph(c))
-                                               throw parse_error{std::string{"Encountered an unexpected letter: "} +
-                                                                 "char_is_valid_for<" +
-                                                                 detail::type_name_as_string<seq_legal_alph_type> +
-                                                                 "> evaluated to false on " +
-                                                                 detail::make_printable(c)};
-                                           return c;
-                                       });
+        std::string_view const seq_str = raw_record[9];
 
-        if constexpr (detail::decays_to_ignore_v<seq_type>)
+        if (!seq_str.starts_with('*')) // * indicates missing sequence information
         {
-            if constexpr (!detail::decays_to_ignore_v<align_type>)
+            seq.resize(seq_str.size());
+            constexpr auto is_legal_alph = char_is_valid_for<seq_legal_alph_type>;
+
+            for (size_t i = 0; i < seq_str.size(); ++i)
             {
-                static_assert(sequence_container<std::remove_reference_t<decltype(get<1>(align))>>,
-                              "If you want to read ALIGNMENT but not SEQ, the alignment"
-                              " object must store a sequence container at the second (query) position.");
+                if (!is_legal_alph(seq_str[i]))
+                    throw parse_error{std::string{"Encountered an unexpected letter: "} + "char_is_valid_for<"
+                                      + detail::type_name_as_string<seq_legal_alph_type>
+                                      + "> evaluated to false on " + detail::make_printable(seq_str[i])};
 
-                if (!tmp_cigar_vector.empty()) // only parse alignment if cigar information was given
-                {
-
-                    auto tmp_iter = std::ranges::begin(seq_stream);
-                    std::ranges::advance(tmp_iter, offset_tmp);
-
-                    for (; seq_length > 0; --seq_length) // seq_length is not needed anymore
-                    {
-                        get<1>(align).push_back(std::ranges::range_value_t<decltype(get<1>(align))>{}.assign_char(*tmp_iter));
-                        ++tmp_iter;
-                    }
-
-                    std::ranges::advance(tmp_iter, soft_clipping_end);
-                }
-                else
-                {
-                    get<1>(align) = std::remove_reference_t<decltype(get<1>(align))>{}; // empty container
-                }
-            }
-            else
-            {
-                detail::consume(seq_stream);
+                seq[i] = assign_char_to(seq_str[i], std::ranges::range_value_t<seq_type>{});
             }
         }
-        else
-        {
-            read_forward_range_field(seq_stream, seq);
-
-            if constexpr (!detail::decays_to_ignore_v<align_type>)
-            {
-                if (!tmp_cigar_vector.empty()) // if no alignment info is given, the field::alignment should remain empty
-                {
-                    assign_unaligned(get<1>(align),
-                                     seq | views::slice(static_cast<decltype(std::ranges::size(seq))>(offset_tmp),
-                                                       std::ranges::size(seq) - soft_clipping_end));
-                }
-            }
-        }
-    }
-    else
-    {
-        ++std::ranges::begin(field_view); // skip '*'
     }
 
     // Field 11:  Quality
     // -------------------------------------------------------------------------------------------------------------
-    auto const tab_or_end = is_char<'\t'> || is_char<'\r'> || is_char<'\n'>;
-    auto qual_view = stream_view | detail::take_until_or_throw(tab_or_end);
+    // We don't know wether we have 11 or 12 fields, since the tags are optional.
+    // The last field will thus contain either the quality sequence
+    // or the quality sequence AND tags.
+    size_t tag_begin_pos = raw_record[10].find('\t');
+
+    std::string_view qualities =
+        (tag_begin_pos == std::string_view::npos) ? raw_record[10] : raw_record[10].substr(0, tag_begin_pos);
+
     if constexpr (!detail::decays_to_ignore_v<qual_type>)
-        read_forward_range_field(qual_view, qual);
-    else
-        detail::consume(qual_view);
+        read_forward_range_field(qualities, qual);
 
     if constexpr (!detail::decays_to_ignore_v<seq_type> && !detail::decays_to_ignore_v<qual_type>)
     {
-        if (std::ranges::distance(seq) != 0 && std::ranges::distance(qual) != 0 &&
-            std::ranges::distance(seq) != std::ranges::distance(qual))
+        if (std::ranges::distance(seq) != 0 && std::ranges::distance(qual) != 0
+            && std::ranges::distance(seq) != std::ranges::distance(qual))
         {
-            throw format_error{detail::to_string("Sequence length (", std::ranges::distance(seq),
-                                                 ") and quality length (", std::ranges::distance(qual),
+            throw format_error{detail::to_string("Sequence length (",
+                                                 std::ranges::distance(seq),
+                                                 ") and quality length (",
+                                                 std::ranges::distance(qual),
                                                  ") must be the same.")};
         }
     }
 
     // All remaining optional fields if any: SAM tags dictionary
     // -------------------------------------------------------------------------------------------------------------
-    while (is_char<'\t'>(*std::ranges::begin(stream_view))) // read all tags if present
+    if constexpr (!detail::decays_to_ignore_v<tag_dict_type>)
     {
-        ++std::ranges::begin(stream_view); // skip tab
-        auto stream_until_tab_or_end = stream_view | detail::take_until_or_throw(tab_or_end);
-        if constexpr (!detail::decays_to_ignore_v<tag_dict_type>)
-            read_sam_dict_field(stream_until_tab_or_end, tag_dict);
-        else
-            detail::consume(stream_until_tab_or_end);
-    }
-
-    detail::consume(stream_view | detail::take_until(!(is_char<'\r'> || is_char<'\n'>))); // consume new line
-
-    // DONE READING - wrap up
-    // -------------------------------------------------------------------------------------------------------------
-    // Alignment object construction
-    // Note that the query sequence in get<1>(align) has already been filled while reading Field 10.
-    if constexpr (!detail::decays_to_ignore_v<align_type>)
-    {
-        int32_t ref_idx{(ref_id_tmp.empty()/*unmapped read?*/) ? -1 : 0};
-
-        if constexpr (!detail::decays_to_ignore_v<ref_seqs_type>)
+        while (tag_begin_pos != std::string_view::npos) // read all tags if present
         {
-            if (!ref_id_tmp.empty())
-            {
-                assert(header.ref_dict.count(ref_id_tmp) != 0); // taken care of in check_and_assign_ref_id()
-                ref_idx = header.ref_dict[ref_id_tmp];          // get index for reference sequence
-            }
-        }
+            ++tag_begin_pos; // skip '\t'
+            size_t const tag_end_pos = raw_record[10].find('\t', tag_begin_pos);
 
-        construct_alignment(align, tmp_cigar_vector, ref_idx, ref_seqs, ref_offset_tmp, ref_length);
+            char const * tag_begin = raw_record[10].begin() + tag_begin_pos;
+            char const * tag_end =
+                (tag_end_pos == std::string_view::npos) ? raw_record[10].end() : raw_record[10].begin() + tag_end_pos;
+
+            read_sam_dict(std::string_view{tag_begin, tag_end}, tag_dict);
+
+            tag_begin_pos = tag_end_pos;
+        }
     }
 
-    if constexpr (!detail::decays_to_ignore_v<cigar_type>)
-        std::swap(cigar_vector, tmp_cigar_vector);
+    assert(stream_it == std::default_sentinel_t{} || *stream_it == '\n');
+    ++stream_it; // Move from end of record to the beginning of the next or to the end of the stream.
 }
 
 //!\copydoc sam_file_output_format::write_alignment_record
@@ -640,7 +546,6 @@ template <typename stream_type,
           typename id_type,
           typename ref_seq_type,
           typename ref_id_type,
-          typename align_type,
           typename qual_type,
           typename mate_type,
           typename tag_dict_type,
@@ -652,11 +557,9 @@ inline void format_sam::write_alignment_record(stream_type & stream,
                                                seq_type && seq,
                                                qual_type && qual,
                                                id_type && id,
-                                               int32_t const offset,
                                                ref_seq_type && SEQAN3_DOXYGEN_ONLY(ref_seq),
                                                ref_id_type && ref_id,
                                                std::optional<int32_t> ref_offset,
-                                               align_type && align,
                                                std::vector<cigar> const & cigar_vector,
                                                sam_flag const flag,
                                                uint8_t const mapq,
@@ -681,42 +584,28 @@ inline void format_sam::write_alignment_record(stream_type & stream,
     // ---------------------------------------------------------------------
     // Type Requirements (as static asserts for user friendliness)
     // ---------------------------------------------------------------------
-    static_assert((std::ranges::forward_range<seq_type>        &&
-                  alphabet<std::ranges::range_reference_t<seq_type>>),
+    static_assert((std::ranges::forward_range<seq_type> && alphabet<std::ranges::range_reference_t<seq_type>>),
                   "The seq object must be a std::ranges::forward_range over "
                   "letters that model seqan3::alphabet.");
 
-    static_assert((std::ranges::forward_range<id_type>         &&
-                  alphabet<std::ranges::range_reference_t<id_type>>),
+    static_assert((std::ranges::forward_range<id_type> && alphabet<std::ranges::range_reference_t<id_type>>),
                   "The id object must be a std::ranges::forward_range over "
                   "letters that model seqan3::alphabet.");
 
     if constexpr (!detail::decays_to_ignore_v<ref_id_type>)
     {
-        static_assert((std::ranges::forward_range<ref_id_type> ||
-                       std::integral<std::remove_reference_t<ref_id_type>> ||
-                       detail::is_type_specialisation_of_v<std::remove_cvref_t<ref_id_type>, std::optional>),
+        static_assert((std::ranges::forward_range<ref_id_type> || std::integral<std::remove_reference_t<ref_id_type>>
+                       || detail::is_type_specialisation_of_v<std::remove_cvref_t<ref_id_type>, std::optional>),
                       "The ref_id object must be a std::ranges::forward_range "
                       "over letters that model seqan3::alphabet.");
 
-        if constexpr (std::integral<std::remove_cvref_t<ref_id_type>> ||
-                      detail::is_type_specialisation_of_v<std::remove_cvref_t<ref_id_type>, std::optional>)
+        if constexpr (std::integral<std::remove_cvref_t<ref_id_type>>
+                      || detail::is_type_specialisation_of_v<std::remove_cvref_t<ref_id_type>, std::optional>)
             static_assert(!detail::decays_to_ignore_v<header_type>,
                           "If you give indices as reference id information the header must also be present.");
     }
 
-    static_assert(tuple_like<std::remove_cvref_t<align_type>>,
-                  "The align object must be a std::pair of two ranges whose "
-                  "value_type is comparable to seqan3::gap");
-
-    static_assert((std::tuple_size_v<std::remove_cvref_t<align_type>> == 2 &&
-                   std::equality_comparable_with<gap, std::ranges::range_reference_t<decltype(std::get<0>(align))>> &&
-                   std::equality_comparable_with<gap, std::ranges::range_reference_t<decltype(std::get<1>(align))>>),
-                  "The align object must be a std::pair of two ranges whose "
-                  "value_type is comparable to seqan3::gap");
-
-    static_assert((std::ranges::forward_range<qual_type>       &&
-                   alphabet<std::ranges::range_reference_t<qual_type>>),
+    static_assert((std::ranges::forward_range<qual_type> && alphabet<std::ranges::range_reference_t<qual_type>>),
                   "The qual object must be a std::ranges::forward_range "
                   "over letters that model seqan3::alphabet.");
 
@@ -726,19 +615,23 @@ inline void format_sam::write_alignment_record(stream_type & stream,
                   "2) a std::integral or std::optional<std::integral>, and "
                   "3) a std::integral.");
 
-    static_assert(((std::ranges::forward_range<decltype(std::get<0>(mate))>     ||
-                    std::integral<std::remove_cvref_t<decltype(std::get<0>(mate))>> ||
-                    detail::is_type_specialisation_of_v<std::remove_cvref_t<decltype(std::get<0>(mate))>, std::optional>) &&
-                  (std::integral<std::remove_cvref_t<decltype(std::get<1>(mate))>> ||
-                   detail::is_type_specialisation_of_v<std::remove_cvref_t<decltype(std::get<1>(mate))>, std::optional>) &&
-                  std::integral<std::remove_cvref_t<decltype(std::get<2>(mate))>>),
-                  "The mate object must be a std::tuple of size 3 with "
-                  "1) a std::ranges::forward_range with a value_type modelling seqan3::alphabet, "
-                  "2) a std::integral or std::optional<std::integral>, and "
-                  "3) a std::integral.");
+    static_assert(
+        ((std::ranges::forward_range<decltype(std::get<0>(mate))>
+          || std::integral<std::remove_cvref_t<decltype(std::get<0>(mate))>>
+          || detail::is_type_specialisation_of_v<
+              std::remove_cvref_t<decltype(std::get<0>(mate))>,
+              std::optional>)&&(std::integral<std::remove_cvref_t<decltype(std::get<1>(mate))>>
+                                || detail::is_type_specialisation_of_v<
+                                    std::remove_cvref_t<decltype(std::get<1>(mate))>,
+                                    std::optional>)&&std::integral<std::remove_cvref_t<decltype(std::get<2>(mate))>>),
+        "The mate object must be a std::tuple of size 3 with "
+        "1) a std::ranges::forward_range with a value_type modelling seqan3::alphabet, "
+        "2) a std::integral or std::optional<std::integral>, and "
+        "3) a std::integral.");
 
-    if constexpr (std::integral<std::remove_cvref_t<decltype(std::get<0>(mate))>> ||
-                  detail::is_type_specialisation_of_v<std::remove_cvref_t<decltype(std::get<0>(mate))>, std::optional>)
+    if constexpr (std::integral<std::remove_cvref_t<decltype(std::get<0>(mate))>>
+                  || detail::is_type_specialisation_of_v<std::remove_cvref_t<decltype(std::get<0>(mate))>,
+                                                         std::optional>)
         static_assert(!detail::decays_to_ignore_v<header_type>,
                       "If you give indices as mate reference id information the header must also be present.");
 
@@ -748,19 +641,17 @@ inline void format_sam::write_alignment_record(stream_type & stream,
     // ---------------------------------------------------------------------
     // logical Requirements
     // ---------------------------------------------------------------------
-    if constexpr (!detail::decays_to_ignore_v<header_type> &&
-                  !detail::decays_to_ignore_v<ref_id_type> &&
-                  !std::integral<std::remove_reference_t<ref_id_type>> &&
-                  !detail::is_type_specialisation_of_v<std::remove_reference_t<ref_id_type>, std::optional>)
+    if constexpr (!detail::decays_to_ignore_v<header_type> && !detail::decays_to_ignore_v<ref_id_type>
+                  && !std::integral<std::remove_reference_t<ref_id_type>>
+                  && !detail::is_type_specialisation_of_v<std::remove_reference_t<ref_id_type>, std::optional>)
     {
 
         if (options.sam_require_header && !std::ranges::empty(ref_id))
         {
             auto id_it = header.ref_dict.end();
 
-            if constexpr (std::ranges::contiguous_range<decltype(ref_id)> &&
-                          std::ranges::sized_range<decltype(ref_id)> &&
-                          std::ranges::borrowed_range<decltype(ref_id)>)
+            if constexpr (std::ranges::contiguous_range<decltype(ref_id)> && std::ranges::sized_range<decltype(ref_id)>
+                          && std::ranges::borrowed_range<decltype(ref_id)>)
             {
                 id_it = header.ref_dict.find(std::span{std::ranges::data(ref_id), std::ranges::size(ref_id)});
             }
@@ -776,7 +667,9 @@ inline void format_sam::write_alignment_record(stream_type & stream,
             }
 
             if (id_it == header.ref_dict.end()) // no reference id matched
-                throw format_error{detail::to_string("The ref_id '", ref_id, "' was not in the list of references:",
+                throw format_error{detail::to_string("The ref_id '",
+                                                     ref_id,
+                                                     "' was not in the list of references:",
                                                      header.ref_ids())};
         }
     }
@@ -846,23 +739,6 @@ inline void format_sam::write_alignment_record(stream_type & stream,
         for (auto & c : cigar_vector) //TODO THIS IS PROBABLY TERRIBLE PERFORMANCE_WISE
             stream_it.write_range(c.to_string());
     }
-    else if (!std::ranges::empty(get<0>(align)) && !std::ranges::empty(get<1>(align)))
-    {
-        // compute possible distance from alignment end to sequence end
-        // which indicates soft clipping at the end.
-        // This should be replace by a free count_gaps function for
-        // aligned sequences which is more efficient if possible.
-        size_t off_end{std::ranges::size(seq) - offset};
-        for (auto chr : get<1>(align))
-            if (chr == gap{})
-                ++off_end;
-
-        // Might happen if get<1>(align) doesn't correspond to the reference.
-        assert(off_end >= std::ranges::size(get<1>(align)));
-        off_end -= std::ranges::size(get<1>(align));
-
-        write_range_or_asterisk(stream_it, detail::get_cigar_string(align, offset, off_end));
-    }
     else
     {
         *stream_it = '*';
@@ -874,7 +750,8 @@ inline void format_sam::write_alignment_record(stream_type & stream,
     {
         write_range_or_asterisk(stream_it, (header.ref_ids())[get<0>(mate)]);
     }
-    else if constexpr (detail::is_type_specialisation_of_v<std::remove_reference_t<decltype(get<0>(mate))>, std::optional>)
+    else if constexpr (detail::is_type_specialisation_of_v<std::remove_reference_t<decltype(get<0>(mate))>,
+                                                           std::optional>)
     {
         if (get<0>(mate).has_value())
             write_range_or_asterisk(stream_it, header.ref_ids()[get<0>(mate).value()]);
@@ -913,13 +790,11 @@ inline void format_sam::write_alignment_record(stream_type & stream,
     stream_it.write_end_of_line(options.add_carriage_return);
 }
 
-
 /*!\brief Reads a list of values separated by comma as it is the case for SAM tag arrays.
- * \tparam stream_view_type The type of the stream as a view.
  * \tparam value_type       The type of values to be stored in the tag array.
  *
  * \param[in, out] variant      A std::variant object to store the tag arrays.
- * \param[in, out] stream_view  The stream view to iterate over.
+ * \param[in, out] str          The string_view to parse.
  * \param[in]      value        A temporary value that determines the underlying type of the tag array.
  *
  * \details
@@ -931,28 +806,30 @@ inline void format_sam::write_alignment_record(stream_type & stream,
  * format is not in a correct state (e.g. required fields are not given), but throwing might occur downstream of
  * the actual error.
  */
-template <typename stream_view_type, arithmetic value_type>
+template <arithmetic value_type>
 inline void format_sam::read_sam_dict_vector(seqan3::detail::sam_tag_variant & variant,
-                                             stream_view_type && stream_view,
+                                             std::string_view const str,
                                              value_type value)
 {
-    std::vector<value_type> tmp_vector;
-    while (std::ranges::begin(stream_view) != ranges::end(stream_view)) // not fully consumed yet
+    std::vector<value_type> tmp_vector{};
+    size_t start_pos{0};
+    size_t end_pos{0};
+
+    while (start_pos != std::string_view::npos)
     {
-        read_arithmetic_field(stream_view | detail::take_until(is_char<','>), value);
+        end_pos = str.find(',', start_pos);
+        auto end = (end_pos == std::string_view::npos) ? str.end() : str.begin() + end_pos;
+        read_arithmetic_field(std::string_view{str.begin() + start_pos, end}, value);
         tmp_vector.push_back(value);
 
-        if (is_char<','>(*std::ranges::begin(stream_view)))
-            ++std::ranges::begin(stream_view); // skip ','
+        start_pos = (end_pos == std::string_view::npos) ? end_pos : end_pos + 1;
     }
     variant = std::move(tmp_vector);
 }
 
 /*!\brief Reads a list of byte pairs as it is the case for SAM tag byte arrays.
- * \tparam stream_view_type The type of the stream as a view.
- *
  * \param[in, out] variant      A std::variant object to store the tag arrays.
- * \param[in, out] stream_view  The stream view to iterate over.
+ * \param[in, out] str          The string_view to parse.
  *
  * \details
  *
@@ -961,34 +838,37 @@ inline void format_sam::read_sam_dict_vector(seqan3::detail::sam_tag_variant & v
  *
  * The function throws a seqan3::format_error if there was an uneven number of bytes.
  */
-template <typename stream_view_type>
-inline void format_sam::read_sam_byte_vector(seqan3::detail::sam_tag_variant & variant,
-                                             stream_view_type && stream_view)
+inline void format_sam::read_sam_byte_vector(seqan3::detail::sam_tag_variant & variant, std::string_view const str)
 {
-    std::vector<std::byte> tmp_vector;
-    std::byte value;
+    std::vector<std::byte> tmp_vector{};
+    // std::from_chars cannot directly parse into a std::byte
+    uint8_t dummy_byte{};
 
-    while (std::ranges::begin(stream_view) != ranges::end(stream_view)) // not fully consumed yet
+    if (str.size() % 2 != 0)
+        throw format_error{"[CORRUPTED SAM FILE]  Hexadecimal tag must have even number of digits."};
+
+    // H encodes bytes in a hexadecimal format. Two hex values are stored for each byte as characters.
+    // E.g., '1' and 'A' need one byte each and are read as `\x1A`, which is 27 in decimal.
+    for (auto hex_begin = str.begin(), hex_end = str.begin() + 2; hex_begin != str.end(); hex_begin += 2, hex_end += 2)
     {
-        try
-        {
-            read_byte_field(stream_view | detail::take_exactly_or_throw(2), value);
-        }
-        catch (std::exception const & e)
-        {
-            throw format_error{"Hexadecimal tag has an uneven number of digits!"};
-        }
+        auto res = std::from_chars(hex_begin, hex_end, dummy_byte, 16);
 
-        tmp_vector.push_back(value);
+        if (res.ec == std::errc::invalid_argument)
+            throw format_error{std::string("[CORRUPTED SAM FILE] The string '") + std::string(hex_begin, hex_end)
+                               + "' could not be cast into type uint8_t."};
+
+        if (res.ec == std::errc::result_out_of_range)
+            throw format_error{std::string("[CORRUPTED SAM FILE] Casting '") + std::string(str)
+                               + "' into type uint8_t would cause an overflow."};
+
+        tmp_vector.push_back(std::byte{dummy_byte});
     }
 
     variant = std::move(tmp_vector);
 }
 
 /*!\brief Reads the optional tag fields into the seqan3::sam_tag_dictionary.
- * \tparam stream_view_type   The type of the stream as a view.
- *
- * \param[in, out] stream_view  The stream view to iterate over.
+ * \param[in, out] tag_str      The string_view to parse for the sam_tag_dictionary entries.
  * \param[in, out] target       The seqan3::sam_tag_dictionary to store the tag information.
  *
  * \throws seqan3::format_error if any unexpected character or format is encountered.
@@ -1002,94 +882,91 @@ inline void format_sam::read_sam_byte_vector(seqan3::detail::sam_tag_variant & v
  * format is not in a correct state (e.g. required fields are not given), but throwing might occur downstream of
  * the actual error.
  */
-template <typename stream_view_type>
-inline void format_sam::read_sam_dict_field(stream_view_type && stream_view, sam_tag_dictionary & target)
+inline void format_sam::read_sam_dict(std::string_view const tag_str, sam_tag_dictionary & target)
 {
     /* Every SAM tag has the format "[TAG]:[TYPE_ID]:[VALUE]", where TAG is a two letter
        name tag which is converted to a unique integer identifier and TYPE_ID is one character in [A,i,Z,H,B,f]
        describing the type for the upcoming VALUES. If TYPE_ID=='B' it signals an array of comma separated
        VALUE's and the inner value type is identified by the character following ':', one of [cCsSiIf].
     */
-    uint16_t tag = static_cast<uint16_t>(*std::ranges::begin(stream_view)) << 8;
-    ++std::ranges::begin(stream_view); // skip char read before
-    tag += static_cast<uint16_t>(*std::ranges::begin(stream_view));
-    ++std::ranges::begin(stream_view); // skip char read before
-    ++std::ranges::begin(stream_view); // skip ':'
-    char type_id = *std::ranges::begin(stream_view);
-    ++std::ranges::begin(stream_view); // skip char read before
-    ++std::ranges::begin(stream_view); // skip ':'
+    assert(tag_str.size() > 5);
+
+    uint16_t tag = static_cast<uint16_t>(tag_str[0]) << 8;
+    tag += static_cast<uint16_t>(tag_str[1]);
+
+    char type_id = tag_str[3];
 
     switch (type_id)
     {
-        case 'A' : // char
-        {
-            target[tag] = static_cast<char>(*std::ranges::begin(stream_view));
-            ++std::ranges::begin(stream_view); // skip char that has been read
-            break;
-        }
-        case 'i' : // int32_t
-        {
-            int32_t tmp;
-            read_arithmetic_field(stream_view, tmp);
-            target[tag] = tmp;
-            break;
-        }
-        case 'f' : // float
-        {
-            float tmp;
-            read_arithmetic_field(stream_view, tmp);
-            target[tag] = tmp;
-            break;
-        }
-        case 'Z' : // string
-        {
-            target[tag] = stream_view | views::to<std::string>;
-            break;
-        }
-        case 'H' :
-        {
-            read_sam_byte_vector(target[tag], stream_view);
-            break;
-        }
-        case 'B' : // Array. Value type depends on second char [cCsSiIf]
-        {
-            char array_value_type_id = *std::ranges::begin(stream_view);
-            ++std::ranges::begin(stream_view); // skip char read before
-            ++std::ranges::begin(stream_view); // skip first ','
+    case 'A': // char
+    {
+        assert(tag_str.size() == 6);
+        target[tag] = tag_str[5];
+        break;
+    }
+    case 'i': // int32_t
+    {
+        int32_t tmp;
+        read_arithmetic_field(tag_str.substr(5), tmp);
+        target[tag] = tmp;
+        break;
+    }
+    case 'f': // float
+    {
+        float tmp;
+        read_arithmetic_field(tag_str.substr(5), tmp);
+        target[tag] = tmp;
+        break;
+    }
+    case 'Z': // string
+    {
+        target[tag] = std::string{tag_str.substr(5)};
+        break;
+    }
+    case 'H':
+    {
+        read_sam_byte_vector(target[tag], tag_str.substr(5));
+        break;
+    }
+    case 'B': // Array. Value type depends on second char [cCsSiIf]
+    {
+        assert(tag_str.size() > 6);
+        char array_value_type_id = tag_str[5];
 
-            switch (array_value_type_id)
-            {
-                case 'c' : // int8_t
-                    read_sam_dict_vector(target[tag], stream_view, int8_t{});
-                    break;
-                case 'C' : // uint8_t
-                    read_sam_dict_vector(target[tag], stream_view, uint8_t{});
-                    break;
-                case 's' : // int16_t
-                    read_sam_dict_vector(target[tag], stream_view, int16_t{});
-                    break;
-                case 'S' : // uint16_t
-                    read_sam_dict_vector(target[tag], stream_view, uint16_t{});
-                    break;
-                case 'i' : // int32_t
-                    read_sam_dict_vector(target[tag], stream_view, int32_t{});
-                    break;
-                case 'I' : // uint32_t
-                    read_sam_dict_vector(target[tag], stream_view, uint32_t{});
-                    break;
-                case 'f' : // float
-                    read_sam_dict_vector(target[tag], stream_view, float{});
-                    break;
-                default:
-                    throw format_error{std::string("The first character in the numerical ") +
-                                       "id of a SAM tag must be one of [cCsSiIf] but '" + array_value_type_id +
-                                       "' was given."};
-            }
+        switch (array_value_type_id)
+        {
+        case 'c': // int8_t
+            read_sam_dict_vector(target[tag], tag_str.substr(7), int8_t{});
             break;
-        }
+        case 'C': // uint8_t
+            read_sam_dict_vector(target[tag], tag_str.substr(7), uint8_t{});
+            break;
+        case 's': // int16_t
+            read_sam_dict_vector(target[tag], tag_str.substr(7), int16_t{});
+            break;
+        case 'S': // uint16_t
+            read_sam_dict_vector(target[tag], tag_str.substr(7), uint16_t{});
+            break;
+        case 'i': // int32_t
+            read_sam_dict_vector(target[tag], tag_str.substr(7), int32_t{});
+            break;
+        case 'I': // uint32_t
+            read_sam_dict_vector(target[tag], tag_str.substr(7), uint32_t{});
+            break;
+        case 'f': // float
+            read_sam_dict_vector(target[tag], tag_str.substr(7), float{});
+            break;
         default:
-            throw format_error{std::string("The second character in the numerical id of a "
-                               "SAM tag must be one of [A,i,Z,H,B,f] but '") + type_id + "' was given."};
+            throw format_error{std::string("The first character in the numerical ")
+                               + "id of a SAM tag must be one of [cCsSiIf] but '" + array_value_type_id
+                               + "' was given."};
+        }
+        break;
+    }
+    default:
+        throw format_error{std::string("The second character in the numerical id of a "
+                                       "SAM tag ([TAG]:[TYPE_ID]:[VALUE]) must be one of [A,i,Z,H,B,f] but '")
+                           + type_id + "' was given."};
     }
 }
 
@@ -1136,9 +1013,10 @@ inline void format_sam::write_range_or_asterisk(stream_it_t & stream_it, char co
  * \param[in]     separator The field separator to append.
  */
 template <typename stream_it_t>
-inline void format_sam::write_tag_fields(stream_it_t & stream_it, sam_tag_dictionary const & tag_dict, char const separator)
+inline void
+format_sam::write_tag_fields(stream_it_t & stream_it, sam_tag_dictionary const & tag_dict, char const separator)
 {
-    auto const stream_variant_fn = [&stream_it] (auto && arg) // helper to print a std::variant
+    auto const stream_variant_fn = [&stream_it](auto && arg) // helper to print a std::variant
     {
         using T = std::remove_cvref_t<decltype(arg)>;
 

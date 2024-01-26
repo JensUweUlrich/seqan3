@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -62,12 +62,12 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr shape()                          noexcept = default; //!< Defaulted.
-    constexpr shape(shape const &)             noexcept = default; //!< Defaulted.
-    constexpr shape(shape &&)                  noexcept = default; //!< Defaulted.
+    constexpr shape() noexcept = default;                          //!< Defaulted.
+    constexpr shape(shape const &) noexcept = default;             //!< Defaulted.
+    constexpr shape(shape &&) noexcept = default;                  //!< Defaulted.
     constexpr shape & operator=(shape const &) noexcept = default; //!< Defaulted.
-    constexpr shape & operator=(shape &&)      noexcept = default; //!< Defaulted.
-    ~shape()                                   noexcept = default; //!< Defaulted.
+    constexpr shape & operator=(shape &&) noexcept = default;      //!< Defaulted.
+    ~shape() noexcept = default;                                   //!< Defaulted.
 
     /*!\brief Construct an ungapped shape from a given size.
      *
@@ -127,6 +127,6 @@ constexpr shape operator""_shape(unsigned long long const value)
 }
 //!\}
 
-} // inline namespace literals
+} // namespace literals
 
-}// namespace seqan3
+} // namespace seqan3

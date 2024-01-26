@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -36,12 +36,12 @@ public:
     /*!\name Constructors, assignment and destructor
      * \{
      */
-    constexpr hit_all() = default; //!< Defaulted.
-    constexpr hit_all(hit_all const &) = default; //!< Defaulted.
-    constexpr hit_all(hit_all &&) = default; //!< Defaulted.
+    constexpr hit_all() = default;                            //!< Defaulted.
+    constexpr hit_all(hit_all const &) = default;             //!< Defaulted.
+    constexpr hit_all(hit_all &&) = default;                  //!< Defaulted.
     constexpr hit_all & operator=(hit_all const &) = default; //!< Defaulted.
-    constexpr hit_all & operator=(hit_all &&) = default; //!< Defaulted.
-    ~hit_all() = default; //!< Defaulted.
+    constexpr hit_all & operator=(hit_all &&) = default;      //!< Defaulted.
+    ~hit_all() = default;                                     //!< Defaulted.
 
     //!\}
 
@@ -61,12 +61,12 @@ public:
     /*!\name Constructors, assignment and destructor
      * \{
      */
-    constexpr hit_all_best() = default; //!< Defaulted.
-    constexpr hit_all_best(hit_all_best const &) = default; //!< Defaulted.
-    constexpr hit_all_best(hit_all_best &&) = default; //!< Defaulted.
+    constexpr hit_all_best() = default;                                 //!< Defaulted.
+    constexpr hit_all_best(hit_all_best const &) = default;             //!< Defaulted.
+    constexpr hit_all_best(hit_all_best &&) = default;                  //!< Defaulted.
     constexpr hit_all_best & operator=(hit_all_best const &) = default; //!< Defaulted.
-    constexpr hit_all_best & operator=(hit_all_best &&) = default; //!< Defaulted.
-    ~hit_all_best() = default; //!< Defaulted.
+    constexpr hit_all_best & operator=(hit_all_best &&) = default;      //!< Defaulted.
+    ~hit_all_best() = default;                                          //!< Defaulted.
 
     //!\}
 
@@ -86,12 +86,12 @@ public:
     /*!\name Constructors, assignment and destructor
      * \{
      */
-    constexpr hit_single_best() = default; //!< Defaulted.
-    constexpr hit_single_best(hit_single_best const &) = default; //!< Defaulted.
-    constexpr hit_single_best(hit_single_best &&) = default; //!< Defaulted.
+    constexpr hit_single_best() = default;                                    //!< Defaulted.
+    constexpr hit_single_best(hit_single_best const &) = default;             //!< Defaulted.
+    constexpr hit_single_best(hit_single_best &&) = default;                  //!< Defaulted.
     constexpr hit_single_best & operator=(hit_single_best const &) = default; //!< Defaulted.
-    constexpr hit_single_best & operator=(hit_single_best &&) = default; //!< Defaulted.
-    ~hit_single_best() = default; //!< Defaulted.
+    constexpr hit_single_best & operator=(hit_single_best &&) = default;      //!< Defaulted.
+    ~hit_single_best() = default;                                             //!< Defaulted.
 
     //!\}
 
@@ -115,12 +115,12 @@ public:
     /*!\name Constructors, assignment and destructor
      * \{
      */
-    constexpr hit_strata() = default; //!< Defaulted.
-    constexpr hit_strata(hit_strata const &) = default; //!< Defaulted.
-    constexpr hit_strata(hit_strata &&) = default; //!< Defaulted.
+    constexpr hit_strata() = default;                               //!< Defaulted.
+    constexpr hit_strata(hit_strata const &) = default;             //!< Defaulted.
+    constexpr hit_strata(hit_strata &&) = default;                  //!< Defaulted.
     constexpr hit_strata & operator=(hit_strata const &) = default; //!< Defaulted.
-    constexpr hit_strata & operator=(hit_strata &&) = default; //!< Defaulted.
-    ~hit_strata() = default; //!< Defaulted.
+    constexpr hit_strata & operator=(hit_strata &&) = default;      //!< Defaulted.
+    ~hit_strata() = default;                                        //!< Defaulted.
 
     /*!\brief Initialises the strata config.
      * \param[in] stratum The stratum to include in the search.
@@ -152,12 +152,12 @@ public:
     /*!\name Constructors, assignment and destructor
      * \{
      */
-    hit() = default; //!< Defaulted.
-    hit(hit const &) = default; //!< Defaulted.
-    hit(hit &&) = default; //!< Defaulted.
+    hit() = default;                        //!< Defaulted.
+    hit(hit const &) = default;             //!< Defaulted.
+    hit(hit &&) = default;                  //!< Defaulted.
     hit & operator=(hit const &) = default; //!< Defaulted.
-    hit & operator=(hit &&) = default; //!< Defaulted.
-    ~hit() = default; //!< Defaulted.
+    hit & operator=(hit &&) = default;      //!< Defaulted.
+    ~hit() = default;                       //!< Defaulted.
 
     /*!\brief Sets the given configuration element to the dynamic hit configuration element.
      *
@@ -170,17 +170,13 @@ public:
      * seqan3::search_cfg::hit_all_best, seqan3::search_cfg::hit_single_best and seqan3::search_cfg::hit_strata.
      */
     template <typename hit_config_t>
-    //!\cond
         requires pack_traits::contains<hit_config_t, hit_all, hit_all_best, hit_single_best, hit_strata>
-    //!\endcond
     explicit hit(hit_config_t hit_config) noexcept : hit_variant{std::move(hit_config)}
     {}
 
     //!\copydoc seqan3::search_cfg::hit::hit(hit_config_t hit_config)
     template <typename hit_config_t>
-    //!\cond
         requires pack_traits::contains<hit_config_t, hit_all, hit_all_best, hit_single_best, hit_strata>
-    //!\endcond
     hit & operator=(hit_config_t hit_config) noexcept
     {
         hit_variant = std::move(hit_config);

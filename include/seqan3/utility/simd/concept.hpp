@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <seqan3/std/concepts>
+#include <concepts>
 #include <type_traits>
 
 #include <seqan3/utility/simd/simd_traits.hpp>
@@ -21,7 +21,8 @@ namespace seqan3::detail
 {
 //!\cond
 template <template <typename> typename rebind>
-struct simd_traits_has_rebind : std::true_type {};
+struct simd_traits_has_rebind : std::true_type
+{};
 // NOTE: this definition should be used for seqan3::simd, but gcc has a bug that it will not fail silently if
 // simd_t is a pointer to a incomplete type. Furthermore the is_pointer_v should prevent those cases by checking the type
 // beforehand, but for some reasons the short-circuit semantic of `&&` does not work in this case and gcc still evaluates
@@ -31,45 +32,68 @@ struct simd_traits_has_rebind : std::true_type {};
 //     error: invalid use of incomplete type ‘struct incomplete::template_type<int>’
 //          requires std::same_as<decltype(a - b), simd_t>;
 template <typename simd_t>
-concept simd_concept = requires (simd_t a, simd_t b)
-{
-    typename simd_traits<std::remove_reference_t<simd_t>>::scalar_type;
-    typename simd_traits<std::remove_reference_t<simd_t>>::mask_type;
-    typename simd_traits<std::remove_reference_t<simd_t>>::swizzle_type;
-    requires simd_traits_has_rebind<simd_traits<std::remove_reference_t<simd_t>>::template rebind>::value;
+concept simd_concept =
+    requires (simd_t a, simd_t b) {
+        typename simd_traits<std::remove_reference_t<simd_t>>::scalar_type;
+        typename simd_traits<std::remove_reference_t<simd_t>>::mask_type;
+        typename simd_traits<std::remove_reference_t<simd_t>>::swizzle_type;
+        requires simd_traits_has_rebind<simd_traits<std::remove_reference_t<simd_t>>::template rebind>::value;
 
-    // require that static member variables are defined
-    requires std::integral<decltype(simd_traits<std::remove_reference_t<simd_t>>::length)>;
-    requires std::integral<decltype(simd_traits<std::remove_reference_t<simd_t>>::max_length)>;
+        // require that static member variables are defined
+        requires std::integral<decltype(simd_traits<std::remove_reference_t<simd_t>>::length)>;
+        requires std::integral<decltype(simd_traits<std::remove_reference_t<simd_t>>::max_length)>;
 
-    // assume array access that returns a scalar_type type
-    SEQAN3_RETURN_TYPE_CONSTRAINT(a[0], std::convertible_to,
-                                  typename simd_traits<std::remove_reference_t<simd_t>>::scalar_type);
+        // assume array access that returns a scalar_type type
+        {
+            a[0]
+            } -> std::convertible_to<typename simd_traits<std::remove_reference_t<simd_t>>::scalar_type>;
 
-    // require comparison operators
-    SEQAN3_RETURN_TYPE_CONSTRAINT(a == b,
-                                  std::same_as, typename simd_traits<std::remove_reference_t<simd_t>>::mask_type);
-    SEQAN3_RETURN_TYPE_CONSTRAINT(a != b,
-                                  std::same_as, typename simd_traits<std::remove_reference_t<simd_t>>::mask_type);
-    SEQAN3_RETURN_TYPE_CONSTRAINT(a < b,
-                                  std::same_as, typename simd_traits<std::remove_reference_t<simd_t>>::mask_type);
-    SEQAN3_RETURN_TYPE_CONSTRAINT(a > b,
-                                  std::same_as, typename simd_traits<std::remove_reference_t<simd_t>>::mask_type);
-    SEQAN3_RETURN_TYPE_CONSTRAINT(a <= b,
-                                  std::same_as, typename simd_traits<std::remove_reference_t<simd_t>>::mask_type);
-    SEQAN3_RETURN_TYPE_CONSTRAINT(a >= b,
-                                  std::same_as, typename simd_traits<std::remove_reference_t<simd_t>>::mask_type);
+        // require comparison operators
+        {
+            a == b
+            } -> std::same_as<typename simd_traits<std::remove_reference_t<simd_t>>::mask_type>;
+        {
+            a != b
+            } -> std::same_as<typename simd_traits<std::remove_reference_t<simd_t>>::mask_type>;
+        {
+            a < b
+            } -> std::same_as<typename simd_traits<std::remove_reference_t<simd_t>>::mask_type>;
+        {
+            a > b
+            } -> std::same_as<typename simd_traits<std::remove_reference_t<simd_t>>::mask_type>;
+        {
+            a <= b
+            } -> std::same_as<typename simd_traits<std::remove_reference_t<simd_t>>::mask_type>;
+        {
+            a >= b
+            } -> std::same_as<typename simd_traits<std::remove_reference_t<simd_t>>::mask_type>;
 
-    // require arithmetic operators
-    SEQAN3_RETURN_TYPE_CONSTRAINT(a + b, std::same_as, std::remove_reference_t<simd_t>);
-    SEQAN3_RETURN_TYPE_CONSTRAINT(a - b, std::same_as, std::remove_reference_t<simd_t>);
-    SEQAN3_RETURN_TYPE_CONSTRAINT(a * b, std::same_as, std::remove_reference_t<simd_t>);
-    SEQAN3_RETURN_TYPE_CONSTRAINT(a / b, std::same_as, std::remove_reference_t<simd_t>);
-    SEQAN3_RETURN_TYPE_CONSTRAINT(a += b, std::same_as, std::remove_reference_t<simd_t> &);
-    SEQAN3_RETURN_TYPE_CONSTRAINT(a -= b, std::same_as, std::remove_reference_t<simd_t> &);
-    SEQAN3_RETURN_TYPE_CONSTRAINT(a *= b, std::same_as, std::remove_reference_t<simd_t> &);
-    SEQAN3_RETURN_TYPE_CONSTRAINT(a /= b, std::same_as, std::remove_reference_t<simd_t> &);
-};
+        // require arithmetic operators
+        {
+            a + b
+            } -> std::same_as<std::remove_reference_t<simd_t>>;
+        {
+            a - b
+            } -> std::same_as<std::remove_reference_t<simd_t>>;
+        {
+            a * b
+            } -> std::same_as<std::remove_reference_t<simd_t>>;
+        {
+            a / b
+            } -> std::same_as<std::remove_reference_t<simd_t>>;
+        {
+            a += b
+            } -> std::same_as<std::remove_reference_t<simd_t> &>;
+        {
+            a -= b
+            } -> std::same_as<std::remove_reference_t<simd_t> &>;
+        {
+            a *= b
+            } -> std::same_as<std::remove_reference_t<simd_t> &>;
+        {
+            a /= b
+            } -> std::same_as<std::remove_reference_t<simd_t> &>;
+    };
 //!\endcond
 
 } // namespace seqan3::detail
@@ -95,7 +119,8 @@ inline namespace simd
  */
 //!\cond
 template <typename simd_t>
-concept simd_concept = !std::is_pointer_v<std::decay_t<simd_t>> && detail::simd_concept<simd_t>;
+concept simd_concept = !
+std::is_pointer_v<std::decay_t<simd_t>> && detail::simd_concept<simd_t>;
 //!\endcond
 
 /*!\interface seqan3::simd::simd_index <>
@@ -108,12 +133,11 @@ concept simd_concept = !std::is_pointer_v<std::decay_t<simd_t>> && detail::simd_
  */
 //!\cond
 template <typename t>
-concept simd_index = simd::simd_concept<t> && requires ()
-{
-    requires std::integral<typename simd_traits<std::remove_reference_t<t>>::scalar_type>;
-};
+concept simd_index =
+    simd::simd_concept<t>
+    && requires () { requires std::integral<typename simd_traits<std::remove_reference_t<t>>::scalar_type>; };
 //!\endcond
 
-} // inline namespace simd
+} // namespace simd
 
 } // namespace seqan3

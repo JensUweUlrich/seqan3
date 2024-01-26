@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -18,16 +18,14 @@
 //!\brief The major version as MACRO.
 #define SEQAN3_VERSION_MAJOR 3
 //!\brief The minor version as MACRO.
-#define SEQAN3_VERSION_MINOR 2
+#define SEQAN3_VERSION_MINOR 4
 //!\brief The patch version as MACRO.
 #define SEQAN3_VERSION_PATCH 0
 //!\brief The release candidate number. 0 means stable release, >= 1 means release candidate.
 #define SEQAN3_RELEASE_CANDIDATE 1
 
 //!\brief The full version as MACRO (number).
-#define SEQAN3_VERSION (SEQAN3_VERSION_MAJOR * 10000 \
-                      + SEQAN3_VERSION_MINOR * 100 \
-                      + SEQAN3_VERSION_PATCH)
+#define SEQAN3_VERSION (SEQAN3_VERSION_MAJOR * 10000 + SEQAN3_VERSION_MINOR * 100 + SEQAN3_VERSION_PATCH)
 
 /*!\brief Converts a number to a string. Preprocessor needs this indirection to
  * properly expand the values to strings.
@@ -35,26 +33,22 @@
 #define SEQAN3_VERSION_CSTRING_HELPER_STR(str) #str
 
 //!\brief Converts version numbers to string.
-#define SEQAN3_VERSION_CSTRING_HELPER_FUNC(MAJOR, MINOR, PATCH) \
-    SEQAN3_VERSION_CSTRING_HELPER_STR(MAJOR) "."\
-    SEQAN3_VERSION_CSTRING_HELPER_STR(MINOR) "."\
-    SEQAN3_VERSION_CSTRING_HELPER_STR(PATCH)
+#define SEQAN3_VERSION_CSTRING_HELPER_FUNC(MAJOR, MINOR, PATCH)                                                        \
+    SEQAN3_VERSION_CSTRING_HELPER_STR(MAJOR)                                                                           \
+    "." SEQAN3_VERSION_CSTRING_HELPER_STR(MINOR) "." SEQAN3_VERSION_CSTRING_HELPER_STR(PATCH)
 
 #if (SEQAN3_RELEASE_CANDIDATE > 0)
 //!\brief A helper function that expands to a suitable release candidate suffix.
-#define SEQAN3_RELEASE_CANDIDATE_HELPER(RC) \
-    "-rc." SEQAN3_VERSION_CSTRING_HELPER_STR(RC)
+#    define SEQAN3_RELEASE_CANDIDATE_HELPER(RC) "-rc." SEQAN3_VERSION_CSTRING_HELPER_STR(RC)
 #else
 //!\brief A helper function that expands to a suitable release candidate suffix.
-#define SEQAN3_RELEASE_CANDIDATE_HELPER(RC) ""
+#    define SEQAN3_RELEASE_CANDIDATE_HELPER(RC) ""
 #endif
 
 //!\brief The full version as null terminated string.
-#define SEQAN3_VERSION_CSTRING \
-    SEQAN3_VERSION_CSTRING_HELPER_FUNC(SEQAN3_VERSION_MAJOR, \
-                                       SEQAN3_VERSION_MINOR, \
-                                       SEQAN3_VERSION_PATCH) \
-                                       SEQAN3_RELEASE_CANDIDATE_HELPER(SEQAN3_RELEASE_CANDIDATE)
+#define SEQAN3_VERSION_CSTRING                                                                                         \
+    SEQAN3_VERSION_CSTRING_HELPER_FUNC(SEQAN3_VERSION_MAJOR, SEQAN3_VERSION_MINOR, SEQAN3_VERSION_PATCH)               \
+    SEQAN3_RELEASE_CANDIDATE_HELPER(SEQAN3_RELEASE_CANDIDATE)
 
 namespace seqan3
 {
@@ -70,7 +64,7 @@ constexpr uint8_t seqan3_version_patch = SEQAN3_VERSION_PATCH;
 constexpr std::size_t seqan3_version = SEQAN3_VERSION;
 
 //!\brief The full version as null terminated string.
-constexpr char const* seqan3_version_cstring = SEQAN3_VERSION_CSTRING;
+constexpr char const * seqan3_version_cstring = SEQAN3_VERSION_CSTRING;
 
 } // namespace seqan3
 

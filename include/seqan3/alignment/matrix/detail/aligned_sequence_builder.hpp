@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,8 +12,8 @@
 
 #pragma once
 
-#include <seqan3/std/concepts>
-#include <seqan3/std/ranges>
+#include <concepts>
+#include <ranges>
 #include <type_traits>
 #include <vector>
 
@@ -135,14 +135,14 @@ public:
      * \{
      */
     constexpr aligned_sequence_builder()
-        requires std::default_initializable<type_reduce_t<fst_sequence_t>> &&
-                 std::default_initializable<type_reduce_t<sec_sequence_t>>
-        = default; //!< Defaulted.
-    constexpr aligned_sequence_builder(aligned_sequence_builder const &) = default; //!< Defaulted.
-    constexpr aligned_sequence_builder(aligned_sequence_builder &&) = default; //!< Defaulted.
+        requires std::default_initializable<type_reduce_t<fst_sequence_t>>
+                  && std::default_initializable<type_reduce_t<sec_sequence_t>>
+    = default;                                                                                  //!< Defaulted.
+    constexpr aligned_sequence_builder(aligned_sequence_builder const &) = default;             //!< Defaulted.
+    constexpr aligned_sequence_builder(aligned_sequence_builder &&) = default;                  //!< Defaulted.
     constexpr aligned_sequence_builder & operator=(aligned_sequence_builder const &) = default; //!< Defaulted.
-    constexpr aligned_sequence_builder & operator=(aligned_sequence_builder &&) = default; //!< Defaulted.
-    ~aligned_sequence_builder() = default; //!< Defaulted.
+    constexpr aligned_sequence_builder & operator=(aligned_sequence_builder &&) = default;      //!< Defaulted.
+    ~aligned_sequence_builder() = default;                                                      //!< Defaulted.
 
     /*!\brief Construction from the underlying sequences.
      * \param[in] fst_rng The first range to build the aligned sequence for.
@@ -156,7 +156,7 @@ public:
 
     /*!\brief Builds the aligned sequences from the given trace path.
      * \tparam trace_path_t The type of the trace path; must model std::ranges::input_range and
-     *                      std::same_as<std::ranges::range_value_t<trace_path_t>, seqan::detail::trace_directions> must evaluate to
+     *                      std::same_as<std::ranges::range_value_t<trace_path_t>, seqan3::detail::trace_directions> must evaluate to
      *                      `true`.
      * \param[in] trace_path The trace path.
      * \returns seqan3::detail::aligned_sequence_builder::result_type with the built alignment.
@@ -194,12 +194,14 @@ public:
         std::tie(res.first_sequence_slice_positions.first, res.second_sequence_slice_positions.first) =
             std::pair<size_t, size_t>{trace_it.coordinate()};
 
-        assign_unaligned(std::get<0>(res.alignment),
-                         std::views::all(fst_rng) | views::slice(res.first_sequence_slice_positions.first,
-                                                                 res.first_sequence_slice_positions.second));
-        assign_unaligned(std::get<1>(res.alignment),
-                         std::views::all(sec_rng) | views::slice(res.second_sequence_slice_positions.first,
-                                                                 res.second_sequence_slice_positions.second));
+        assign_unaligned(
+            std::get<0>(res.alignment),
+            std::views::all(fst_rng)
+                | views::slice(res.first_sequence_slice_positions.first, res.first_sequence_slice_positions.second));
+        assign_unaligned(
+            std::get<1>(res.alignment),
+            std::views::all(sec_rng)
+                | views::slice(res.second_sequence_slice_positions.first, res.second_sequence_slice_positions.second));
 
         // Now we need to insert the values.
         fill_aligned_sequence(trace_segments | std::views::reverse,
@@ -210,7 +212,6 @@ public:
     }
 
 private:
-
     /*!\brief Fills the sequences with gaps according to the given trace segments.
      * \tparam reverse_traces_t The type storing the reverse trace.
      * \param[in] rev_traces The trace segments in order from source to sink in the trace matrix.
@@ -253,7 +254,7 @@ private:
  */
 //!\brief Deduces the type from the passed constructor arguments.
 template <std::ranges::viewable_range fst_sequence_t, std::ranges::viewable_range sec_sequence_t>
-aligned_sequence_builder(fst_sequence_t &&, sec_sequence_t &&) ->
-    aligned_sequence_builder<fst_sequence_t, sec_sequence_t>;
+aligned_sequence_builder(fst_sequence_t &&, sec_sequence_t &&)
+    -> aligned_sequence_builder<fst_sequence_t, sec_sequence_t>;
 //!\}
 } // namespace seqan3::detail

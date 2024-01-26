@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -50,7 +50,8 @@ private:
 
     //!\brief Befriend seqan3::nucleotide_base.
     friend base_t;
-    //!\cond \brief Befriend seqan3::alphabet_base.
+    //!\cond
+    //!\brief Befriend seqan3::alphabet_base.
     friend base_t::base_t;
     //!\endcond
 
@@ -58,70 +59,21 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr aa27()                         noexcept = default; //!< Defaulted.
-    constexpr aa27(aa27 const &)             noexcept = default; //!< Defaulted.
-    constexpr aa27(aa27 &&)                  noexcept = default; //!< Defaulted.
+    constexpr aa27() noexcept = default;                         //!< Defaulted.
+    constexpr aa27(aa27 const &) noexcept = default;             //!< Defaulted.
+    constexpr aa27(aa27 &&) noexcept = default;                  //!< Defaulted.
     constexpr aa27 & operator=(aa27 const &) noexcept = default; //!< Defaulted.
-    constexpr aa27 & operator=(aa27 &&)      noexcept = default; //!< Defaulted.
-    ~aa27()                                  noexcept = default; //!< Defaulted.
+    constexpr aa27 & operator=(aa27 &&) noexcept = default;      //!< Defaulted.
+    ~aa27() noexcept = default;                                  //!< Defaulted.
 
     using base_t::base_t;
     //!\}
 
 private:
     //!\copydoc seqan3::dna4::rank_to_char_table
-    static constexpr char_type rank_to_char_table[alphabet_size]
-    {
-        'A',
-        'B',
-        'C',
-        'D',
-        'E',
-        'F',
-        'G',
-        'H',
-        'I',
-        'J',
-        'K',
-        'L',
-        'M',
-        'N',
-        'O',
-        'P',
-        'Q',
-        'R',
-        'S',
-        'T',
-        'U',
-        'V',
-        'W',
-        'X',
-        'Y',
-        'Z',
-        '*'
-    };
-
-    //!\copydoc seqan3::dna4::char_to_rank_table
-    static constexpr std::array<rank_type, 256> char_to_rank_table
-    {
-        [] () constexpr
-        {
-            std::array<rank_type, 256> ret{};
-
-            // initialize with UNKNOWN (std::array::fill unfortunately not constexpr)
-            for (auto & c : ret)
-                c = 23; // value of 'X'
-
-            // reverse mapping for characters and their lowercase
-            for (rank_type rnk = 0u; rnk < alphabet_size; ++rnk)
-            {
-                ret[static_cast<rank_type>(rank_to_char_table[rnk])] = rnk;
-                ret[static_cast<rank_type>(to_lower(rank_to_char_table[rnk]))] = rnk;
-            }
-
-            return ret;
-        }()
-    };
+    static constexpr char_type rank_to_char_table[alphabet_size]{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
+                                                                 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
+                                                                 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '*'};
 
     //!\copydoc seqan3::dna4::rank_to_char
     static constexpr char_type rank_to_char(rank_type const rank)
@@ -135,7 +87,29 @@ private:
         using index_t = std::make_unsigned_t<char_type>;
         return char_to_rank_table[static_cast<index_t>(chr)];
     }
+
+    // clang-format off
+    //!\copydoc seqan3::dna4::char_to_rank_table
+    static constexpr std::array<rank_type, 256> char_to_rank_table
+    {
+        []() constexpr {
+            std::array<rank_type, 256> ret{};
+
+            // initialize with 'X' (UNKNOWN)
+            ret.fill(23u);
+
+            // reverse mapping for characters and their lowercase
+            for (rank_type rnk = 0u; rnk < alphabet_size; ++rnk)
+            {
+                ret[static_cast<rank_type>(rank_to_char_table[rnk])] = rnk;
+                ret[static_cast<rank_type>(to_lower(rank_to_char_table[rnk]))] = rnk;
+            }
+
+            return ret;
+        }()
+    };
 };
+// clang-format on
 
 // ------------------------------------------------------------------
 // containers
@@ -184,7 +158,7 @@ constexpr aa27 operator""_aa27(char const c) noexcept
  *
  * \stableapi{Since version 3.1.}
  */
-inline aa27_vector operator""_aa27(char const * const s, size_t const n)
+SEQAN3_WORKAROUND_LITERAL aa27_vector operator""_aa27(char const * const s, size_t const n)
 {
     aa27_vector r;
     r.resize(n);
@@ -196,6 +170,6 @@ inline aa27_vector operator""_aa27(char const * const s, size_t const n)
 }
 //!\}
 
-} // inline namespace literals
+} // namespace literals
 
 } // namespace seqan3

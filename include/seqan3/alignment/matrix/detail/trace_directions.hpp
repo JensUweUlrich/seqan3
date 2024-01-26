@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -28,17 +28,21 @@ namespace seqan3::detail
 enum struct trace_directions : uint8_t
 {
     //!\brief No trace
-    none      = 0b00000,
+    none = 0b00000,
     //!\brief Trace comes from the diagonal entry.
-    diagonal  = 0b00001,
+    diagonal = 0b00001,
     //!\brief Trace comes from the above entry, while opening the gap.
-    up_open   = 0b00010,
+    up_open = 0b00110,
     //!\brief Trace comes from the above entry.
-    up        = 0b00100,
+    up = 0b00100,
     //!\brief Trace comes from the left entry, while opening the gap.
-    left_open = 0b01000,
+    left_open = 0b11000,
     //!\brief Trace comes from the left entry.
-    left      = 0b10000
+    left = 0b10000,
+    //!\brief Carry bit for the last up open even if it is not the maximum value.
+    carry_up_open = 0b00010,
+    //!\brief Carry bit for the last left open even if it is not the maximum value.
+    carry_left_open = 0b01000
 };
 
 } // namespace seqan3::detail
@@ -50,7 +54,7 @@ namespace seqan3
 //!\ingroup alignment_matrix
 //!\sa seqan3::enum_bitwise_operators enables combining enum values.
 template <>
-constexpr bool add_enum_bitwise_operators<seqan3::detail::trace_directions> = true;
+inline constexpr bool add_enum_bitwise_operators<seqan3::detail::trace_directions> = true;
 //!\endcond
 
 /*!\brief All trace_directions can be printed as ascii or as utf8 to the seqan3::debug_stream.
@@ -74,15 +78,13 @@ constexpr bool add_enum_bitwise_operators<seqan3::detail::trace_directions> = tr
 template <typename char_t>
 inline debug_stream_type<char_t> & operator<<(debug_stream_type<char_t> & s, detail::trace_directions const trace)
 {
-    static char const * unicode[32]{ "↺",   "↖",   "↑",   "↖↑",   "⇡",   "↖⇡",   "↑⇡",   "↖↑⇡",
-                                     "←",  "↖←",  "↑←",  "↖↑←",  "⇡←",  "↖⇡←",  "↑⇡←",  "↖↑⇡←",
-                                     "⇠",  "↖⇠",  "↑⇠",  "↖↑⇠",  "⇡⇠",  "↖⇡⇠",  "↑⇡⇠",  "↖↑⇡⇠",
-                                    "←⇠", "↖←⇠", "↑←⇠", "↖↑←⇠", "⇡←⇠", "↖⇡←⇠", "↑⇡←⇠", "↖↑⇡←⇠"};
+    static char const * unicode[32]{"↺",   "↖",    "↑",   "↖↑",  "⇡",    "↖⇡",   "↑⇡",  "↖↑⇡",  "←",    "↖←",   "↑←",
+                                    "↖↑←", "⇡←",   "↖⇡←", "↑⇡←", "↖↑⇡←", "⇠",    "↖⇠",  "↑⇠",   "↖↑⇠",  "⇡⇠",   "↖⇡⇠",
+                                    "↑⇡⇠", "↖↑⇡⇠", "←⇠",  "↖←⇠", "↑←⇠",  "↖↑←⇠", "⇡←⇠", "↖⇡←⇠", "↑⇡←⇠", "↖↑⇡←⇠"};
 
-    static char const * csv[32]{ "N",   "D",   "U",   "DU",   "u",   "Du",   "Uu",   "DUu",
-                                 "L",  "DL",  "UL",  "DUL",  "uL",  "DuL",  "UuL",  "DUuL",
-                                 "l",  "Dl",  "Ul",  "DUl",  "ul",  "Dul",  "Uul",  "DUul",
-                                "Ll", "DLl", "ULl", "DULl", "uLl", "DuLl", "UuLl", "DUuLl"};
+    static char const * csv[32]{"N",   "D",    "U",   "DU",  "u",    "Du",   "Uu",  "DUu",  "L",    "DL",   "UL",
+                                "DUL", "uL",   "DuL", "UuL", "DUuL", "l",    "Dl",  "Ul",   "DUl",  "ul",   "Dul",
+                                "Uul", "DUul", "Ll",  "DLl", "ULl",  "DULl", "uLl", "DuLl", "UuLl", "DUuLl"};
 
     bool is_unicode = (s.flags2() & fmtflags2::utf8) == fmtflags2::utf8;
     auto const & trace_dir = is_unicode ? unicode : csv;

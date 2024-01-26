@@ -11,10 +11,8 @@ int main()
     // The default types; you can adjust this list if you don't want to read all this data.
     using default_fields = seqan3::fields<seqan3::field::seq,
                                           seqan3::field::id,
-                                          seqan3::field::offset,
                                           seqan3::field::ref_id,
                                           seqan3::field::ref_offset,
-                                          seqan3::field::alignment,
                                           seqan3::field::cigar,
                                           seqan3::field::mapq,
                                           seqan3::field::qual,
@@ -23,11 +21,11 @@ int main()
                                           seqan3::field::tags,
                                           seqan3::field::header_ptr>;
 
-                                                                // The expected format:
+    // The expected format:
     using sam_file_input_t = seqan3::sam_file_input<seqan3::sam_file_input_default_traits<>,
-                                                                default_fields,
-                                                                // Which formats are allowed:
-                                                                seqan3::type_list<seqan3::format_sam>>;
+                                                    default_fields,
+                                                    // Which formats are allowed:
+                                                    seqan3::type_list<seqan3::format_sam>>;
 
     sam_file_input_t fin{std::istringstream{input}, seqan3::format_sam{}};
 }

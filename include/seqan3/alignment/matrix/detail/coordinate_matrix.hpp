@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,8 +12,8 @@
 
 #pragma once
 
-#include <seqan3/std/concepts>
-#include <seqan3/std/ranges>
+#include <concepts>
+#include <ranges>
 
 #include <seqan3/alignment/matrix/detail/matrix_coordinate.hpp>
 #include <seqan3/core/detail/template_inspection.hpp>
@@ -60,9 +60,7 @@ namespace seqan3::detail
  */
 
 template <typename index_t>
-//!\cond
     requires (std::integral<index_t> || simd_index<index_t>)
-//!\endcond
 class coordinate_matrix
 {
 private:
@@ -109,12 +107,12 @@ public:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    coordinate_matrix() = default; //!< Defaulted.
-    coordinate_matrix(coordinate_matrix const &) = default; //!< Defaulted.
-    coordinate_matrix(coordinate_matrix &&) = default; //!< Defaulted.
+    coordinate_matrix() = default;                                      //!< Defaulted.
+    coordinate_matrix(coordinate_matrix const &) = default;             //!< Defaulted.
+    coordinate_matrix(coordinate_matrix &&) = default;                  //!< Defaulted.
     coordinate_matrix & operator=(coordinate_matrix const &) = default; //!< Defaulted.
-    coordinate_matrix & operator=(coordinate_matrix &&) = default; //!< Defaulted.
-    ~coordinate_matrix() = default; //!< Defaulted.
+    coordinate_matrix & operator=(coordinate_matrix &&) = default;      //!< Defaulted.
+    ~coordinate_matrix() = default;                                     //!< Defaulted.
 
     /*!\brief Resets the coordinate matrix with the given end column index and end row index representing the new
      *        dimensions of the matrix.
@@ -174,9 +172,7 @@ public:
  * seqan3::detail::matrix_coordinate using the seqan3::detail::convert_to_matrix_coordinate function object.
  */
 template <typename index_t>
-//!\cond
     requires (std::integral<index_t> || simd_index<index_t>)
-//!\endcond
 class coordinate_matrix<index_t>::iterator
 {
 private:
@@ -195,7 +191,7 @@ public:
      */
     //!\brief The value type.
     using value_type = decltype(std::declval<iota_view_t>()
-                              | std::views::transform(convert_to_matrix_coordinate{index_t{}/*column_id*/}));
+                                | std::views::transform(convert_to_matrix_coordinate{index_t{} /*column_id*/}));
     //!\brief The reference type.
     using reference = value_type;
     //!\brief The pointer type.
@@ -209,12 +205,12 @@ public:
     /*!\name Constructor, assignment and destructor
      * \{
      */
-    iterator() = default; //!< Defaulted.
-    iterator(iterator const &) = default; //!< Defaulted.
-    iterator(iterator &&) = default; //!< Defaulted.
+    iterator() = default;                             //!< Defaulted.
+    iterator(iterator const &) = default;             //!< Defaulted.
+    iterator(iterator &&) = default;                  //!< Defaulted.
     iterator & operator=(iterator const &) = default; //!< Defaulted.
-    iterator & operator=(iterator &&) = default; //!< Defaulted.
-    ~iterator() = default; //!< Defaulted.
+    iterator & operator=(iterator &&) = default;      //!< Defaulted.
+    ~iterator() = default;                            //!< Defaulted.
 
     /*!\brief Constructs and initialises the iterator with the current column index and the row index marking the end
      *        of the rows (size of one column).
@@ -222,8 +218,7 @@ public:
      * \param[in] column_id \copybrief seqan3::detail::coordinate_matrix::iterator::column_id
      * \param[in] row_count \copybrief seqan3::detail::coordinate_matrix::iterator::row_count
      */
-    explicit iterator(size_type column_id, size_type row_count) noexcept :
-        row_count{std::move(row_count)}
+    explicit iterator(size_type column_id, size_type row_count) noexcept : row_count{std::move(row_count)}
     {
         if constexpr (simd_index<index_t>)
             this->column_id = simd::fill<index_t>(std::move(column_id));

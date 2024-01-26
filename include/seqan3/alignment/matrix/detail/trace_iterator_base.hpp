@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,11 +12,12 @@
 
 #pragma once
 
+#include <concepts>
+#include <ranges>
+
 #include <seqan3/alignment/matrix/detail/trace_directions.hpp>
 #include <seqan3/alignment/matrix/detail/two_dimensional_matrix_iterator_base.hpp>
 #include <seqan3/alignment/matrix/detail/two_dimensional_matrix_iterator_concept.hpp>
-#include <seqan3/std/concepts>
-#include <seqan3/std/ranges>
 
 namespace seqan3::detail
 {
@@ -67,12 +68,6 @@ private:
 
     //!\brief Befriend with corresponding const_iterator.
     template <typename other_derived_t, two_dimensional_matrix_iterator other_matrix_iter_t>
-    //!\cond
-#if !SEQAN3_WORKAROUND_FURTHER_CONSTRAIN_FRIEND_DECLARATION
-        requires std::constructible_from<derived_t, other_derived_t> &&
-                 std::constructible_from<matrix_iter_t, other_matrix_iter_t>
-#endif // !SEQAN3_WORKAROUND_FURTHER_CONSTRAIN_FRIEND_DECLARATION
-    //!\endcond
     friend class trace_iterator_base;
 
     //!\brief Befriend the derived iterator class to allow calling the private constructors.
@@ -81,12 +76,12 @@ private:
     /*!\name Constructors, destructor and assignment
      * \{
      */
-    constexpr trace_iterator_base() = default; //!< Defaulted.
-    constexpr trace_iterator_base(trace_iterator_base const &) = default; //!< Defaulted.
-    constexpr trace_iterator_base(trace_iterator_base &&) = default; //!< Defaulted.
+    constexpr trace_iterator_base() = default;                                        //!< Defaulted.
+    constexpr trace_iterator_base(trace_iterator_base const &) = default;             //!< Defaulted.
+    constexpr trace_iterator_base(trace_iterator_base &&) = default;                  //!< Defaulted.
     constexpr trace_iterator_base & operator=(trace_iterator_base const &) = default; //!< Defaulted.
-    constexpr trace_iterator_base & operator=(trace_iterator_base &&) = default; //!< Defaulted.
-    ~trace_iterator_base() = default; //!< Defaulted.
+    constexpr trace_iterator_base & operator=(trace_iterator_base &&) = default;      //!< Defaulted.
+    ~trace_iterator_base() = default;                                                 //!< Defaulted.
 
     /*!\brief Constructs from the underlying trace matrix iterator indicating the start of the trace path.
      * \param[in] matrix_iter The underlying matrix iterator.
@@ -107,9 +102,7 @@ private:
      * Allows the conversion of non-const to const iterator.
      */
     template <typename other_derived_t, two_dimensional_matrix_iterator other_matrix_iter_t>
-    //!\cond
         requires std::constructible_from<matrix_iter_t, other_matrix_iter_t>
-    //!\endcond
     constexpr trace_iterator_base(trace_iterator_base<other_derived_t, other_matrix_iter_t> const & other) noexcept :
         trace_iterator_base{other.matrix_iter}
     {}
@@ -119,10 +112,12 @@ public:
     /*!\name Associated types
      * \{
      */
-    using value_type = trace_directions; //!< The value type.
-    using reference = trace_directions const &; //!< The reference type.
-    using pointer = value_type const *; //!< The pointer type.
-    using difference_type = std::ptrdiff_t; //!< The difference type.
+    // Doxygen: https://github.com/seqan/product_backlog/issues/424
+    //!\brief The value type.
+    using value_type = trace_directions;
+    using reference = trace_directions const &;          //!< The reference type.
+    using pointer = value_type const *;                  //!< The pointer type.
+    using difference_type = std::ptrdiff_t;              //!< The difference type.
     using iterator_category = std::forward_iterator_tag; //!< Forward iterator tag.
     //!\}
 
@@ -162,14 +157,14 @@ public:
         {
             derived().go_up(matrix_iter);
             // Set new trace direction if last position was up_open.
-            if (static_cast<bool>(old_dir & trace_directions::up_open))
+            if (static_cast<bool>(old_dir & trace_directions::carry_up_open))
                 set_trace_direction(*matrix_iter);
         }
         else if (current_direction == trace_directions::left)
         {
             derived().go_left(matrix_iter);
             // Set new trace direction if last position was left_open.
-            if (static_cast<bool>(old_dir & trace_directions::left_open))
+            if (static_cast<bool>(old_dir & trace_directions::carry_left_open))
                 set_trace_direction(*matrix_iter);
         }
         else
@@ -262,13 +257,11 @@ private:
         {
             current_direction = trace_directions::diagonal;
         }
-        else if (static_cast<bool>(dir & trace_directions::up) ||
-                 static_cast<bool>(dir & trace_directions::up_open))
+        else if (static_cast<bool>(dir & trace_directions::up))
         {
             current_direction = trace_directions::up;
         }
-        else if (static_cast<bool>(dir & trace_directions::left) ||
-                 static_cast<bool>(dir & trace_directions::left_open))
+        else if (static_cast<bool>(dir & trace_directions::left))
         {
             current_direction = trace_directions::left;
         }
@@ -290,7 +283,7 @@ private:
         return static_cast<derived_t const &>(*this);
     }
 
-    matrix_iter_t matrix_iter{}; //!< The underlying matrix iterator.
+    matrix_iter_t matrix_iter{};          //!< The underlying matrix iterator.
     trace_directions current_direction{}; //!< The current trace direction.
 };
 

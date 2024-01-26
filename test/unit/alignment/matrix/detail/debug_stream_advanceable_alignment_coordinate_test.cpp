@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -17,8 +17,8 @@ TEST(debug_stream_test, advanceable_alignment_coordinate)
         seqan3::detail::advanceable_alignment_coordinate<seqan3::detail::advanceable_alignment_coordinate_state::none>;
     using row_incrementable =
         seqan3::detail::advanceable_alignment_coordinate<seqan3::detail::advanceable_alignment_coordinate_state::row>;
-    using col_incrementable =
-        seqan3::detail::advanceable_alignment_coordinate<seqan3::detail::advanceable_alignment_coordinate_state::column>;
+    using col_incrementable = seqan3::detail::advanceable_alignment_coordinate<
+        seqan3::detail::advanceable_alignment_coordinate_state::column>;
 
     not_incrementable co_not{seqan3::detail::column_index_type{10u}, seqan3::detail::row_index_type{5u}};
     col_incrementable co_col{seqan3::detail::column_index_type{10u}, seqan3::detail::row_index_type{5u}};

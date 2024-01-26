@@ -1,12 +1,12 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
-#include <gtest/gtest.h>
 #include <gtest/gtest-spi.h> // provides test utility to test google test itself
+#include <gtest/gtest.h>
 
 #include <seqan3/test/expect_same_type.hpp>
 
@@ -149,11 +149,11 @@ TEST(int_rvalue_ref, same_type_fail)
 
 TEST(tuple, same_type_pass)
 {
-    auto && expect_result = seqan3::test::expect_same_type{}(
-        "std::type_identity< decltype(std::tuple{0, .0f, .0, 0u})>{}",
-        "std::type_identity< std::tuple<int, float, double, unsigned>>{}",
-        std::type_identity<decltype(std::tuple{0, .0f, .0, 0u})>{},
-        std::type_identity<std::tuple<int, float, double, unsigned>>{});
+    auto && expect_result =
+        seqan3::test::expect_same_type{}("std::type_identity< decltype(std::tuple{0, .0f, .0, 0u})>{}",
+                                         "std::type_identity< std::tuple<int, float, double, unsigned>>{}",
+                                         std::type_identity<decltype(std::tuple{0, .0f, .0, 0u})>{},
+                                         std::type_identity<std::tuple<int, float, double, unsigned>>{});
 
     EXPECT_TRUE(expect_result);
     EXPECT_SAME_TYPE(decltype(std::tuple{0, .0f, .0, 0u}), (std::tuple<int, float, double, unsigned>));
@@ -161,21 +161,28 @@ TEST(tuple, same_type_pass)
 
 TEST(tuple, same_type_fail)
 {
+#ifdef _LIBCPP_VERSION
+    char const * error_message = "Expected equality of these values:\n"
+                                 "  decltype(std::tuple{0, .0f, .0, 0u})\n"
+                                 "    Which is: \"std::__1::tuple<int, float, double, unsigned int>\"\n"
+                                 "  std::tuple<int, float, unsigned, double>\n"
+                                 "    Which is: \"std::__1::tuple<int, float, unsigned int, double>\"";
+#else
     char const * error_message = "Expected equality of these values:\n"
                                  "  decltype(std::tuple{0, .0f, .0, 0u})\n"
                                  "    Which is: \"std::tuple<int, float, double, unsigned int>\"\n"
                                  "  std::tuple<int, float, unsigned, double>\n"
                                  "    Which is: \"std::tuple<int, float, unsigned int, double>\"";
-
-    auto && expect_result = seqan3::test::expect_same_type{}(
-        "std::type_identity< decltype(std::tuple{0, .0f, .0, 0u})>{}",
-        "std::type_identity< std::tuple<int, float, unsigned, double>>{}",
-        std::type_identity<decltype(std::tuple{0, .0f, .0, 0u})>{},
-        std::type_identity<std::tuple<int, float, unsigned, double>>{});
+#endif
+    auto && expect_result =
+        seqan3::test::expect_same_type{}("std::type_identity< decltype(std::tuple{0, .0f, .0, 0u})>{}",
+                                         "std::type_identity< std::tuple<int, float, unsigned, double>>{}",
+                                         std::type_identity<decltype(std::tuple{0, .0f, .0, 0u})>{},
+                                         std::type_identity<std::tuple<int, float, unsigned, double>>{});
 
     EXPECT_FALSE(expect_result);
     EXPECT_STREQ(error_message, expect_result.message());
-    EXPECT_NONFATAL_FAILURE(EXPECT_SAME_TYPE(decltype(std::tuple{0, .0f, .0, 0u}),
-                                             (std::tuple<int, float, unsigned, double>)),
-                            error_message);
+    EXPECT_NONFATAL_FAILURE(
+        EXPECT_SAME_TYPE(decltype(std::tuple{0, .0f, .0, 0u}), (std::tuple<int, float, unsigned, double>)),
+        error_message);
 }

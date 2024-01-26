@@ -1,39 +1,38 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
 
 #include <gtest/gtest.h>
 
-#include <seqan3/std/algorithm>
-#include <seqan3/std/concepts>
+#include <algorithm>
+#include <concepts>
 #include <deque>
-#include <seqan3/std/iterator>
-#include <seqan3/std/ranges>
+#include <iterator>
+#include <ranges>
 #include <tuple>
 #include <vector>
 
 #include <seqan3/alphabet/nucleotide/dna4.hpp>
-#include <seqan3/utility/container/aligned_allocator.hpp>
-#include <seqan3/utility/range/concept.hpp>
-#include <seqan3/utility/simd/detail/debug_stream_simd.hpp>
-#include <seqan3/utility/simd/simd_traits.hpp>
-#include <seqan3/utility/simd/simd.hpp>
-#include <seqan3/utility/simd/views/to_simd.hpp>
-#include <seqan3/utility/views/type_reduce.hpp>
-
 #include <seqan3/test/performance/sequence_generator.hpp>
 #include <seqan3/test/pretty_printing.hpp>
 #include <seqan3/test/simd_utility.hpp>
+#include <seqan3/utility/container/aligned_allocator.hpp>
+#include <seqan3/utility/range/concept.hpp>
+#include <seqan3/utility/simd/detail/debug_stream_simd.hpp>
+#include <seqan3/utility/simd/simd.hpp>
+#include <seqan3/utility/simd/simd_traits.hpp>
+#include <seqan3/utility/simd/views/to_simd.hpp>
+#include <seqan3/utility/views/type_reduce.hpp>
 
 template <typename t>
 class view_to_simd_test : public ::testing::Test
 {
 public:
     using container_t = std::tuple_element_t<0, t>;
-    using simd_t      = std::tuple_element_t<1, t>;
+    using simd_t = std::tuple_element_t<1, t>;
     using allocator_t = std::conditional_t<seqan3::simd::simd_traits<simd_t>::length == 1,
                                            std::allocator<simd_t>,
                                            seqan3::aligned_allocator<simd_t, sizeof(simd_t)>>;
@@ -50,7 +49,7 @@ public:
             // Generate sequences that end on different boundaries
             size_t l = max_sequence_length - (i * seqan3::simd::simd_traits<simd_t>::length) - i;
             std::ranges::copy(seqan3::test::generate_sequence<std::iter_value_t<container_t>>(l),
-                              std::cpp20::back_inserter(sequences[i]));
+                              std::back_inserter(sequences[i]));
         }
 
         transformed_simd_vec.resize(max_sequence_length, seqan3::simd::fill<simd_t>(padding_value_dna4));
@@ -86,8 +85,7 @@ public:
     std::vector<simd_t, allocator_t> transformed_simd_vec{};
     std::vector<simd_t, allocator_t> transformed_simd_vec_padded{};
 
-    using view_to_simd_type = seqan3::detail::view_to_simd<seqan3::type_reduce_t<std::vector<container_t> &>,
-                                                           simd_t>;
+    using view_to_simd_type = seqan3::detail::view_to_simd<seqan3::type_reduce_t<std::vector<container_t> &>, simd_t>;
 };
 
 using test_types = ::testing::Types<std::tuple<std::vector<seqan3::dna4>, seqan3::simd::simd_type_t<int8_t>>,
@@ -105,16 +103,15 @@ using test_types = ::testing::Types<std::tuple<std::vector<seqan3::dna4>, seqan3
                                     std::tuple<std::deque<seqan3::dna4>, seqan3::simd::simd_type_t<uint8_t>>,
                                     std::tuple<std::deque<seqan3::dna4>, seqan3::simd::simd_type_t<uint16_t>>,
                                     std::tuple<std::deque<seqan3::dna4>, seqan3::simd::simd_type_t<uint32_t>>,
-                                    std::tuple<std::deque<seqan3::dna4>, seqan3::simd::simd_type_t<uint64_t>>
-                                   >;
+                                    std::tuple<std::deque<seqan3::dna4>, seqan3::simd::simd_type_t<uint64_t>>>;
 
 TYPED_TEST_SUITE(view_to_simd_test, test_types, );
 
 TEST(view_to_simd, concept_check)
 {
     using cmp_type = std::vector<seqan3::dna4_vector>;
-    using test_type = seqan3::detail::view_to_simd<seqan3::type_reduce_t<cmp_type &>,
-                                                   seqan3::simd::simd_type_t<int8_t>>;
+    using test_type =
+        seqan3::detail::view_to_simd<seqan3::type_reduce_t<cmp_type &>, seqan3::simd::simd_type_t<int8_t>>;
 
     using iter_t = decltype(std::ranges::begin(std::declval<test_type &>()));
     EXPECT_TRUE(std::input_iterator<iter_t>);
@@ -137,8 +134,8 @@ TEST(view_to_simd, concept_check)
 TEST(view_to_simd, iter_concept)
 {
     using cmp_type = std::vector<seqan3::dna4_vector>;
-    using test_type = seqan3::detail::view_to_simd<seqan3::type_reduce_t<cmp_type &>,
-                                                   seqan3::simd::simd_type_t<int8_t>>;
+    using test_type =
+        seqan3::detail::view_to_simd<seqan3::type_reduce_t<cmp_type &>, seqan3::simd::simd_type_t<int8_t>>;
     using iter_t = std::ranges::iterator_t<test_type>;
     using sent_t = std::ranges::sentinel_t<test_type>;
 
@@ -286,7 +283,7 @@ TYPED_TEST(view_to_simd_test, too_many_sequences)
 {
     using seqan3::operator""_dna4;
     typename TestFixture::container_t cont;
-    std::ranges::copy("ACGTACGACT"_dna4, std::cpp20::back_inserter(cont));
+    std::ranges::copy("ACGTACGACT"_dna4, std::back_inserter(cont));
     this->sequences.push_back(cont);
 
     EXPECT_THROW(typename TestFixture::view_to_simd_type{this->sequences}, std::invalid_argument);

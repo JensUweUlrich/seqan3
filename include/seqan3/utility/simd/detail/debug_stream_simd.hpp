@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -22,15 +22,9 @@ namespace seqan3
 
 /*!\brief Overload for debug_stream for simd types.
  * \ingroup utility_simd
- * \private
- * \todo Make this public again. We made this documentation internal-documentation only for the 3.0.0 release, because
- * the API was not in shape yet. Remove the `private` and `todo` commands and remove `seqan3::simd` from
- * SEQAN3_DOXYGEN_EXCLUDE_SYMBOLS in `seqan3-doxygen.cmake`.
  */
 template <typename char_t, typename simd_t>
-//!\cond
     requires simd::simd_concept<std::remove_cvref_t<simd_t>>
-//!\endcond
 inline debug_stream_type<char_t> & operator<<(debug_stream_type<char_t> & s, simd_t && simd)
 {
     using simd_type = std::remove_cvref_t<simd_t>;

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,8 +12,8 @@
 
 #pragma once
 
-#include <seqan3/std/iterator>
-#include <seqan3/std/ranges>
+#include <iterator>
+#include <ranges>
 #include <type_traits>
 
 #include <seqan3/core/detail/iterator_traits.hpp>
@@ -51,9 +51,8 @@ using maybe_const_sentinel_t = std::ranges::sentinel_t<maybe_const_range_t<const
 //!\cond
 //!\brief The same as std::indirect_unary_predicate but on a range type instead of an iterator type.
 template <typename unary_predicate_fn_t, typename urng_t>
-concept indirect_unary_predicate_on_range = std::ranges::range<urng_t> &&
-                                            std::indirect_unary_predicate<unary_predicate_fn_t,
-                                                                          std::ranges::iterator_t<urng_t>>;
+concept indirect_unary_predicate_on_range =
+    std::ranges::range<urng_t> && std::indirect_unary_predicate<unary_predicate_fn_t, std::ranges::iterator_t<urng_t>>;
 //!\endcond
 } // namespace seqan3::detail
 
@@ -75,9 +74,7 @@ namespace seqan3
  * \see core_range
  */
 template <typename t>
-//!\cond
     requires detail::has_range_value_type<t>
-//!\endcond
 struct range_innermost_value
 {
     //!\brief The return type (recursion not shown).
@@ -86,7 +83,8 @@ struct range_innermost_value
 
 //!\cond
 template <typename t>
-    requires detail::has_range_value_type<t> && detail::has_range_value_type<std::ranges::range_value_t<std::remove_cvref_t<t>>>
+    requires detail::has_range_value_type<t>
+          && detail::has_range_value_type<std::ranges::range_value_t<std::remove_cvref_t<t>>>
 struct range_innermost_value<t>
 {
     using type = typename range_innermost_value<std::ranges::range_value_t<std::remove_cvref_t<t>>>::type;
@@ -113,14 +111,13 @@ using range_innermost_value_t = typename range_innermost_value<t>::type;
  * returns.
  */
 template <typename t>
-//!\cond
     requires detail::has_range_value_type<t>
-//!\endcond
 constexpr size_t range_dimension_v = 1;
 
 //!\cond
 template <typename t>
-    requires detail::has_range_value_type<t> && detail::has_range_value_type<std::ranges::range_value_t<std::remove_cvref_t<t>>>
+    requires detail::has_range_value_type<t>
+              && detail::has_range_value_type<std::ranges::range_value_t<std::remove_cvref_t<t>>>
 constexpr size_t range_dimension_v<t> = range_dimension_v<std::ranges::range_value_t<std::remove_cvref_t<t>>> + 1;
 //!\endcond
 

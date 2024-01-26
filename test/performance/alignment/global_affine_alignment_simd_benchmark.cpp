@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -18,12 +18,11 @@ inline constexpr size_t deviation_step = 8;
 // SeqAn3
 // ----------------------------------------------------------------------------
 
-constexpr auto nt_score_scheme = seqan3::nucleotide_scoring_scheme{seqan3::match_score{4},
-                                                                   seqan3::mismatch_score{-5}};
-constexpr auto affine_cfg = seqan3::align_cfg::method_global{} |
-                            seqan3::align_cfg::gap_cost_affine{seqan3::align_cfg::open_score{-10},
-                                                               seqan3::align_cfg::extension_score{-1}} |
-                            seqan3::align_cfg::scoring_scheme{nt_score_scheme};
+constexpr auto nt_score_scheme = seqan3::nucleotide_scoring_scheme{seqan3::match_score{4}, seqan3::mismatch_score{-5}};
+constexpr auto affine_cfg =
+    seqan3::align_cfg::method_global{}
+    | seqan3::align_cfg::gap_cost_affine{seqan3::align_cfg::open_score{-10}, seqan3::align_cfg::extension_score{-1}}
+    | seqan3::align_cfg::scoring_scheme{nt_score_scheme};
 
 BENCHMARK_CAPTURE(seqan3_affine_accelerated,
                   simd_with_score,
@@ -32,8 +31,8 @@ BENCHMARK_CAPTURE(seqan3_affine_accelerated,
                   seqan3::align_cfg::output_score{},
                   seqan3::align_cfg::score_type<int16_t>{},
                   seqan3::align_cfg::vectorised{})
-                        ->UseRealTime()
-                        ->DenseRange(deviation_begin, deviation_end, deviation_step);
+    ->UseRealTime()
+    ->DenseRange(deviation_begin, deviation_end, deviation_step);
 
 BENCHMARK_CAPTURE(seqan3_affine_accelerated,
                   simd_with_end_position,
@@ -43,8 +42,8 @@ BENCHMARK_CAPTURE(seqan3_affine_accelerated,
                   seqan3::align_cfg::output_end_position{},
                   seqan3::align_cfg::score_type<int16_t>{},
                   seqan3::align_cfg::vectorised{})
-                        ->UseRealTime()
-                        ->DenseRange(deviation_begin, deviation_end, deviation_step);
+    ->UseRealTime()
+    ->DenseRange(deviation_begin, deviation_end, deviation_step);
 
 BENCHMARK_CAPTURE(seqan3_affine_accelerated,
                   simd_parallel_with_score,
@@ -54,8 +53,8 @@ BENCHMARK_CAPTURE(seqan3_affine_accelerated,
                   seqan3::align_cfg::score_type<int16_t>{},
                   seqan3::align_cfg::vectorised{},
                   seqan3::align_cfg::parallel{get_number_of_threads()})
-                        ->UseRealTime()
-                        ->DenseRange(deviation_begin, deviation_end, deviation_step);
+    ->UseRealTime()
+    ->DenseRange(deviation_begin, deviation_end, deviation_step);
 
 BENCHMARK_CAPTURE(seqan3_affine_accelerated,
                   simd_parallel_with_end_position,
@@ -66,8 +65,8 @@ BENCHMARK_CAPTURE(seqan3_affine_accelerated,
                   seqan3::align_cfg::score_type<int16_t>{},
                   seqan3::align_cfg::vectorised{},
                   seqan3::align_cfg::parallel{get_number_of_threads()})
-                        ->UseRealTime()
-                        ->DenseRange(deviation_begin, deviation_end, deviation_step);
+    ->UseRealTime()
+    ->DenseRange(deviation_begin, deviation_end, deviation_step);
 
 #ifdef SEQAN3_HAS_SEQAN2
 
@@ -78,23 +77,23 @@ BENCHMARK_CAPTURE(seqan3_affine_accelerated,
 // Note SeqAn2 has no parallel interface yet for computing the traceback as well.
 BENCHMARK_CAPTURE(seqan2_affine_accelerated,
                   simd_with_score,
-                  seqan::Dna{},
-                  seqan::Score<int16_t>{4, -5, -1, -11},
-                  seqan::ExecutionPolicy<seqan::Serial, seqan::Vectorial>{},
+                  seqan2::Dna{},
+                  seqan2::Score<int16_t>{4, -5, -1, -11},
+                  seqan2::ExecutionPolicy<seqan2::Serial, seqan2::Vectorial>{},
                   1,
                   affine_cfg)
-                        ->UseRealTime()
-                        ->DenseRange(deviation_begin, deviation_end, deviation_step);
+    ->UseRealTime()
+    ->DenseRange(deviation_begin, deviation_end, deviation_step);
 
 BENCHMARK_CAPTURE(seqan2_affine_accelerated,
                   simd_parallel_with_score,
-                  seqan::Dna{},
-                  seqan::Score<int16_t>{4, -5, -1, -11},
-                  seqan::ExecutionPolicy<seqan::Parallel, seqan::Vectorial>{},
+                  seqan2::Dna{},
+                  seqan2::Score<int16_t>{4, -5, -1, -11},
+                  seqan2::ExecutionPolicy<seqan2::Parallel, seqan2::Vectorial>{},
                   get_number_of_threads(),
                   affine_cfg)
-                        ->UseRealTime()
-                        ->DenseRange(deviation_begin, deviation_end, deviation_step);
+    ->UseRealTime()
+    ->DenseRange(deviation_begin, deviation_end, deviation_step);
 #endif // SEQAN3_HAS_SEQAN2
 
 // ============================================================================

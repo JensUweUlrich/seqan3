@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -10,11 +10,10 @@
 #include <seqan3/alphabet/nucleotide/dna4.hpp>
 #include <seqan3/search/views/kmer_hash.hpp>
 #include <seqan3/test/performance/sequence_generator.hpp>
-#include <seqan3/test/performance/naive_kmer_hash.hpp>
 #include <seqan3/test/performance/units.hpp>
 
 #ifdef SEQAN3_HAS_SEQAN2
-    #include <seqan/index.h>
+#    include <seqan/index.h>
 #endif // SEQAN3_HAS_SEQAN2
 
 inline benchmark::Counter bp_per_second(size_t const basepairs)
@@ -36,8 +35,7 @@ inline seqan3::shape make_gapped_shape(size_t const k)
     return shape;
 }
 
-
-static void arguments(benchmark::internal::Benchmark* b)
+static void arguments(benchmark::internal::Benchmark * b)
 {
     for (int32_t sequence_length : {1'000, 50'000, /*1'000'000*/})
     {
@@ -104,8 +102,20 @@ static void naive_kmer_hash(benchmark::State & state)
 
     for (auto _ : state)
     {
-        for (auto h : seq | seqan3::views::naive_kmer_hash(k))
+        // creates a initial subrange covering exactly 'k-1' characters
+        auto subrange_begin = begin(seq);
+        auto subrange_end = std::ranges::next(subrange_begin, k - 1, end(seq));
+
+        // slide over the range
+        while (subrange_end != end(seq))
+        {
+            ++subrange_end; // extend to 'k' characters
+            auto r = std::ranges::subrange{subrange_begin, subrange_end};
+            auto h = std::hash<decltype(r)>{}(r);
+            ++subrange_begin; // move front forward, back to 'k-1' characters range
+
             benchmark::DoNotOptimize(sum += h);
+        }
     }
 
     // prevent complete optimisation
@@ -117,14 +127,14 @@ static void naive_kmer_hash(benchmark::State & state)
 #ifdef SEQAN3_HAS_SEQAN2
 inline auto make_gapped_shape_seqan2(size_t const k)
 {
-    seqan::String<char> bitmap;
+    seqan2::String<char> bitmap;
 
     for (size_t i{0}; i < k - 1; ++i)
-        seqan::append(bitmap, seqan::CharString(std::to_string((i + 1) % 2)));
+        seqan2::append(bitmap, seqan2::CharString(std::to_string((i + 1) % 2)));
 
-    seqan::append(bitmap, seqan::CharString("1"));
+    seqan2::append(bitmap, seqan2::CharString("1"));
 
-    seqan::Shape<seqan::Dna, seqan::GenericShape> s(bitmap);
+    seqan2::Shape<seqan2::Dna, seqan2::GenericShape> s(bitmap);
     return s;
 }
 
@@ -134,19 +144,19 @@ static void seqan2_kmer_hash_ungapped(benchmark::State & state)
     assert(sequence_length > 0);
     size_t k = static_cast<size_t>(state.range(1));
     assert(k > 0);
-    auto seq = seqan3::test::generate_sequence_seqan2<seqan::Dna>(sequence_length, 0, 0);
-    seqan::Shape<seqan::Dna, seqan::SimpleShape> s;
-    seqan::resize(s, k);
+    auto seq = seqan3::test::generate_sequence_seqan2<seqan2::Dna>(sequence_length, 0, 0);
+    seqan2::Shape<seqan2::Dna, seqan2::SimpleShape> s;
+    seqan2::resize(s, k);
 
     size_t sum{0};
 
     for (auto _ : state)
     {
-        auto it = seqan::begin(seq);
-        seqan::hashInit(s, it);
-        for (size_t i{0}; i < seqan::length(seq) - k + 1; ++i, ++it)
+        auto it = seqan2::begin(seq);
+        seqan2::hashInit(s, it);
+        for (size_t i{0}; i < seqan2::length(seq) - k + 1; ++i, ++it)
         {
-            benchmark::DoNotOptimize(sum += seqan::hashNext(s, it));
+            benchmark::DoNotOptimize(sum += seqan2::hashNext(s, it));
         }
     }
 
@@ -162,18 +172,18 @@ static void seqan2_kmer_hash_gapped(benchmark::State & state)
     assert(sequence_length > 0);
     size_t k = static_cast<size_t>(state.range(1));
     assert(k > 0);
-    auto seq = seqan3::test::generate_sequence_seqan2<seqan::Dna>(sequence_length, 0, 0);
-    seqan::Shape<seqan::Dna, seqan::GenericShape> s = make_gapped_shape_seqan2(k);
+    auto seq = seqan3::test::generate_sequence_seqan2<seqan2::Dna>(sequence_length, 0, 0);
+    seqan2::Shape<seqan2::Dna, seqan2::GenericShape> s = make_gapped_shape_seqan2(k);
 
     size_t sum{0};
 
     for (auto _ : state)
     {
-        auto it = seqan::begin(seq);
-        seqan::hashInit(s, it);
-        for (size_t i{0}; i < seqan::length(seq) - k + 1; ++i, ++it)
+        auto it = seqan2::begin(seq);
+        seqan2::hashInit(s, it);
+        for (size_t i{0}; i < seqan2::length(seq) - k + 1; ++i, ++it)
         {
-            benchmark::DoNotOptimize(sum += seqan::hashNext(s, it));
+            benchmark::DoNotOptimize(sum += seqan2::hashNext(s, it));
         }
     }
 

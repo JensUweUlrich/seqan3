@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -15,7 +15,7 @@
 #include <seqan3/alignment/configuration/align_config_gap_cost_affine.hpp>
 #include <seqan3/alignment/matrix/detail/trace_directions.hpp>
 #include <seqan3/alignment/pairwise/detail/alignment_algorithm_state.hpp>
-#include <seqan3/utility/concept/exposition_only/core_language.hpp>
+#include <seqan3/utility/concept.hpp>
 
 namespace seqan3::detail
 {
@@ -83,9 +83,8 @@ private:
      * seqan3::detail::alignment_trace_matrix_proxy.
      */
     template <typename cell_t>
-    constexpr void compute_cell(cell_t && current_cell,
-                                alignment_algorithm_state<score_t> & cache,
-                                score_t const score) const noexcept
+    constexpr void
+    compute_cell(cell_t && current_cell, alignment_algorithm_state<score_t> & cache, score_t const score) const noexcept
     {
         // score_cell = seqan3::detail::alignment_score_matrix_proxy
         // trace_cell = seqan3::detail::alignment_trace_matrix_proxy
@@ -98,8 +97,10 @@ private:
         {
             tmp = (tmp < score_cell.up) ? (trace_cell.current = trace_cell.up, score_cell.up)
                                         : (trace_cell.current = trace_directions::diagonal | trace_cell.up, tmp);
-            tmp = (tmp < score_cell.r_left) ? (trace_cell.current = trace_cell.r_left, score_cell.r_left)
-                                            : (trace_cell.current |= trace_cell.r_left, tmp);
+            tmp = (tmp < score_cell.r_left)
+                    ? (trace_cell.current = trace_cell.r_left | (trace_cell.current & trace_directions::carry_up_open),
+                       score_cell.r_left)
+                    : (trace_cell.current |= trace_cell.r_left, tmp);
         }
         else
         {
@@ -151,20 +152,20 @@ private:
         score_cell.current = score_cell.diagonal + score;
 
         score_cell.current = (score_cell.current < score_cell.r_left)
-                                ? (trace_cell.current = trace_cell.r_left, score_cell.r_left)
-                                : (trace_cell.current = trace_directions::diagonal, score_cell.current);
+                               ? (trace_cell.current = trace_cell.r_left, score_cell.r_left)
+                               : (trace_cell.current = trace_directions::diagonal, score_cell.current);
 
         if constexpr (align_local_t::value)
         {
-            score_cell.current = (score_cell.current < 0) ? (trace_cell.current = trace_directions::none, 0)
-                                                          : score_cell.current;
+            score_cell.current =
+                (score_cell.current < 0) ? (trace_cell.current = trace_directions::none, 0) : score_cell.current;
         }
         // Check if this was the optimum. Possibly a noop.
         static_cast<alignment_algorithm_t const &>(*this).check_score_of_cell(current_cell, cache);
 
         // At the top of the band we can not come from up but only diagonal or left, so the next vertical must be a
         // gap open.
-        score_cell.up = score_cell.current + cache.gap_open_score;  // add gap open cost
+        score_cell.up = score_cell.current + cache.gap_open_score; // add gap open cost
         trace_cell.up = trace_directions::up_open;
     }
 
@@ -183,8 +184,8 @@ private:
     template <typename alignment_configuration_t>
     constexpr void initialise_alignment_state(alignment_configuration_t const & config) noexcept
     {
-        auto scheme = config.get_or(align_cfg::gap_cost_affine{align_cfg::open_score{-10},
-                                                               align_cfg::extension_score{-1}});
+        auto scheme =
+            config.get_or(align_cfg::gap_cost_affine{align_cfg::open_score{-10}, align_cfg::extension_score{-1}});
 
         alignment_state.gap_extension_score = static_cast<score_t>(scheme.extension_score);
         alignment_state.gap_open_score = static_cast<score_t>(scheme.extension_score + scheme.open_score);

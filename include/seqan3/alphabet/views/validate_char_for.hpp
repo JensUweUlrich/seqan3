@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <seqan3/std/ranges>
+#include <ranges>
 
 #include <seqan3/alphabet/concept.hpp>
 #include <seqan3/utility/type_traits/basic.hpp>
@@ -70,16 +70,18 @@ namespace seqan3::views
  * \experimentalapi{Experimental since version 3.2.}
  */
 template <alphabet alphabet_type>
-inline auto const validate_char_for = deep{std::views::transform([] <typename char_t> (char_t && in) -> char_t
-{
-    static_assert(std::common_reference_with<char_t, alphabet_char_t<alphabet_type>>,
-                  "The innermost value type must have a common reference to underlying char type of alphabet_type.");
-
-    if (!char_is_valid_for<alphabet_type>(in))
+inline auto const validate_char_for = deep{std::views::transform(
+    []<typename char_t>(char_t && in) -> char_t
     {
-        throw seqan3::invalid_char_assignment{"alphabet_type", in};
-    }
-    return std::forward<char_t>(in);
-})};
+        static_assert(
+            std::common_reference_with<char_t, alphabet_char_t<alphabet_type>>,
+            "The innermost value type must have a common reference to underlying char type of alphabet_type.");
+
+        if (!char_is_valid_for<alphabet_type>(in))
+        {
+            throw seqan3::invalid_char_assignment{"alphabet_type", in};
+        }
+        return std::forward<char_t>(in);
+    })};
 
 } // namespace seqan3::views

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------------------------
-// Copyright (c) 2006-2021, Knut Reinert & Freie Universität Berlin
-// Copyright (c) 2016-2021, Knut Reinert & MPI für molekulare Genetik
+// Copyright (c) 2006-2023, Knut Reinert & Freie Universität Berlin
+// Copyright (c) 2016-2023, Knut Reinert & MPI für molekulare Genetik
 // This file may be used, modified and/or redistributed under the terms of the 3-clause BSD-License
 // shipped with this file and also available at: https://github.com/seqan/seqan3/blob/master/LICENSE.md
 // -----------------------------------------------------------------------------------------------------
@@ -11,8 +11,8 @@
 #include <seqan3/alphabet/nucleotide/dna5.hpp>
 #include <seqan3/alphabet/views/char_to.hpp>
 #include <seqan3/search/fm_index/bi_fm_index.hpp>
+#include <seqan3/utility/range/to.hpp>
 #include <seqan3/utility/views/slice.hpp>
-#include <seqan3/utility/views/to.hpp>
 
 #include "bi_fm_index_cursor_collection_test_template.hpp"
 
@@ -24,24 +24,23 @@ struct bi_fm_index_cursor_collection_test : public ::testing::Test
     using alphabet_type = typename index_type::alphabet_type;
     using text_type = std::vector<alphabet_type>;
 
-    static constexpr auto convert = seqan3::views::char_to<alphabet_type> | seqan3::views::to<text_type>;
+    static constexpr auto convert = seqan3::views::char_to<alphabet_type> | seqan3::ranges::to<text_type>();
 
     text_type text{convert(std::string_view{"ACGGTAGGACGTAGC"})};
     text_type text1{convert(std::string_view{"AACGATCGGA"})};
     text_type text2{convert(std::string_view{"TGCTACGATCC"})};
-    text_type text3 = seqan3::views::slice(text, 0, 11) | seqan3::views::to<text_type>; // "ACGGTAGGACG"
-    text_type text4 = seqan3::views::slice(text, 0, 14) | seqan3::views::to<text_type>; // "ACGGTAGGACGTAG"
+    text_type text3 = seqan3::views::slice(text, 0, 11) | seqan3::ranges::to<text_type>(); // "ACGGTAGGACG"
+    text_type text4 = seqan3::views::slice(text, 0, 14) | seqan3::ranges::to<text_type>(); // "ACGGTAGGACGTAG"
 
     std::vector<text_type> text_col1{text1, text1};
     std::vector<text_type> text_col2{text3, text2};
     std::vector<text_type> text_col3{text4, text2};
     std::vector<text_type> text_col4{text, text2};
 
-    std::vector<text_type> rev_text1 = text_col1 | seqan3::views::deep{std::views::reverse}
-                                                 | seqan3::views::to<std::vector<text_type>>;
-    std::vector<text_type> rev_text2 = text_col4 | seqan3::views::deep{std::views::reverse}
-                                                 | std::views::reverse
-                                                 | seqan3::views::to<std::vector<text_type>>;
+    std::vector<text_type> rev_text1 =
+        text_col1 | seqan3::views::deep{std::views::reverse} | seqan3::ranges::to<std::vector<text_type>>();
+    std::vector<text_type> rev_text2 = text_col4 | seqan3::views::deep{std::views::reverse} | std::views::reverse
+                                     | seqan3::ranges::to<std::vector<text_type>>();
 
     text_type pattern1{convert(std::string_view{"CAG"})};
     text_type pattern2{convert(std::string_view{"TT"})};

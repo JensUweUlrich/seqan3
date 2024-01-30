@@ -978,12 +978,12 @@ private:
 
     friend class membership_agent;
 
-    template <std::integral value_t>
+/*    template <std::integral value_t>
     friend class counting_agent_type;
 
     template <std::integral value_t>
     friend class counting_vector;
-
+*/
 public:
     /*!\name Constructors, destructor and assignment
      * \{
@@ -1257,7 +1257,7 @@ public:
         // Each iteration can handle 64 bits, so we need to iterate `((rhs.size() + 63) >> 6` many times
         for (size_t batch = 0, bin = 0; batch < ((rhs.size() + 63) >> 6); bin = 64 * ++batch)
         {
-            size_t tmp = rhs.data.get_int(batch * 64); // get 64 bits starting at position `batch * 64`
+            size_t tmp = rhs.raw_data().get_int(batch * 64); // get 64 bits starting at position `batch * 64`
             if (tmp ^ (1ULL<<63)) // This is a special case, because we would shift by 64 (UB) in the while loop.
             {
                 while (tmp > 0)

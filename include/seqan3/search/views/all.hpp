@@ -21,3 +21,4 @@
 #include <seqan3/search/views/kmer_hash.hpp>
 #include <seqan3/search/views/minimiser.hpp>
 #include <seqan3/search/views/minimiser_hash.hpp>
+#include <seqan3/search/views/fracmin_hash.hpp>
